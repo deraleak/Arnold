@@ -11,9 +11,10 @@
     --green: #00ff41;
     --green-dim: #00aa2a;
     --green-faint: #003010;
-    --black: #000000;
-    --panel-bg: rgba(0, 10, 0, 0.85);
-    --border: rgba(0, 255, 65, 0.25);
+    --cyan: #00e5ff;
+    --black: #000;
+    --panel-bg: rgba(0,10,0,0.88);
+    --border: rgba(0,255,65,0.2);
     --font: 'Share Tech Mono', monospace;
   }
 
@@ -29,382 +30,1461 @@
     flex-direction: column;
   }
 
-  /* ── MATRIX RAIN ── */
   #rain {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: fixed; inset: 0;
     z-index: 0;
-    opacity: 0.18;
+    opacity: 0.15;
   }
 
-  /* ── HEADER ── */
-  header {
-    position: relative;
-    z-index: 10;
-    display: flex;
+  /* ══════════════════════════════════════
+     USER SELECTION SCREEN
+  ══════════════════════════════════════ */
+  #user-screen {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 200;
     align-items: center;
-    justify-content: space-between;
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.75);
-  }
-  .logo {
-    font-size: 1.4rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--green);
-    text-shadow: 0 0 12px var(--green);
-  }
-  .logo span { color: var(--green-dim); }
-  #clock {
-    font-size: 0.9rem;
-    color: var(--green-dim);
-    letter-spacing: 0.1em;
-  }
-  .status-dot {
-    width: 8px; height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-    display: inline-block;
-    margin-right: 8px;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    justify-content: center;
   }
 
-  /* ── MAIN LAYOUT ── */
-  main {
-    position: relative;
-    z-index: 10;
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    padding: 16px 24px;
-    overflow: hidden;
-  }
-
-  .panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
+  #user-panel {
+    background: rgba(0,8,0,0.96);
+    border: 1px solid var(--green-dim);
+    box-shadow: 0 0 60px rgba(0,255,65,0.08), inset 0 0 40px rgba(0,255,65,0.02);
+    width: 560px;
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
 
-  .panel-header {
-    padding: 10px 16px;
+  #user-panel-header {
+    padding: 24px 28px 20px;
     border-bottom: 1px solid var(--border);
-    font-size: 0.7rem;
+  }
+
+  .user-panel-eyebrow {
+    font-size: 0.6rem;
+    letter-spacing: 0.35em;
+    color: var(--green-dim);
+    margin-bottom: 6px;
+  }
+
+  #user-panel-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,255,65,0.5);
+  }
+
+  #user-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) transparent;
+  }
+
+  .user-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 28px;
+    border-bottom: 1px solid rgba(0,255,65,0.06);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .user-row:hover { background: rgba(0,255,65,0.05); }
+
+  .user-row-name {
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: var(--green);
+  }
+  .user-row-login {
+    font-size: 0.68rem;
+    color: #005520;
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  .user-edit-inline { display: none; align-items: center; gap: 8px; grid-column: 1; }
+  .user-edit-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--green);
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    outline: none;
+    width: 180px;
+    padding: 2px 4px;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(0,255,65,0.3);
+    color: var(--green-dim);
+    font-family: var(--font);
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  #user-panel-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  #create-form { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  #new-name-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    outline: none;
+    padding: 4px 0;
+  }
+  #new-name-input::placeholder { color: #004410; }
+  #new-name-input:focus { border-bottom-color: var(--green); }
+
+  /* ══════════════════════════════════════
+     MAIN APP
+  ══════════════════════════════════════ */
+  #main-app {
+    display: none;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    z-index: 10;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.8);
+    flex-shrink: 0;
+  }
+  .logo { font-size: 1.3rem; letter-spacing: 0.25em; text-transform: uppercase; text-shadow: 0 0 12px var(--green); }
+  .logo span { color: var(--green-dim); }
+
+  .header-right { display: flex; align-items: center; gap: 18px; }
+  #user-badge {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--green-dim);
+    border: 1px solid rgba(0,255,65,0.2);
+    padding: 4px 12px;
+  }
+  #user-badge strong { color: var(--green); }
+
+  #clock { font-size: 0.85rem; color: var(--green-dim); letter-spacing: 0.1em; }
+  .status-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    display: inline-block;
+    margin-right: 7px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── GRID ── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    padding: 10px 18px;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .panel-chat    { grid-column: 1; grid-row: 1; }
+  .panel-history { grid-column: 1; grid-row: 2; }
+  .panel-today   { grid-column: 2; grid-row: 1 / 3; }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .panel-header {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.65rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--green-dim);
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    flex-shrink: 0;
   }
-  .panel-header::before {
-    content: '//';
-    color: var(--green-dim);
-    opacity: 0.5;
-  }
+  .panel-header-label::before { content: '// '; opacity: 0.5; }
 
-  /* ── CHAT PANEL ── */
-  #chat-panel {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--green-dim) transparent;
+  /* ── CHAT ── */
+  #chat-scroll {
+    flex: 1; overflow-y: auto; padding: 10px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+    min-height: 0;
   }
-  #chat-panel::-webkit-scrollbar { width: 4px; }
-  #chat-panel::-webkit-scrollbar-thumb { background: var(--green-dim); }
-
-  .msg {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .msg-meta {
-    font-size: 0.65rem;
-    color: var(--green-dim);
-    letter-spacing: 0.1em;
-  }
-  .msg-text {
-    font-size: 0.88rem;
-    line-height: 1.5;
-    padding: 6px 10px;
-    border-left: 2px solid var(--border);
-  }
+  .msg { display: flex; flex-direction: column; gap: 2px; }
+  .msg-meta { font-size: 0.6rem; color: var(--green-dim); letter-spacing: 0.1em; }
+  .msg-text { font-size: 0.82rem; line-height: 1.45; padding: 5px 9px; border-left: 2px solid var(--border); }
   .msg.you .msg-meta { color: #4af; }
   .msg.you .msg-text { border-color: #4af; color: #cef; }
-  .msg.arnold .msg-text { border-color: var(--green); color: var(--green); text-shadow: 0 0 6px rgba(0,255,65,0.4); }
+  .msg.arnold .msg-text { border-color: var(--green); color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,.3); }
 
-  /* ── DIALOGUE BOX ── */
-  #dialogue-box {
-    display: none;
-    padding: 12px 16px;
-    border-top: 1px solid var(--green);
-    background: rgba(0, 30, 0, 0.9);
-    gap: 8px;
-    align-items: center;
+  /* ── INPUT ── */
+  #input-box {
+    display: flex; gap: 8px; align-items: center;
+    padding: 9px 14px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,15,0,0.9);
+    flex-shrink: 0;
+    transition: border-color .2s;
   }
-  #dialogue-box.active { display: flex; }
-  #dialogue-input {
-    flex: 1;
-    background: transparent;
+  #input-box.dialogue-active { border-top-color: var(--green); }
+  #cmd-input {
+    flex: 1; background: transparent;
     border: 1px solid var(--green-dim);
-    color: var(--green);
-    font-family: var(--font);
-    font-size: 0.88rem;
-    padding: 6px 10px;
-    outline: none;
-    border-radius: 2px;
+    color: var(--green); font-family: var(--font); font-size: 0.82rem;
+    padding: 5px 9px; outline: none; border-radius: 2px;
   }
-  #dialogue-input::placeholder { color: var(--green-dim); opacity: 0.5; }
-  #dialogue-input:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(0,255,65,0.3); }
-  #dialogue-submit {
-    background: transparent;
-    border: 1px solid var(--green);
-    color: var(--green);
-    font-family: var(--font);
+  #cmd-input::placeholder { color: var(--green-dim); opacity: .45; }
+  #cmd-input:focus { border-color: var(--green); box-shadow: 0 0 7px rgba(0,255,65,.2); }
+
+  .btn {
+    background: transparent; border: 1px solid var(--green);
+    color: var(--green); font-family: var(--font); font-size: 0.72rem;
+    padding: 5px 12px; cursor: pointer; letter-spacing: 0.08em;
+    transition: background .15s; white-space: nowrap;
+  }
+  .btn:hover { background: rgba(0,255,65,.1); }
+  .btn-sm { font-size: 0.62rem; padding: 3px 9px; }
+
+  /* ── EXERCISE HISTORY ── */
+  #history-scroll {
+    flex: 1; overflow-y: auto; padding: 10px 14px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+    min-height: 0;
+  }
+  .history-entry {
+    display: grid; grid-template-columns: 40px 1fr auto;
+    gap: 10px; align-items: center;
+    padding: 5px 0; border-bottom: 1px solid rgba(0,255,65,.06);
     font-size: 0.8rem;
-    padding: 6px 14px;
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    transition: background 0.2s;
   }
-  #dialogue-submit:hover { background: rgba(0,255,65,0.12); }
+  .history-entry:last-child { border-bottom: none; }
+  .h-set { color: #004d18; font-size: 0.68rem; }
+  .h-weight { color: var(--green); }
+  .h-reps { color: var(--green-dim); font-size: 0.75rem; text-align: right; }
 
-  /* ── WORKOUT PANEL ── */
-  #workout-panel {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--green-dim) transparent;
+  /* ── TODAY'S SESSION ── */
+  .entry-actions { display: flex; gap: 6px; margin-left: auto; }
+  .btn-entry { background: none; border: 1px solid rgba(0,255,65,.2); color: var(--green-dim);
+    font-family: var(--font); font-size: .65rem; padding: 2px 7px; cursor: pointer; letter-spacing:.05em; }
+  .btn-entry:hover { border-color: var(--green); color: var(--green); }
+  .btn-del:hover { border-color: #ff4040; color: #ff4040; }
+
+  /* Inline edit form */
+  .entry-edit-form { display: none; flex-wrap: wrap; gap: 6px; padding: 6px 0; align-items: center; }
+  .entry-edit-form.open { display: flex; }
+  .entry-edit-form input, .entry-edit-form select {
+    background: rgba(0,20,0,.9); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .7rem; padding: 3px 6px;
+    width: 80px; outline: none;
   }
-  #workout-panel::-webkit-scrollbar { width: 4px; }
-  #workout-panel::-webkit-scrollbar-thumb { background: var(--green-dim); }
+  .entry-edit-form input:focus, .entry-edit-form select:focus { border-color: var(--green); }
+  .entry-edit-form .ex-input { width: 140px; }
+  .entry-edit-form .btn-save { background: rgba(0,255,65,.1); border-color: var(--green); color: var(--green); }
+  .entry-edit-form .btn-cancel { color: var(--green-dim); }
 
+  #workout-scroll {
+    flex: 1; overflow-y: auto; padding: 10px 14px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+    min-height: 0;
+  }
   .workout-entry {
-    display: grid;
-    grid-template-columns: 1fr auto auto auto;
-    gap: 12px;
-    align-items: center;
-    padding: 7px 0;
-    border-bottom: 1px solid rgba(0,255,65,0.08);
-    font-size: 0.85rem;
+    display: grid; grid-template-columns: 1fr auto auto auto;
+    gap: 10px; align-items: center;
+    padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.07);
+    font-size: 0.82rem;
   }
   .workout-entry:last-child { border-bottom: none; }
   .ex-name { color: var(--green); }
-  .ex-stat {
-    color: var(--green-dim);
-    font-size: 0.78rem;
-    text-align: right;
-  }
-  .ex-stat strong { color: var(--green); font-size: 0.88rem; }
-  .ex-time { color: #005520; font-size: 0.7rem; }
+  .ex-stat { color: var(--green-dim); font-size: 0.74rem; text-align: right; }
+  .ex-stat strong { color: var(--green); font-size: 0.82rem; }
+  .ex-time { color: #004010; font-size: 0.65rem; }
 
   .empty-state {
-    color: var(--green-dim);
-    font-size: 0.8rem;
-    opacity: 0.5;
-    padding: 20px 0;
-    text-align: center;
-    letter-spacing: 0.1em;
+    color: var(--green-dim); font-size: 0.75rem; opacity: .4;
+    padding: 16px 0; text-align: center; letter-spacing: .1em;
   }
 
   /* ── FOOTER ── */
   footer {
-    position: relative;
-    z-index: 10;
-    padding: 8px 24px;
-    border-top: 1px solid var(--border);
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.65rem;
-    color: #003d10;
-    letter-spacing: 0.15em;
+    padding: 6px 20px; border-top: 1px solid var(--border);
+    background: rgba(0,0,0,.8); display: flex; justify-content: space-between;
+    font-size: 0.6rem; color: #003510; letter-spacing: .15em; flex-shrink: 0;
+    position: relative; z-index: 10;
   }
+
+  /* ══════════════════════════════════════
+     EXERCISE DETAILS OVERLAY
+  ══════════════════════════════════════ */
+  #details-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.97); flex-direction: column;
+  }
+  #details-overlay.open { display: flex; }
+
+  #details-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #details-title {
+    font-size: 1.15rem; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.55);
+  }
+  #details-close {
+    background: transparent; border: 1px solid var(--green-dim);
+    color: var(--green-dim); font-family: var(--font); font-size: 0.75rem;
+    padding: 6px 18px; cursor: pointer; letter-spacing: .12em; transition: all .15s;
+  }
+  #details-close:hover { border-color: var(--green); color: var(--green); }
+
+  /* Description block */
+  #details-desc-block {
+    padding: 10px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #details-desc-view { display: flex; align-items: center; gap: 16px; }
+  .desc-text-empty { color: #003a10; font-size: .72rem; letter-spacing: .12em; font-style: italic; }
+  .desc-text-filled { color: var(--green-dim); font-size: .78rem; letter-spacing: .06em; flex: 1; }
+  #details-desc-input {
+    background: rgba(0,15,0,.95); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .78rem;
+    padding: 6px 10px; resize: vertical; width: 600px; max-width: 100%; outline: none;
+    letter-spacing: .05em; line-height: 1.5;
+  }
+  #details-desc-input:focus { border-color: var(--green); }
+
+  /* Stats row */
+  #details-stats {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .stat-card {
+    padding: 16px 24px; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .stat-card:last-child { border-right: none; }
+  .stat-label { font-size: 0.6rem; letter-spacing: .22em; color: var(--green-dim); }
+  .stat-value { font-size: 1.45rem; color: var(--green); text-shadow: 0 0 14px rgba(0,255,65,.45); letter-spacing: .05em; }
+  .stat-sub { font-size: 0.62rem; color: #005520; letter-spacing: .1em; margin-top: 2px; }
+
+  /* Chart */
+  #details-chart-wrap {
+    padding: 18px 32px 0;
+    flex-shrink: 0;
+    position: relative;
+  }
+  #details-chart { width: 100%; position: relative; }
+  #chart-tooltip {
+    position: absolute; display: none;
+    background: rgba(0,12,0,0.97); border: 1px solid var(--green);
+    padding: 7px 12px; font-size: 0.72rem; pointer-events: none;
+    z-index: 10; min-width: 130px;
+  }
+  .tt-date { color: var(--green-dim); font-size: 0.62rem; letter-spacing: .1em; margin-bottom: 4px; }
+  .tt-row { display: flex; justify-content: space-between; gap: 16px; }
+  .tt-key { color: #005520; }
+  .tt-val { color: var(--green); }
+
+  /* Session table */
+  #details-body {
+    flex: 1; overflow-y: auto; padding: 20px 32px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+  }
+  .session-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .session-table th {
+    text-align: left; font-size: 0.6rem; letter-spacing: .2em; color: var(--green-dim);
+    border-bottom: 1px solid var(--border); padding: 0 12px 8px 0;
+    font-weight: normal;
+  }
+  .session-table th:last-child { text-align: center; }
+  .session-table td {
+    padding: 9px 12px 9px 0; border-bottom: 1px solid rgba(0,255,65,.06);
+    color: var(--green-dim); vertical-align: top;
+  }
+  .session-table tr:last-child td { border-bottom: none; }
+  .session-table tr:hover td { background: rgba(0,255,65,.03); }
+  .td-date { color: #006020; font-size: 0.75rem; letter-spacing: .1em; }
+  .td-weight { color: var(--green); font-size: 0.9rem; }
+  .td-vol { color: var(--green); }
+  .td-sets { color: #006020; }
+  .pr-badge {
+    display: inline-block; font-size: 0.58rem; letter-spacing: .15em;
+    border: 1px solid var(--green); color: var(--green);
+    padding: 2px 6px; text-shadow: 0 0 8px var(--green);
+    box-shadow: 0 0 8px rgba(0,255,65,.2); margin: auto;
+  }
+  .no-data { color: var(--green-dim); opacity: .4; font-size: .75rem; padding: 30px 0; text-align: center; letter-spacing: .1em; }
+
+  /* ══════════════════════════════════════
+     EXERCISE LIST OVERLAY
+  ══════════════════════════════════════ */
+  #exlist-overlay {
+    display: none; position: fixed; inset: 0; z-index: 110;
+    background: rgba(0,0,0,0.97); flex-direction: column;
+  }
+  #exlist-overlay.open { display: flex; }
+  #exlist-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #exlist-title { font-size: 1.1rem; letter-spacing: .28em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); }
+  #exlist-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing:.12em;
+  }
+  #exlist-close:hover { border-color: var(--green); color: var(--green); }
+
+  /* Add-exercise bar */
+  #exlist-add-bar {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    padding: 12px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #exlist-add-bar input, #exlist-add-bar select {
+    background: rgba(0,15,0,.95); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .75rem;
+    padding: 5px 10px; outline: none;
+  }
+  #exlist-add-bar input:focus, #exlist-add-bar select:focus { border-color: var(--green); }
+  #exlist-name-input { width: 200px; }
+  #exlist-cat-select { width: 160px; }
+
+  /* Exercise list body */
+  #exlist-body {
+    flex: 1; overflow-y: auto; padding: 20px 32px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+  }
+  .exlist-category { margin-bottom: 28px; }
+  .exlist-cat-header {
+    font-size: .58rem; letter-spacing: .25em; color: var(--green-dim);
+    border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;
+  }
+  .exlist-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.04);
+  }
+  .exlist-row:hover { background: rgba(0,255,65,.02); }
+  .exlist-name { flex: 1; font-size: .82rem; color: var(--green); letter-spacing: .05em; }
+  .exlist-cat-tag { font-size: .6rem; color: #005520; letter-spacing: .1em; width: 120px; }
+  .exlist-edit-inline { display: none; flex: 1; flex-direction: column; gap: 6px; }
+  .exlist-edit-inline.open { display: flex; }
+  .exlist-edit-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .exlist-edit-inline input, .exlist-edit-inline select, .exlist-edit-inline textarea {
+    background: rgba(0,15,0,.95); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .75rem; padding: 3px 8px; outline: none;
+  }
+  .exlist-edit-inline input { width: 160px; }
+  .exlist-edit-inline select { width: 140px; }
+  .exlist-edit-inline textarea { width: 100%; resize: vertical; min-height: 38px; padding: 4px 8px; letter-spacing:.04em; }
+  .exlist-edit-inline input:focus, .exlist-edit-inline select:focus, .exlist-edit-inline textarea:focus { border-color: var(--green); }
 </style>
 </head>
 <body>
 
 <canvas id="rain"></canvas>
 
-<header>
-  <div class="logo">PROJECT <span>ARNOLD</span></div>
-  <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
-</header>
+<!-- ══════════════════════════════════════
+     USER SELECTION SCREEN
+══════════════════════════════════════ -->
+<div id="user-screen">
+  <div id="user-panel">
+    <div id="user-panel-header">
+      <div class="user-panel-eyebrow">PROJECT ARNOLD // AUTHENTICATION REQUIRED</div>
+      <div id="user-panel-title">IDENTIFY OPERATOR</div>
+    </div>
 
-<main>
-  <!-- LEFT: Chat -->
-  <div class="panel" style="display:flex; flex-direction:column;">
-    <div class="panel-header">Live Feed</div>
-    <div id="chat-panel"></div>
-    <div id="dialogue-box">
-      <input id="dialogue-input" type="text" placeholder="Type your response..." autocomplete="off" />
-      <button id="dialogue-submit">SEND</button>
+    <div id="user-list"></div>
+
+    <div id="user-panel-footer">
+      <button class="btn-ghost" id="toggle-create-btn" onclick="toggleCreateForm()">+ CREATE NEW OPERATOR</button>
+      <div id="create-form" style="display:none;">
+        <input id="new-name-input" type="text" placeholder="Operator name..." autocomplete="off" maxlength="32" />
+        <button class="btn-ghost" onclick="createUser()">CONFIRM</button>
+        <button class="btn-ghost" onclick="toggleCreateForm()">CANCEL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="main-app">
+  <header>
+    <div class="logo">PROJECT <span>ARNOLD</span></div>
+    <div class="header-right">
+      <div id="user-badge">OPERATOR: <strong id="user-name-display">—</strong></div>
+      <button class="btn btn-sm" onclick="logout()">LOGOUT</button>
+      <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TOP LEFT: Chat -->
+    <div class="panel panel-chat">
+      <div class="panel-header">
+        <span class="panel-header-label">Live Feed</span>
+      </div>
+      <div id="chat-scroll"></div>
+      <div id="input-box">
+        <input id="cmd-input" type="text" placeholder="Type a command..." autocomplete="off" />
+        <button class="btn" id="cmd-submit">SEND</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM LEFT: Exercise History -->
+    <div class="panel panel-history">
+      <div class="panel-header">
+        <span class="panel-header-label" id="history-title">Last Session</span>
+        <button class="btn btn-sm" id="details-btn">EXERCISE DETAILS</button>
+      </div>
+      <div id="history-scroll">
+        <div class="empty-state">[ LOG A SET TO SEE HISTORY ]</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Today's Session -->
+    <div class="panel panel-today">
+      <div class="panel-header">
+        <span class="panel-header-label">Today's Session</span>
+        <div style="margin-left:auto;display:flex;gap:6px;">
+          <button id="exercise-list-btn" class="btn-entry" style="padding:3px 12px;font-size:.7rem;">☰ EXERCISE LIST</button>
+          <button id="manual-log-btn" class="btn-entry" style="padding:3px 12px;font-size:.7rem;">+ LOG SET</button>
+        </div>
+      </div>
+      <!-- Manual entry form (hidden until + LOG SET clicked) -->
+      <div id="manual-entry-form" style="display:none; padding:8px 14px; border-bottom:1px solid var(--border); gap:8px; flex-wrap:wrap; align-items:center;">
+        <select id="me-exercise" style="background:rgba(0,20,0,.9);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font);font-size:.72rem;padding:4px 6px;flex:1;min-width:140px;outline:none;"></select>
+        <input id="me-weight" type="number" placeholder="weight (lbs)" min="0" step="2.5"
+          style="background:rgba(0,20,0,.9);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font);font-size:.72rem;padding:4px 6px;width:110px;outline:none;" />
+        <input id="me-reps" type="number" placeholder="reps" min="1"
+          style="background:rgba(0,20,0,.9);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font);font-size:.72rem;padding:4px 6px;width:70px;outline:none;" />
+        <input id="me-sets" type="number" placeholder="sets" min="1" value="1"
+          style="background:rgba(0,20,0,.9);border:1px solid var(--green-dim);color:var(--green);font-family:var(--font);font-size:.72rem;padding:4px 6px;width:60px;outline:none;" />
+        <button id="me-save" class="btn-entry btn-save">LOG</button>
+        <button id="me-cancel" class="btn-entry btn-cancel">CANCEL</button>
+      </div>
+      <div id="workout-scroll">
+        <div class="empty-state">[ NO SETS LOGGED YET ]</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>TEXT INPUT // ENTER TO SEND</span>
+    <span>LOCAL // OLLAMA + SQLITE</span>
+    <span>localhost:8000</span>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     EXERCISE LIST OVERLAY
+══════════════════════════════════════ -->
+<div id="exlist-overlay">
+  <div id="exlist-header">
+    <div id="exlist-title">MASTER EXERCISE LIST</div>
+    <button id="exlist-close">✕ CLOSE</button>
+  </div>
+  <div id="exlist-add-bar">
+    <span style="font-size:.6rem;letter-spacing:.2em;color:var(--green-dim);">ADD EXERCISE:</span>
+    <input id="exlist-name-input" type="text" placeholder="exercise name" />
+    <select id="exlist-cat-select"><option value="">— category —</option></select>
+    <button id="exlist-add-btn" class="btn-entry btn-save">+ ADD</button>
+  </div>
+  <div id="exlist-body"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     EXERCISE DETAILS OVERLAY
+══════════════════════════════════════ -->
+<div id="details-overlay">
+  <div id="details-header">
+    <div id="details-title">Exercise Details</div>
+    <button id="details-close">✕ CLOSE</button>
+  </div>
+
+  <div id="details-desc-block">
+    <div id="details-desc-view">
+      <span id="details-desc-text" class="desc-text-empty">[ NO DESCRIPTION ]</span>
+      <button id="details-desc-edit-btn" class="btn-entry">✎ EDIT DESCRIPTION</button>
+    </div>
+    <div id="details-desc-form" style="display:none; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+      <textarea id="details-desc-input" rows="2" placeholder="Describe this exercise — cues, notes, form tips..."></textarea>
+      <div style="display:flex;gap:6px;">
+        <button id="details-desc-save" class="btn-entry btn-save">SAVE</button>
+        <button id="details-desc-cancel" class="btn-entry btn-cancel">CANCEL</button>
+      </div>
     </div>
   </div>
 
-  <!-- RIGHT: Today's Workout -->
-  <div class="panel">
-    <div class="panel-header">Today's Session</div>
-    <div id="workout-panel">
-      <div class="empty-state">[ NO SETS LOGGED YET ]</div>
+  <div id="details-stats">
+    <div class="stat-card">
+      <div class="stat-label">SESSIONS</div>
+      <div class="stat-value" id="stat-sessions">—</div>
+      <div class="stat-sub" id="stat-sessions-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">MAX SET</div>
+      <div class="stat-value" id="stat-pr">—</div>
+      <div class="stat-sub" id="stat-pr-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">BEST SESSION VOLUME</div>
+      <div class="stat-value" id="stat-best-vol">—</div>
+      <div class="stat-sub" id="stat-best-vol-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TOTAL VOLUME LIFTED</div>
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-sub" id="stat-total-sub"></div>
     </div>
   </div>
-</main>
 
-<footer>
-  <span>PUSH-TO-TALK: HOLD SPACE</span>
-  <span>LOCAL // OLLAMA + WHISPER + SQLITE</span>
-  <span>localhost:8000</span>
-</footer>
+  <div id="details-chart-wrap">
+    <div id="details-chart"></div>
+    <div id="chart-tooltip"></div>
+  </div>
+
+  <div id="details-body"></div>
+</div>
 
 <script>
 // ── MATRIX RAIN ──
-const canvas = document.getElementById('rain');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const cols = Math.floor(canvas.width / 16);
-const drops = Array(cols).fill(1);
-
-function drawRain() {
-  ctx.fillStyle = 'rgba(0,0,0,0.05)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00ff41';
-  ctx.font = '14px monospace';
-  for (let i = 0; i < drops.length; i++) {
-    const char = String.fromCharCode(0x30A0 + Math.random() * 96);
-    ctx.fillText(char, i * 16, drops[i] * 16);
-    if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  }
-}
-setInterval(drawRain, 50);
-
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
+(function() {
+  const canvas = document.getElementById('rain');
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const cols = () => Math.floor(canvas.width / 16);
+  let drops = [];
+  function resetDrops() { drops = Array(cols()).fill(1); }
+  resetDrops();
+  window.addEventListener('resize', resetDrops);
+  setInterval(() => {
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '14px monospace';
+    drops.forEach((y, i) => {
+      ctx.fillText(String.fromCharCode(0x30A0 + Math.random() * 96), i * 16, y * 16);
+      if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    });
+  }, 50);
+})();
 
 // ── CLOCK ──
-function updateClock() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
-}
-setInterval(updateClock, 1000);
-updateClock();
+setInterval(() => {
+  const el = document.getElementById('clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
+}, 1000);
 
-// ── CHAT POLLING ──
+// ══════════════════════════════════════
+// USER MANAGEMENT
+// ══════════════════════════════════════
+let currentUser = null;
+let sessionToken = localStorage.getItem('arnold_token') || null;
+
+// Every authenticated fetch goes through this helper
+function authFetch(url, opts = {}) {
+  opts.headers = Object.assign({'Content-Type': 'application/json'}, opts.headers || {});
+  if (sessionToken) opts.headers['X-Arnold-Token'] = sessionToken;
+  return fetch(url, opts);
+}
+
+async function checkSession() {
+  const data = await authFetch('/api/session').then(r => r.json());
+  if (data.user) {
+    currentUser = data.user;
+    showMainApp();
+  } else {
+    sessionToken = null;
+    localStorage.removeItem('arnold_token');
+    showUserScreen();
+  }
+}
+
+function showUserScreen() {
+  document.getElementById('user-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  loadUsers();
+}
+
+function showMainApp() {
+  document.getElementById('user-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'flex';
+  document.getElementById('user-name-display').textContent = currentUser.name;
+  document.getElementById('cmd-input').focus();
+}
+
+async function loadUsers() {
+  const users = await fetch('/api/users').then(r => r.json());
+  const list = document.getElementById('user-list');
+  list.innerHTML = '';
+
+  if (!users.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:24px;">[ NO OPERATORS FOUND — CREATE ONE BELOW ]</div>';
+    return;
+  }
+
+  users.forEach(u => {
+    const row = document.createElement('div');
+    row.className = 'user-row';
+    const lastLogin = u.last_login
+      ? new Date(u.last_login).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
+      : 'Never logged in';
+
+    row.innerHTML = `
+      <div class="user-row-name user-name-display" data-id="${u.id}" style="cursor:pointer;">${u.name}</div>
+      <div class="user-row-login">${lastLogin}</div>
+      <button class="btn-ghost" onclick="startEdit(${u.id}, this)">EDIT</button>
+    `;
+
+    row.querySelector('.user-name-display').addEventListener('click', () => loginAs(u.id));
+    list.appendChild(row);
+  });
+}
+
+function startEdit(uid, btn) {
+  const row = btn.closest('.user-row');
+  const nameEl = row.querySelector('.user-name-display');
+  const currentName = nameEl.textContent;
+
+  nameEl.style.display = 'none';
+  btn.style.display = 'none';
+
+  const form = document.createElement('div');
+  form.style.cssText = 'display:flex;align-items:center;gap:8px;grid-column:1 / -1;';
+  form.innerHTML = `
+    <input class="user-edit-input" type="text" value="${currentName}" maxlength="32" />
+    <button class="btn-ghost">SAVE</button>
+    <button class="btn-ghost" id="cancel-edit-${uid}">CANCEL</button>
+  `;
+  row.appendChild(form);
+
+  const input = form.querySelector('input');
+  const saveBtn = form.querySelector('button');
+  input.focus();
+  input.select();
+
+  const cancel = () => {
+    form.remove();
+    nameEl.style.display = '';
+    btn.style.display = '';
+  };
+
+  saveBtn.addEventListener('click', () => saveEdit(uid, input.value, cancel, nameEl));
+  form.querySelector(`#cancel-edit-${uid}`).addEventListener('click', cancel);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') cancel();
+  });
+}
+
+async function saveEdit(uid, name, onCancel, nameEl) {
+  name = name.trim();
+  if (!name) return;
+  const res = await fetch(`/api/users/${uid}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name})
+  }).then(r => r.json());
+
+  if (res.error) { alert(res.error); return; }
+  nameEl.textContent = name;
+  onCancel();
+}
+
+function toggleCreateForm() {
+  const form = document.getElementById('create-form');
+  const btn = document.getElementById('toggle-create-btn');
+  const showing = form.style.display !== 'none';
+  form.style.display = showing ? 'none' : 'flex';
+  btn.style.display = showing ? '' : 'none';
+  if (!showing) {
+    document.getElementById('new-name-input').focus();
+  }
+}
+
+async function createUser() {
+  const input = document.getElementById('new-name-input');
+  const name = input.value.trim();
+  if (!name) return;
+
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name})
+  }).then(r => r.json());
+
+  if (res.error) { alert(res.error); return; }
+  input.value = '';
+  toggleCreateForm();
+  document.getElementById('toggle-create-btn').style.display = '';
+  loadUsers();
+}
+document.getElementById('new-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createUser();
+  if (e.key === 'Escape') toggleCreateForm();
+});
+
+async function loginAs(userId) {
+  const res = await fetch('/api/session/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({user_id: userId})
+  }).then(r => r.json());
+  if (res.error) { alert(res.error); return; }
+  sessionToken = res.token;
+  localStorage.setItem('arnold_token', sessionToken);
+  currentUser = {id: res.id, name: res.name};
+  showMainApp();
+}
+
+async function logout() {
+  await authFetch('/api/session/logout', {method: 'POST'});
+  sessionToken = null;
+  localStorage.removeItem('arnold_token');
+  currentUser = null;
+  showUserScreen();
+}
+
+// Re-check session every 60s (catches 2hr inactivity logout)
+setInterval(async () => {
+  if (!currentUser) return;
+  const data = await authFetch('/api/session').then(r => r.json());
+  if (!data.user) { sessionToken = null; localStorage.removeItem('arnold_token'); currentUser = null; showUserScreen(); }
+}, 60000);
+
+// ══════════════════════════════════════
+// MAIN APP POLLING
+// ══════════════════════════════════════
 let lastChatCount = 0;
+let currentExercise = null;
 
 async function refreshChat() {
   try {
-    const res = await fetch('/api/chat');
-    const msgs = await res.json();
-    if (msgs.length !== lastChatCount) {
-      lastChatCount = msgs.length;
-      const panel = document.getElementById('chat-panel');
-      panel.innerHTML = '';
-      msgs.forEach(m => {
-        const div = document.createElement('div');
-        div.className = `msg ${m.role}`;
-        div.innerHTML = `
-          <div class="msg-meta">${m.role.toUpperCase()} // ${m.time}</div>
-          <div class="msg-text">${m.message}</div>
-        `;
-        panel.appendChild(div);
-      });
-      panel.scrollTop = panel.scrollHeight;
-    }
+    const msgs = await fetch('/api/chat').then(r => r.json());
+    if (msgs.length === lastChatCount) return;
+    lastChatCount = msgs.length;
+    const panel = document.getElementById('chat-scroll');
+    panel.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = `msg ${m.role}`;
+      div.innerHTML = `<div class="msg-meta">${m.role.toUpperCase()} // ${m.time}</div>
+                       <div class="msg-text">${m.message}</div>`;
+      panel.appendChild(div);
+    });
+    panel.scrollTop = panel.scrollHeight;
   } catch(e) {}
 }
 
-// ── WORKOUT POLLING ──
-async function refreshWorkouts() {
+let _exerciseNames = [];
+async function getExerciseNames() {
+  if (_exerciseNames.length) return _exerciseNames;
   try {
-    const res = await fetch('/api/workouts/today');
-    const sets = await res.json();
-    const panel = document.getElementById('workout-panel');
-    if (!sets.length) {
-      panel.innerHTML = '<div class="empty-state">[ NO SETS LOGGED YET ]</div>';
-      return;
-    }
+    const data = await authFetch('/api/exercises').then(r => r.json());
+    _exerciseNames = data.map(e => e.name);
+  } catch(e) {}
+  return _exerciseNames;
+}
+
+async function refreshWorkouts() {
+  if (document.querySelector('.entry-edit-form.open')) return; // don't clobber an open edit form
+  if (document.getElementById('manual-entry-form')?.style.display !== 'none') return; // don't clobber open manual form
+  try {
+    const sets = await authFetch('/api/workouts/today').then(r => r.json());
+    const panel = document.getElementById('workout-scroll');
+    if (!sets.length) { panel.innerHTML = '<div class="empty-state">[ NO SETS LOGGED YET ]</div>'; return; }
+    const exNames = await getExerciseNames();
     panel.innerHTML = '';
     sets.forEach(s => {
       const div = document.createElement('div');
       div.className = 'workout-entry';
-      const time = s.timestamp ? s.timestamp.split(' ')[1]?.slice(0,5) || '' : '';
+      div.style.flexWrap = 'wrap';
+      const time = s.timestamp?.split(' ')[1]?.slice(0,5) || '';
       const wt = s.weight ? `${s.weight}lbs` : 'BW';
+
+      const exOpts = exNames.map(n => `<option value="${n}"${n===s.exercise?' selected':''}>${n}</option>`).join('');
+
       div.innerHTML = `
         <div class="ex-name">${s.exercise}</div>
         <div class="ex-stat"><strong>${s.sets}</strong> sets</div>
         <div class="ex-stat"><strong>${wt}</strong> × <strong>${s.reps}</strong></div>
         <div class="ex-time">${time}</div>
-      `;
+        <div class="entry-actions">
+          <button class="btn-entry btn-edit" data-id="${s.id}">✎ EDIT</button>
+          <button class="btn-entry btn-del" data-id="${s.id}">✕ DELETE</button>
+        </div>
+        <div class="entry-edit-form" data-id="${s.id}">
+          <select class="ex-input">${exOpts}</select>
+          <input type="number" class="f-weight" placeholder="weight" value="${s.weight || ''}" min="0" step="2.5" />
+          <input type="number" class="f-reps"   placeholder="reps"   value="${s.reps   || ''}" min="1" />
+          <input type="number" class="f-sets"   placeholder="sets"   value="${s.sets   || 1}"  min="1" />
+          <button class="btn-entry btn-save">SAVE</button>
+          <button class="btn-entry btn-cancel">CANCEL</button>
+        </div>`;
+
+      div.querySelector('.btn-edit').addEventListener('click', () => {
+        div.querySelector('.entry-edit-form').classList.toggle('open');
+      });
+      div.querySelector('.btn-cancel').addEventListener('click', () => {
+        div.querySelector('.entry-edit-form').classList.remove('open');
+      });
+      div.querySelector('.btn-del').addEventListener('click', async () => {
+        if (!confirm(`Delete this set (${s.exercise} ${wt} × ${s.reps})?`)) return;
+        await authFetch(`/api/workout/${s.id}`, {method: 'DELETE'});
+        _exerciseNames = [];
+        refreshWorkouts();
+      });
+      div.querySelector('.btn-save').addEventListener('click', async () => {
+        const form = div.querySelector('.entry-edit-form');
+        const exercise = form.querySelector('.ex-input').value;
+        const weight   = parseFloat(form.querySelector('.f-weight').value) || null;
+        const reps     = parseInt(form.querySelector('.f-reps').value) || null;
+        const sets_val = parseInt(form.querySelector('.f-sets').value) || 1;
+        if (!reps) { alert('Reps required'); return; }
+        await authFetch(`/api/workout/${s.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({exercise, weight, reps, sets: sets_val})
+        });
+        form.classList.remove('open');
+        refreshWorkouts();
+      });
+
       panel.appendChild(div);
     });
   } catch(e) {}
 }
 
-// ── DIALOGUE STATE POLLING ──
-async function refreshDialogue() {
+async function refreshHistory() {
   try {
-    const res = await fetch('/api/dialogue');
-    const data = await res.json();
-    const box = document.getElementById('dialogue-box');
-    if (data.active) {
-      box.classList.add('active');
-      document.getElementById('dialogue-input').focus();
-    } else {
-      box.classList.remove('active');
-      document.getElementById('dialogue-input').value = '';
-    }
-  } catch(e) {}
-}
+    const data = await authFetch('/api/exercise/current').then(r => r.json());
+    const name = data.exercise;
+    if (!name) return;
 
-// ── DIALOGUE SUBMIT ──
-async function submitDialogue() {
-  const input = document.getElementById('dialogue-input');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  try {
-    await fetch('/api/dialogue/input', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({text})
+    if (name !== currentExercise) {
+      currentExercise = name;
+      document.getElementById('history-title').textContent = `Last Session — ${name}`;
+    }
+
+    const history = await authFetch(`/api/exercise/${encodeURIComponent(name)}/history`).then(r => r.json());
+    const panel = document.getElementById('history-scroll');
+    if (!history.length) { panel.innerHTML = '<div class="empty-state">[ NO HISTORY YET ]</div>'; return; }
+
+    const last = history[0];
+    panel.innerHTML = `<div style="font-size:.62rem;color:#005520;letter-spacing:.15em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,255,65,.08);">${last.date} — VOL: ${last.volume.toLocaleString()} lbs${last.is_pr ? ' <span style="color:var(--green);border:1px solid var(--green);padding:1px 5px;font-size:.55rem;">PR</span>' : ''}</div>`;
+    last.entries.forEach((e, i) => {
+      const div = document.createElement('div');
+      div.className = 'history-entry';
+      const wt = e.weight ? `${e.weight} lbs` : 'BW';
+      div.innerHTML = `<span class="h-set">SET ${i+1}</span>
+                       <span class="h-weight">${wt}</span>
+                       <span class="h-reps">${e.reps} reps</span>`;
+      panel.appendChild(div);
     });
   } catch(e) {}
 }
 
-document.getElementById('dialogue-submit').addEventListener('click', submitDialogue);
-document.getElementById('dialogue-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') submitDialogue();
+async function refreshDialogue() {
+  try {
+    const data = await fetch('/api/dialogue').then(r => r.json());
+    const box = document.getElementById('input-box');
+    const input = document.getElementById('cmd-input');
+    box.classList.toggle('dialogue-active', data.active);
+    input.placeholder = data.active ? 'Type your response...' : 'Type a command...';
+  } catch(e) {}
+}
+
+async function submitInput() {
+  const input = document.getElementById('cmd-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try {
+    await authFetch('/api/input', {method: 'POST', body: JSON.stringify({text})});
+  } catch(e) {}
+}
+document.getElementById('cmd-submit').addEventListener('click', submitInput);
+document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitInput(); });
+
+function pollAll() {
+  if (!currentUser) return;
+  refreshChat(); refreshWorkouts(); refreshHistory(); refreshDialogue();
+}
+setInterval(pollAll, 1500);
+
+// ══════════════════════════════════════
+// MANUAL ENTRY FORM (right panel)
+// ══════════════════════════════════════
+document.getElementById('manual-log-btn').addEventListener('click', async () => {
+  const form = document.getElementById('manual-entry-form');
+  const isOpen = form.style.display !== 'none';
+  if (isOpen) { form.style.display = 'none'; return; }
+  // Populate exercise dropdown
+  const sel = document.getElementById('me-exercise');
+  sel.innerHTML = '';
+  const names = await getExerciseNames();
+  names.forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o); });
+  // Pre-select current exercise if one is active
+  if (currentExercise) sel.value = currentExercise;
+  form.style.display = 'flex';
+  document.getElementById('me-reps').focus();
 });
 
-// ── POLL ALL ──
-function pollAll() {
-  refreshChat();
+document.getElementById('me-cancel').addEventListener('click', () => {
+  document.getElementById('manual-entry-form').style.display = 'none';
+});
+
+document.getElementById('me-save').addEventListener('click', async () => {
+  const exercise = document.getElementById('me-exercise').value;
+  const weight   = parseFloat(document.getElementById('me-weight').value) || null;
+  const reps     = parseInt(document.getElementById('me-reps').value) || null;
+  const sets_val = parseInt(document.getElementById('me-sets').value) || 1;
+  if (!exercise || !reps) { alert('Exercise and reps are required.'); return; }
+
+  await authFetch('/api/workout/manual', {
+    method: 'POST',
+    body: JSON.stringify({exercise, weight, reps, sets: sets_val})
+  });
+  document.getElementById('manual-entry-form').style.display = 'none';
+  document.getElementById('me-reps').value = '';
+  document.getElementById('me-weight').value = '';
+  document.getElementById('me-sets').value = '1';
   refreshWorkouts();
-  refreshDialogue();
+});
+
+// ══════════════════════════════════════
+// EXERCISE DETAILS OVERLAY
+// ══════════════════════════════════════
+document.getElementById('details-btn').addEventListener('click', openDetails);
+document.getElementById('details-close').addEventListener('click', closeDetails);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetails(); });
+
+function closeDetails() {
+  document.getElementById('details-overlay').classList.remove('open');
 }
-pollAll();
-setInterval(pollAll, 1500);
+
+async function openDetails() {
+  if (!currentExercise) return;
+  const overlay = document.getElementById('details-overlay');
+  document.getElementById('details-title').textContent = currentExercise.toUpperCase() + ' — PERFORMANCE DATA';
+  overlay.classList.add('open');
+
+  // Reset
+  ['stat-sessions','stat-pr','stat-best-vol','stat-total'].forEach(id => document.getElementById(id).textContent = '…');
+  ['stat-sessions-sub','stat-pr-sub','stat-best-vol-sub','stat-total-sub'].forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('details-chart').innerHTML = '';
+  document.getElementById('details-body').innerHTML = '';
+
+  // Load description
+  loadDescription(currentExercise);
+
+  try {
+    const history = await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/history`).then(r => r.json());
+    if (!history.length) {
+      document.getElementById('details-body').innerHTML = '<div class="no-data">[ NO HISTORY FOUND ]</div>';
+      ['stat-sessions','stat-pr','stat-best-vol','stat-total'].forEach(id => document.getElementById(id).textContent = '—');
+      return;
+    }
+
+    renderStats(history);
+    renderChart(history);
+    renderTable(history);
+  } catch(e) {
+    document.getElementById('details-body').innerHTML = '<div class="no-data">[ ERROR LOADING DATA ]</div>';
+  }
+}
+
+async function loadDescription(name) {
+  const textEl  = document.getElementById('details-desc-text');
+  const viewEl  = document.getElementById('details-desc-view');
+  const formEl  = document.getElementById('details-desc-form');
+  const inputEl = document.getElementById('details-desc-input');
+  formEl.style.display = 'none';
+  viewEl.style.display = 'flex';
+  try {
+    const info = await authFetch(`/api/exercise/${encodeURIComponent(name)}/info`).then(r => r.json());
+    const desc = info.description || '';
+    if (desc) {
+      textEl.className = 'desc-text-filled';
+      textEl.textContent = desc;
+    } else {
+      textEl.className = 'desc-text-empty';
+      textEl.textContent = '[ NO DESCRIPTION ]';
+    }
+    inputEl.value = desc;
+  } catch(e) {}
+}
+
+// Description edit wiring
+document.getElementById('details-desc-edit-btn').addEventListener('click', () => {
+  document.getElementById('details-desc-view').style.display = 'none';
+  document.getElementById('details-desc-form').style.display = 'flex';
+  document.getElementById('details-desc-input').focus();
+});
+document.getElementById('details-desc-cancel').addEventListener('click', () => {
+  document.getElementById('details-desc-form').style.display = 'none';
+  document.getElementById('details-desc-view').style.display = 'flex';
+});
+document.getElementById('details-desc-save').addEventListener('click', async () => {
+  const desc = document.getElementById('details-desc-input').value.trim();
+  await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/description`, {
+    method: 'PUT',
+    body: JSON.stringify({description: desc})
+  });
+  document.getElementById('details-desc-form').style.display = 'none';
+  document.getElementById('details-desc-view').style.display = 'flex';
+  loadDescription(currentExercise);
+});
+
+function renderStats(history) {
+  const sessions = history.length;
+
+  // Max set: find peak weight, then most reps logged at that weight across all sessions
+  const peakWeight = Math.max(...history.map(s => s.max_set?.weight || 0));
+  const peakReps = Math.max(
+    ...history.flatMap(s =>
+      (s.entries || []).filter(e => (e.weight || 0) === peakWeight).map(e => e.reps)
+    ).filter(r => r > 0)
+  );
+  const peakDate = history.find(s => s.max_set?.weight === peakWeight)?.date || '';
+
+  const volumes = history.map(s => s.volume);
+  const bestVol = Math.max(...volumes);
+  const bestVolDate = history.find(s => s.volume === bestVol)?.date || '';
+  const totalVol = volumes.reduce((a,b) => a + b, 0);
+  const totalLbs = totalVol >= 1000 ? `${(totalVol/1000).toFixed(1)}k` : totalVol.toLocaleString();
+
+  document.getElementById('stat-sessions').textContent = sessions;
+  document.getElementById('stat-sessions-sub').textContent = `since ${[...history].reverse()[0]?.date || ''}`;
+  document.getElementById('stat-pr').textContent = peakWeight ? `${peakWeight} × ${peakReps}` : '—';
+  document.getElementById('stat-pr-sub').textContent = peakDate ? `${peakWeight} lbs for ${peakReps} reps` : '';
+  document.getElementById('stat-best-vol').textContent = bestVol ? `${bestVol.toLocaleString()} lbs` : '—';
+  document.getElementById('stat-best-vol-sub').textContent = bestVolDate ? `on ${bestVolDate}` : '';
+  document.getElementById('stat-total').textContent = totalVol ? `${totalLbs} lbs` : '—';
+  document.getElementById('stat-total-sub').textContent = `across ${sessions} session${sessions !== 1 ? 's' : ''}`;
+}
+
+function renderChart(history) {
+  const el = document.getElementById('details-chart');
+  const tooltip = document.getElementById('chart-tooltip');
+
+  // Oldest-first for chart
+  const data = [...history].reverse();
+  if (data.length === 0) return;
+
+  const W = el.clientWidth || 900;
+  const H = 180;
+  const P = {top: 22, right: 24, bottom: 34, left: 70};
+  const CW = W - P.left - P.right;
+  const CH = H - P.top - P.bottom;
+
+  const vols = data.map(s => s.volume);
+  const maxV = Math.max(...vols);
+  const minV = Math.max(0, Math.min(...vols) * 0.8);
+
+  const x = i => P.left + (data.length > 1 ? (i / (data.length - 1)) * CW : CW / 2);
+  const y = v => P.top + CH - ((v - minV) / ((maxV - minV) || 1)) * CH;
+
+  const pts = data.map((s, i) => [x(i), y(s.volume)]);
+
+  // Smooth catmull-rom-ish curve via bezier
+  let linePath = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < pts.length; i++) {
+    const [px, py] = pts[i-1];
+    const [cx, cy] = pts[i];
+    const mx = (px + cx) / 2;
+    linePath += ` C ${mx.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${cy.toFixed(1)} ${cx.toFixed(1)},${cy.toFixed(1)}`;
+  }
+
+  const fillPath = `M ${P.left},${P.top+CH} L ${pts.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L ')} L ${pts[pts.length-1][0].toFixed(1)},${P.top+CH} Z`;
+
+  // Y ticks
+  const yTickCount = 4;
+  let yTicksHtml = '';
+  for (let i = 0; i <= yTickCount; i++) {
+    const v = minV + (maxV - minV) * (i / yTickCount);
+    const yy = y(v).toFixed(1);
+    const label = v >= 1000 ? `${(v/1000).toFixed(1)}k` : Math.round(v);
+    yTicksHtml += `<line x1="${P.left}" y1="${yy}" x2="${(P.left+CW).toFixed(1)}" y2="${yy}" stroke="rgba(0,255,65,0.07)" stroke-width="1"/>
+      <text x="${(P.left-8).toFixed(1)}" y="${(parseFloat(yy)+4).toFixed(1)}" text-anchor="end" fill="#005520" font-size="10" font-family="Share Tech Mono,monospace">${label}</text>`;
+  }
+
+  // X labels
+  const xStep = Math.max(1, Math.ceil(data.length / 7));
+  let xLabelsHtml = '';
+  data.forEach((s, i) => {
+    if (i % xStep !== 0 && i !== data.length - 1) return;
+    xLabelsHtml += `<text x="${x(i).toFixed(1)}" y="${(P.top+CH+22).toFixed(1)}" text-anchor="middle" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace">${s.date.slice(5)}</text>`;
+  });
+
+  // Points
+  let pointsHtml = data.map((s, i) => {
+    const isPR = s.is_pr;
+    const r = isPR ? 6 : 4;
+    const fill = isPR ? '#ffffff' : '#00ff41';
+    const filter = isPR ? 'drop-shadow(0 0 5px #fff)' : 'drop-shadow(0 0 4px #00ff41)';
+    return `<circle cx="${x(i).toFixed(1)}" cy="${y(s.volume).toFixed(1)}" r="${r}" fill="${fill}" stroke="#000" stroke-width="1.5" class="chart-pt" data-idx="${i}" style="cursor:pointer;filter:${filter};"/>`;
+  }).join('');
+
+  el.innerHTML = `
+  <svg id="chart-svg" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;display:block;">
+    <defs>
+      <linearGradient id="vol-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#00ff41" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="#00ff41" stop-opacity="0.01"/>
+      </linearGradient>
+    </defs>
+    ${yTicksHtml}
+    <line x1="${P.left}" y1="${P.top}" x2="${P.left}" y2="${P.top+CH}" stroke="rgba(0,255,65,0.2)" stroke-width="1"/>
+    <line x1="${P.left}" y1="${P.top+CH}" x2="${P.left+CW}" y2="${P.top+CH}" stroke="rgba(0,255,65,0.2)" stroke-width="1"/>
+    <path d="${fillPath}" fill="url(#vol-fill)"/>
+    <path id="chart-line" d="${linePath}" fill="none" stroke="#00ff41" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pointsHtml}
+    ${xLabelsHtml}
+    <text x="${P.left}" y="${P.top-7}" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="0.15em">VOLUME (LBS)</text>
+  </svg>`;
+
+  // Animate line draw using getTotalLength
+  requestAnimationFrame(() => {
+    const path = el.querySelector('#chart-line');
+    if (!path) return;
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    path.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+    requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+  });
+
+  // Tooltip
+  el.querySelectorAll('.chart-pt').forEach(pt => {
+    pt.addEventListener('mouseenter', () => {
+      const i = parseInt(pt.getAttribute('data-idx'));
+      const s = data[i];
+      tooltip.style.display = 'block';
+      const ms = s.max_set;
+      const msStr = ms ? `${ms.weight} × ${ms.reps}` : '—';
+      tooltip.innerHTML = `<div class="tt-date">${s.date}${s.is_pr ? ' ★ PR' : ''}</div>
+        <div class="tt-row"><span class="tt-key">VOLUME</span><span class="tt-val">${s.volume.toLocaleString()} lbs</span></div>
+        <div class="tt-row"><span class="tt-key">MAX SET</span><span class="tt-val">${msStr}</span></div>
+        <div class="tt-row"><span class="tt-key">SETS</span><span class="tt-val">${s.entries.length}</span></div>`;
+    });
+    pt.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      tooltip.style.left = `${Math.min(e.clientX - rect.left + 14, rect.width - 160)}px`;
+      tooltip.style.top = `${e.clientY - rect.top - 60}px`;
+    });
+    pt.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  });
+}
+
+function renderTable(history) {
+  const body = document.getElementById('details-body');
+  if (!history.length) { body.innerHTML = '<div class="no-data">[ NO DATA ]</div>'; return; }
+
+  const rows = history.map(s => {
+    const ms = s.max_set;
+    const maxSet = ms ? `${ms.weight} × ${ms.reps}` : '—';
+    const vol = s.volume ? `${s.volume.toLocaleString()} lbs` : '—';
+    const pr = s.is_pr ? '<span class="pr-badge">NEW PR</span>' : '';
+    return `<tr>
+      <td class="td-date">${s.date}</td>
+      <td class="td-weight">${maxSet}</td>
+      <td class="td-vol">${vol}</td>
+      <td class="td-sets">${s.entries.length} sets</td>
+      <td style="text-align:center;">${pr}</td>
+    </tr>`;
+  }).join('');
+
+  body.innerHTML = `
+  <table class="session-table">
+    <thead>
+      <tr>
+        <th>DATE</th>
+        <th>MAX SET</th>
+        <th>SESSION VOLUME</th>
+        <th>SETS</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ══════════════════════════════════════
+// EXERCISE LIST OVERLAY
+// ══════════════════════════════════════
+document.getElementById('exercise-list-btn').addEventListener('click', openExerciseList);
+document.getElementById('exlist-close').addEventListener('click', () => document.getElementById('exlist-overlay').classList.remove('open'));
+
+async function openExerciseList() {
+  document.getElementById('exlist-overlay').classList.add('open');
+  await loadExlistCategories();
+  renderExlist();
+}
+
+let _exlistData = [];   // [{name, muscle_category}]
+let _exlistCats = [];   // ['Arms', 'Back', ...]
+
+async function loadExlistCategories() {
+  try {
+    _exlistCats = await authFetch('/api/categories').then(r => r.json());
+    const sel = document.getElementById('exlist-cat-select');
+    sel.innerHTML = '<option value="">— category —</option>' +
+      _exlistCats.map(c => `<option value="${c}">${c}</option>`).join('');
+  } catch(e) {}
+}
+
+async function renderExlist() {
+  const body = document.getElementById('exlist-body');
+  body.innerHTML = '<div style="color:#005520;letter-spacing:.1em;font-size:.7rem;">LOADING...</div>';
+  try {
+    _exlistData = await authFetch('/api/exercises').then(r => r.json());
+    _exerciseNames = _exlistData.map(e => e.name);  // keep dropdown cache in sync
+  } catch(e) { body.innerHTML = '<div class="no-data">[ ERROR ]</div>'; return; }
+
+  // Group by category
+  const groups = {};
+  _exlistData.forEach(ex => {
+    const cat = ex.muscle_category || 'Uncategorized';
+    (groups[cat] = groups[cat] || []).push(ex);
+  });
+
+  body.innerHTML = '';
+  Object.keys(groups).sort().forEach(cat => {
+    const sec = document.createElement('div');
+    sec.className = 'exlist-category';
+    sec.innerHTML = `<div class="exlist-cat-header">${cat.toUpperCase()} — ${groups[cat].length} exercise${groups[cat].length !== 1 ? 's' : ''}</div>`;
+
+    groups[cat].forEach(ex => {
+      const row = document.createElement('div');
+      row.className = 'exlist-row';
+
+      const catOpts = _exlistCats.map(c => `<option value="${c}"${c===ex.muscle_category?' selected':''}>${c}</option>`).join('');
+
+      const descSafe = (ex.description || '').replace(/"/g, '&quot;');
+      row.innerHTML = `
+        <div class="exlist-name" data-view>${ex.name}</div>
+        <div class="exlist-cat-tag" data-view>${ex.muscle_category || ''}</div>
+        <div class="exlist-edit-inline" data-edit>
+          <div class="exlist-edit-row">
+            <input type="text" class="el-name-inp" value="${ex.name}" />
+            <select class="el-cat-sel">${catOpts}</select>
+            <button class="btn-entry btn-save el-save">SAVE</button>
+            <button class="btn-entry btn-cancel el-cancel">CANCEL</button>
+          </div>
+          <textarea class="el-desc-inp" placeholder="Description / notes / cues (optional)">${ex.description || ''}</textarea>
+        </div>
+        <button class="btn-entry el-edit-btn" style="margin-left:auto;">✎ EDIT</button>
+        <button class="btn-entry btn-del el-del-btn">✕ DELETE</button>`;
+
+      const viewEls  = row.querySelectorAll('[data-view]');
+      const editEl   = row.querySelector('[data-edit]');
+      const editBtn  = row.querySelector('.el-edit-btn');
+      const delBtn   = row.querySelector('.el-del-btn');
+
+      editBtn.addEventListener('click', () => {
+        viewEls.forEach(el => el.style.display = 'none');
+        editEl.classList.add('open');
+        editBtn.style.display = 'none';
+        delBtn.style.display = 'none';
+        row.querySelector('.el-name-inp').focus();
+      });
+
+      row.querySelector('.el-cancel').addEventListener('click', () => {
+        viewEls.forEach(el => el.style.display = '');
+        editEl.classList.remove('open');
+        editBtn.style.display = '';
+        delBtn.style.display = '';
+      });
+
+      row.querySelector('.el-save').addEventListener('click', async () => {
+        const newName = row.querySelector('.el-name-inp').value.trim();
+        const newCat  = row.querySelector('.el-cat-sel').value;
+        const newDesc = row.querySelector('.el-desc-inp').value.trim();
+        if (!newName) return;
+        const res = await authFetch(`/api/exercises/${encodeURIComponent(ex.name)}`, {
+          method: 'PUT',
+          body: JSON.stringify({name: newName, category: newCat, description: newDesc})
+        });
+        if (!res.ok) { alert('Save failed — name may already exist.'); return; }
+        renderExlist();
+      });
+
+      delBtn.addEventListener('click', async () => {
+        if (!confirm(`Delete "${ex.name}"? This won't remove historical workout data.`)) return;
+        await authFetch(`/api/exercises/${encodeURIComponent(ex.name)}`, {method: 'DELETE'});
+        renderExlist();
+      });
+
+      sec.appendChild(row);
+    });
+    body.appendChild(sec);
+  });
+}
+
+// Add-exercise form
+document.getElementById('exlist-add-btn').addEventListener('click', async () => {
+  const name = document.getElementById('exlist-name-input').value.trim();
+  const cat  = document.getElementById('exlist-cat-select').value;
+  if (!name) { document.getElementById('exlist-name-input').focus(); return; }
+  const res = await authFetch('/api/exercises', {
+    method: 'POST',
+    body: JSON.stringify({name, category: cat})
+  });
+  if (!res.ok) { const e = await res.json(); alert(e.error || 'Failed'); return; }
+  document.getElementById('exlist-name-input').value = '';
+  renderExlist();
+});
+document.getElementById('exlist-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('exlist-add-btn').click();
+});
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+checkSession();
 </script>
 </body>
 </html>
