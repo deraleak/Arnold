@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project Arnold</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00aa2a;
+    --green-faint: #003010;
+    --black: #000000;
+    --panel-bg: rgba(0, 10, 0, 0.85);
+    --border: rgba(0, 255, 65, 0.25);
+    --font: 'Share Tech Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--green);
+    font-family: var(--font);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── MATRIX RAIN ── */
+  #rain {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.18;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.75);
+  }
+  .logo {
+    font-size: 1.4rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--green);
+    text-shadow: 0 0 12px var(--green);
+  }
+  .logo span { color: var(--green-dim); }
+  #clock {
+    font-size: 0.9rem;
+    color: var(--green-dim);
+    letter-spacing: 0.1em;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px 24px;
+    overflow: hidden;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header::before {
+    content: '//';
+    color: var(--green-dim);
+    opacity: 0.5;
+  }
+
+  /* ── CHAT PANEL ── */
+  #chat-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) transparent;
+  }
+  #chat-panel::-webkit-scrollbar { width: 4px; }
+  #chat-panel::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .msg-meta {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 0.1em;
+  }
+  .msg-text {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    padding: 6px 10px;
+    border-left: 2px solid var(--border);
+  }
+  .msg.you .msg-meta { color: #4af; }
+  .msg.you .msg-text { border-color: #4af; color: #cef; }
+  .msg.arnold .msg-text { border-color: var(--green); color: var(--green); text-shadow: 0 0 6px rgba(0,255,65,0.4); }
+
+  /* ── DIALOGUE BOX ── */
+  #dialogue-box {
+    display: none;
+    padding: 12px 16px;
+    border-top: 1px solid var(--green);
+    background: rgba(0, 30, 0, 0.9);
+    gap: 8px;
+    align-items: center;
+  }
+  #dialogue-box.active { display: flex; }
+  #dialogue-input {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 0.88rem;
+    padding: 6px 10px;
+    outline: none;
+    border-radius: 2px;
+  }
+  #dialogue-input::placeholder { color: var(--green-dim); opacity: 0.5; }
+  #dialogue-input:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(0,255,65,0.3); }
+  #dialogue-submit {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: var(--font);
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: background 0.2s;
+  }
+  #dialogue-submit:hover { background: rgba(0,255,65,0.12); }
+
+  /* ── WORKOUT PANEL ── */
+  #workout-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--green-dim) transparent;
+  }
+  #workout-panel::-webkit-scrollbar { width: 4px; }
+  #workout-panel::-webkit-scrollbar-thumb { background: var(--green-dim); }
+
+  .workout-entry {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(0,255,65,0.08);
+    font-size: 0.85rem;
+  }
+  .workout-entry:last-child { border-bottom: none; }
+  .ex-name { color: var(--green); }
+  .ex-stat {
+    color: var(--green-dim);
+    font-size: 0.78rem;
+    text-align: right;
+  }
+  .ex-stat strong { color: var(--green); font-size: 0.88rem; }
+  .ex-time { color: #005520; font-size: 0.7rem; }
+
+  .empty-state {
+    color: var(--green-dim);
+    font-size: 0.8rem;
+    opacity: 0.5;
+    padding: 20px 0;
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: #003d10;
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+
+<header>
+  <div class="logo">PROJECT <span>ARNOLD</span></div>
+  <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
+</header>
+
+<main>
+  <!-- LEFT: Chat -->
+  <div class="panel" style="display:flex; flex-direction:column;">
+    <div class="panel-header">Live Feed</div>
+    <div id="chat-panel"></div>
+    <div id="dialogue-box">
+      <input id="dialogue-input" type="text" placeholder="Type your response..." autocomplete="off" />
+      <button id="dialogue-submit">SEND</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Today's Workout -->
+  <div class="panel">
+    <div class="panel-header">Today's Session</div>
+    <div id="workout-panel">
+      <div class="empty-state">[ NO SETS LOGGED YET ]</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>PUSH-TO-TALK: HOLD SPACE</span>
+  <span>LOCAL // OLLAMA + WHISPER + SQLITE</span>
+  <span>localhost:8000</span>
+</footer>
+
+<script>
+// ── MATRIX RAIN ──
+const canvas = document.getElementById('rain');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const cols = Math.floor(canvas.width / 16);
+const drops = Array(cols).fill(1);
+
+function drawRain() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = '14px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+    ctx.fillText(char, i * 16, drops[i] * 16);
+    if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(drawRain, 50);
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// ── CLOCK ──
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── CHAT POLLING ──
+let lastChatCount = 0;
+
+async function refreshChat() {
+  try {
+    const res = await fetch('/api/chat');
+    const msgs = await res.json();
+    if (msgs.length !== lastChatCount) {
+      lastChatCount = msgs.length;
+      const panel = document.getElementById('chat-panel');
+      panel.innerHTML = '';
+      msgs.forEach(m => {
+        const div = document.createElement('div');
+        div.className = `msg ${m.role}`;
+        div.innerHTML = `
+          <div class="msg-meta">${m.role.toUpperCase()} // ${m.time}</div>
+          <div class="msg-text">${m.message}</div>
+        `;
+        panel.appendChild(div);
+      });
+      panel.scrollTop = panel.scrollHeight;
+    }
+  } catch(e) {}
+}
+
+// ── WORKOUT POLLING ──
+async function refreshWorkouts() {
+  try {
+    const res = await fetch('/api/workouts/today');
+    const sets = await res.json();
+    const panel = document.getElementById('workout-panel');
+    if (!sets.length) {
+      panel.innerHTML = '<div class="empty-state">[ NO SETS LOGGED YET ]</div>';
+      return;
+    }
+    panel.innerHTML = '';
+    sets.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'workout-entry';
+      const time = s.timestamp ? s.timestamp.split(' ')[1]?.slice(0,5) || '' : '';
+      const wt = s.weight ? `${s.weight}lbs` : 'BW';
+      div.innerHTML = `
+        <div class="ex-name">${s.exercise}</div>
+        <div class="ex-stat"><strong>${s.sets}</strong> sets</div>
+        <div class="ex-stat"><strong>${wt}</strong> × <strong>${s.reps}</strong></div>
+        <div class="ex-time">${time}</div>
+      `;
+      panel.appendChild(div);
+    });
+  } catch(e) {}
+}
+
+// ── DIALOGUE STATE POLLING ──
+async function refreshDialogue() {
+  try {
+    const res = await fetch('/api/dialogue');
+    const data = await res.json();
+    const box = document.getElementById('dialogue-box');
+    if (data.active) {
+      box.classList.add('active');
+      document.getElementById('dialogue-input').focus();
+    } else {
+      box.classList.remove('active');
+      document.getElementById('dialogue-input').value = '';
+    }
+  } catch(e) {}
+}
+
+// ── DIALOGUE SUBMIT ──
+async function submitDialogue() {
+  const input = document.getElementById('dialogue-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try {
+    await fetch('/api/dialogue/input', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+  } catch(e) {}
+}
+
+document.getElementById('dialogue-submit').addEventListener('click', submitDialogue);
+document.getElementById('dialogue-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitDialogue();
+});
+
+// ── POLL ALL ──
+function pollAll() {
+  refreshChat();
+  refreshWorkouts();
+  refreshDialogue();
+}
+pollAll();
+setInterval(pollAll, 1500);
+</script>
+</body>
+</html>
