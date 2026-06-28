@@ -77,86 +77,59 @@
     text-shadow: 0 0 20px rgba(0,255,65,0.5);
   }
 
-  #user-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--green-dim) transparent;
+  #user-list-wrap {
+    flex: 1; overflow-y: auto; padding: 14px 28px;
+    display: flex; flex-direction: column; gap: 6px;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
   }
-
-  .user-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 28px;
-    border-bottom: 1px solid rgba(0,255,65,0.06);
-    transition: background 0.15s;
-    cursor: pointer;
+  .user-btn {
+    background: rgba(0,12,0,.6); border: 1px solid rgba(0,255,65,.18);
+    color: var(--green-dim); font-family: var(--font); font-size: .8rem;
+    letter-spacing: .2em; padding: 12px 16px; cursor: pointer;
+    text-align: left; display: flex; align-items: center; justify-content: space-between;
+    transition: all .12s;
   }
-  .user-row:hover { background: rgba(0,255,65,0.05); }
-
-  .user-row-name {
-    font-size: 1rem;
-    letter-spacing: 0.12em;
-    color: var(--green);
-  }
-  .user-row-login {
-    font-size: 0.68rem;
-    color: #005520;
-    letter-spacing: 0.1em;
-    text-align: right;
-  }
-
-  .user-edit-inline { display: none; align-items: center; gap: 8px; grid-column: 1; }
-  .user-edit-input {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--green);
-    color: var(--green);
-    font-family: var(--font);
-    font-size: 1rem;
-    letter-spacing: 0.12em;
-    outline: none;
-    width: 180px;
-    padding: 2px 4px;
-  }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid rgba(0,255,65,0.3);
-    color: var(--green-dim);
-    font-family: var(--font);
-    font-size: 0.65rem;
-    padding: 4px 10px;
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+  .user-btn:hover { border-color: var(--green); color: var(--green); background: rgba(0,255,65,.04); box-shadow: 0 0 10px rgba(0,255,65,.08); }
+  .user-btn-meta { font-size: .48rem; letter-spacing: .12em; color: #004a18; }
 
   #user-panel-footer {
-    padding: 16px 28px;
-    border-top: 1px solid var(--border);
+    padding: 14px 28px 20px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 10px;
   }
-
-  #create-form { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
-  #new-name-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--green-dim);
-    color: var(--green);
-    font-family: var(--font);
-    font-size: 0.9rem;
-    letter-spacing: 0.1em;
-    outline: none;
-    padding: 4px 0;
+  #add-user-form { display: flex; flex-direction: column; gap: 10px; }
+  .login-field { display: flex; flex-direction: column; gap: 5px; }
+  .login-label { font-size: .55rem; letter-spacing: .22em; color: var(--green-dim); }
+  .login-input {
+    background: rgba(0,12,0,.9); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .9rem;
+    letter-spacing: .1em; padding: 10px 12px; outline: none; width: 100%;
   }
-  #new-name-input::placeholder { color: #004410; }
-  #new-name-input:focus { border-bottom-color: var(--green); }
+  .login-input:focus { border-color: var(--green); box-shadow: 0 0 8px rgba(0,255,65,.1); }
+  .login-input::placeholder { color: #003a10; }
+  #add-user-error { font-size: .62rem; letter-spacing: .12em; color: #ff4040; display: none; }
+  #add-user-row { display: flex; gap: 8px; }
+  #add-user-submit {
+    flex: 1; background: transparent; border: 1px solid var(--green); color: var(--green);
+    font-family: var(--font); font-size: .72rem; letter-spacing: .2em; padding: 9px; cursor: pointer;
+  }
+  #add-user-submit:hover { background: rgba(0,255,65,.07); }
+  #add-user-cancel {
+    background: transparent; border: 1px solid rgba(0,255,65,.2); color: var(--green-dim);
+    font-family: var(--font); font-size: .65rem; letter-spacing: .18em; padding: 9px 14px; cursor: pointer;
+  }
+  #add-user-cancel:hover { border-color: var(--green-dim); color: var(--green); }
+  #toggle-add-user-btn {
+    background: transparent; border: none; color: #004a1a;
+    font-family: var(--font); font-size: .62rem; letter-spacing: .18em;
+    cursor: pointer; text-align: left; padding: 0;
+  }
+  #toggle-add-user-btn:hover { color: var(--green-dim); }
+  .btn-ghost {
+    background: transparent; border: 1px solid rgba(0,255,65,0.3); color: var(--green-dim);
+    font-family: var(--font); font-size: 0.65rem; padding: 4px 10px; cursor: pointer;
+    letter-spacing: 0.1em; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
 
   /* ══════════════════════════════════════
      MAIN APP
@@ -394,11 +367,11 @@
 
   /* Stats row */
   #details-stats {
-    display: grid; grid-template-columns: repeat(4,1fr);
+    display: flex;
     border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   .stat-card {
-    padding: 16px 24px; border-right: 1px solid var(--border);
+    flex: 1; padding: 16px 20px; border-right: 1px solid var(--border);
     display: flex; flex-direction: column; gap: 4px;
   }
   .stat-card:last-child { border-right: none; }
@@ -515,6 +488,338 @@
   .exlist-edit-inline select { width: 140px; }
   .exlist-edit-inline textarea { width: 100%; resize: vertical; min-height: 38px; padding: 4px 8px; letter-spacing:.04em; }
   .exlist-edit-inline input:focus, .exlist-edit-inline select:focus, .exlist-edit-inline textarea:focus { border-color: var(--green); }
+  .exlist-priority-label {
+    display: flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: .7rem; color: var(--green-dim); user-select: none; padding: 0 6px;
+  }
+  .exlist-priority-label:has(.el-priority-cb:checked) { color: var(--green); text-shadow: 0 0 6px rgba(0,255,65,.4); }
+  .exlist-isometric-label {
+    display: flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: .7rem; color: var(--green-dim); user-select: none; padding: 0 6px;
+  }
+  .exlist-isometric-label:has(.el-isometric-cb:checked) { color: var(--cyan); text-shadow: 0 0 6px rgba(0,229,255,.4); }
+
+  /* ── PRIORITY BAR ── */
+  #priority-bar {
+    display: none;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    background: rgba(0,3,0,0.92);
+    flex-shrink: 0;
+    height: 34px;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+  }
+  #priority-bar.visible { display: flex; }
+  #priority-bar-label {
+    font-size: .54rem;
+    letter-spacing: .22em;
+    color: var(--green-dim);
+    padding: 0 14px;
+    white-space: nowrap;
+    border-right: 1px solid var(--border);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  #priority-bar-track {
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+    position: relative;
+  }
+  #priority-bar-inner {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    padding: 0 8px;
+  }
+  .priority-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    margin: 0 4px;
+    border: 1px solid rgba(0,255,65,0.12);
+    height: 22px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    white-space: nowrap;
+  }
+  .priority-chip:hover { border-color: var(--green); background: rgba(0,255,65,0.05); }
+  .priority-chip-name { font-size: .68rem; letter-spacing: .07em; color: var(--green); }
+  .priority-chip-days { font-size: .58rem; color: var(--green-dim); letter-spacing: .05em; }
+  .priority-chip-days.overdue { color: #ff6040; text-shadow: 0 0 6px rgba(255,60,40,0.4); }
+  .priority-empty { font-size: .65rem; color: #003010; letter-spacing: .12em; padding: 0 16px; }
+  @keyframes priority-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── HISTORY OVERLAY ── */
+  #history-overlay {
+    display: none; position: fixed; inset: 0; z-index: 125;
+    background: rgba(0,2,0,0.98); flex-direction: column;
+  }
+  #history-overlay.open { display: flex; }
+  #history-top-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 15px 28px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #history-top-title { font-size: .95rem; letter-spacing: .28em; color: var(--green); text-shadow: 0 0 14px rgba(0,255,65,.4); }
+  #hist-month-label { font-size: .72rem; letter-spacing: .28em; color: var(--green); min-width: 168px; text-align: center; }
+  .hist-nav-btn {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .78rem; padding: 4px 12px; cursor: pointer; letter-spacing: .06em;
+  }
+  .hist-nav-btn:hover { border-color: var(--green); color: var(--green); }
+  #history-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .72rem; padding: 5px 16px; cursor: pointer; letter-spacing: .12em; margin-left: auto;
+  }
+  #history-close:hover { border-color: var(--green); color: var(--green); }
+  #history-main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Calendar pane */
+  #hist-cal-wrap {
+    width: 58%; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 16px 18px; overflow: hidden;
+  }
+  #hist-muscle-filter {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+  }
+  .hist-mf-btn {
+    font-family: var(--font); font-size: .46rem; letter-spacing: .1em;
+    padding: 2px 7px; border-radius: 2px; cursor: pointer;
+    border: 1px solid rgba(0,255,65,.18); background: transparent; color: #004018;
+    transition: border-color .1s, color .1s, background .1s;
+  }
+  .hist-mf-btn.active {
+    border-color: var(--green); color: var(--green); background: rgba(0,255,65,.07);
+  }
+  .hist-mf-btn:hover { border-color: rgba(0,255,65,.4); color: var(--green-dim); }
+  .hist-mf-clear { border-color: rgba(255,60,60,.25); color: #4a1010; margin-left: 4px; }
+  .hist-mf-clear:hover { border-color: rgba(255,60,60,.55); color: #ff4040; }
+  #hist-dow-row {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 5px;
+  }
+  .hist-dow { font-size: .55rem; letter-spacing: .16em; color: var(--green-dim); text-align: center; padding: 3px 0; }
+  #hist-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; }
+  .cal-cell {
+    position: relative; overflow: hidden; border: 1px solid rgba(0,255,65,.07);
+    padding: 4px 5px 4px; cursor: default;
+    display: flex; flex-direction: column; gap: 3px; transition: border-color .12s;
+  }
+  .cal-cell.has-data { cursor: pointer; }
+  .cal-cell.has-data:hover { border-color: rgba(0,255,65,.28); background: rgba(0,255,65,.02); }
+  .cal-cell.other-month { opacity: .15; pointer-events: none; }
+  .cal-cell.is-today { border-color: rgba(0,255,65,.4); }
+  .cal-cell.is-today .cal-day-num { color: var(--green); font-weight: bold; }
+  .cal-cell.selected { border-color: var(--green); box-shadow: 0 0 16px rgba(0,255,65,.1) inset; }
+  .cal-day-num { font-size: 1.32rem; letter-spacing: .04em; color: var(--green-dim); flex-shrink: 0; }
+  .cal-muscle-list { display: flex; flex-direction: column; gap: 3px; flex: 1; justify-content: flex-end; }
+  .cal-ml-row { display: flex; justify-content: space-between; align-items: baseline; gap: 2px; }
+  .cal-ml-name { font-size: 13.2px; font-family: var(--font); color: rgba(0,255,65,.38); letter-spacing: .05em; }
+  .cal-ml-vol  { font-size: 22px; font-family: var(--font); color: var(--green-dim); letter-spacing: .02em; }
+  .cal-bar {
+    position: absolute; bottom: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, rgba(0,255,65,.25), rgba(0,255,65,.55));
+  }
+
+  /* Day detail pane */
+  #hist-day-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #hist-day-topbar {
+    padding: 14px 22px 12px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 14px; flex-shrink: 0; flex-wrap: wrap;
+  }
+  #hist-day-date { font-size: .72rem; letter-spacing: .2em; color: var(--green); }
+  #hist-day-totvol { font-size: .6rem; letter-spacing: .12em; color: #005520; }
+  #hist-day-scroll { flex: 1; overflow-y: auto; padding: 14px 22px; }
+  #hist-day-footer { padding: 10px 22px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .hist-no-sel, .hist-empty { font-size: .62rem; letter-spacing: .16em; color: #003810; text-align: center; margin: 40px auto; }
+  .hist-ex-group { margin-bottom: 18px; }
+  .hist-ex-hdr { font-size: .58rem; letter-spacing: .22em; color: var(--green-dim); padding-bottom: 5px; border-bottom: 1px solid rgba(0,255,65,.07); margin-bottom: 4px; }
+  .hist-set-row { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid rgba(0,255,65,.04); }
+  .hist-set-desc { font-size: .7rem; letter-spacing: .05em; color: var(--green); flex: 1; }
+  .hist-set-time { font-size: .54rem; color: #003a10; letter-spacing: .06em; }
+  .hist-btn { background: transparent; border: 1px solid rgba(0,255,65,.18); color: var(--green-dim); font-family: var(--font); font-size: .58rem; padding: 2px 8px; cursor: pointer; letter-spacing: .1em; }
+  .hist-btn:hover { border-color: var(--green); color: var(--green); }
+  .hist-btn.del { border-color: rgba(255,40,40,.18); color: rgba(255,60,60,.45); }
+  .hist-btn.del:hover { border-color: #ff4040; color: #ff4040; }
+  .hist-inline-form { display: flex; align-items: center; gap: 5px; padding: 5px 0; flex-wrap: wrap; }
+  .hist-ilabel { font-size: .52rem; color: #004010; letter-spacing: .08em; }
+  .hist-inline-form input {
+    background: rgba(0,12,0,.95); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .68rem;
+    padding: 3px 6px; outline: none; width: 60px;
+  }
+  .hist-inline-form input:focus { border-color: var(--green); }
+  #hist-add-btn {
+    background: transparent; border: 1px solid rgba(0,255,65,.2); color: var(--green-dim);
+    font-family: var(--font); font-size: .62rem; padding: 5px 14px; cursor: pointer; letter-spacing: .14em;
+  }
+  #hist-add-btn:hover { border-color: var(--green); color: var(--green); }
+  #hist-add-form { display: none; margin-top: 10px; flex-direction: column; gap: 8px; }
+  #hist-add-form.open { display: flex; }
+  .hist-add-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hist-add-row select, .hist-add-row input {
+    background: rgba(0,12,0,.95); border: 1px solid var(--green-dim);
+    color: var(--green); font-family: var(--font); font-size: .7rem; padding: 4px 8px; outline: none;
+  }
+  .hist-add-row select { min-width: 160px; }
+  .hist-add-row input { width: 62px; }
+  .hist-add-row select:focus, .hist-add-row input:focus { border-color: var(--green); }
+
+
+  /* ── VOICE INPUT ── */
+  #mic-btn { min-width: 52px; letter-spacing: .1em; user-select: none; }
+  #mic-btn.listening {
+    border-color: var(--green); color: var(--green);
+    background: rgba(0,255,65,.08);
+    animation: mic-glow 1.1s ease-in-out infinite;
+  }
+  @keyframes mic-glow {
+    0%,100% { box-shadow: 0 0 5px rgba(0,255,65,.2); }
+    50%      { box-shadow: 0 0 18px rgba(0,255,65,.55); }
+  }
+  #voice-bar {
+    display: none; padding: 6px 14px; flex-shrink: 0;
+    border-top: 1px solid rgba(0,255,65,.35);
+    background: rgba(0,12,0,.95);
+    align-items: center; gap: 10px;
+  }
+  #voice-bar.active { display: flex; }
+  .voice-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: var(--green); box-shadow: 0 0 7px var(--green);
+    animation: pulse 1s infinite;
+  }
+  #voice-interim {
+    font-size: .75rem; color: var(--green-dim); letter-spacing: .06em;
+    font-style: italic; flex: 1; min-width: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ══════════════════════════════════════
+     RECOVERY OVERLAY
+  ══════════════════════════════════════ */
+  #recovery-overlay {
+    display: none; position: fixed; inset: 0; z-index: 120;
+    background: rgba(0,0,0,0.98); flex-direction: column; overflow: hidden;
+  }
+  #recovery-overlay.open { display: flex; }
+  #recovery-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #recovery-title { font-size: 1.1rem; letter-spacing: .32em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); }
+  #recovery-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing: .12em;
+  }
+  #recovery-close:hover { border-color: var(--green); color: var(--green); }
+  #recovery-banner {
+    display: flex; align-items: stretch; border-bottom: 1px solid var(--border);
+    background: rgba(0,5,0,0.6); flex-shrink: 0;
+  }
+  .rec-banner-block { padding: 14px 32px; display: flex; flex-direction: column; justify-content: center; }
+  .rec-banner-eyebrow { font-size: .52rem; letter-spacing: .3em; color: var(--green-dim); margin-bottom: 4px; }
+  .rec-banner-score { font-size: 2.6rem; letter-spacing: .04em; line-height: 1; transition: color .5s, text-shadow .5s; color: var(--green-dim); }
+  .rec-banner-score.rdy { color: var(--green); text-shadow: 0 0 30px rgba(0,255,65,.5); }
+  .rec-banner-score.rec { color: #ffaa00; text-shadow: 0 0 20px rgba(255,170,0,.35); }
+  .rec-banner-score.ftg { color: #ff4040; text-shadow: 0 0 20px rgba(255,64,64,.35); }
+  .rec-banner-status { font-size: .68rem; letter-spacing: .25em; margin-top: 5px; }
+  .rec-banner-divider { width: 1px; background: var(--border); flex-shrink: 0; }
+  .rec-banner-meta { font-size: .6rem; color: #005520; letter-spacing: .1em; line-height: 2.2; }
+  #rec-body {
+    flex: 1; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+  }
+  #recovery-grid {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    padding: 22px 32px; align-content: flex-start;
+  }
+  /* Volume chart section */
+  #rec-vol-section {
+    padding: 0 32px 32px;
+    border-top: 1px solid var(--border); margin-top: 8px;
+  }
+  #rec-vol-top {
+    display: flex; align-items: center; gap: 20px; padding: 18px 0 14px;
+    flex-wrap: wrap;
+  }
+  #rec-vol-title { font-size: .7rem; letter-spacing: .28em; color: var(--green); flex-shrink: 0; }
+  #rec-vol-filters { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .rec-vol-fbtn {
+    background: transparent; border: 1px solid rgba(0,255,65,.18);
+    color: #004a18; font-family: var(--font); font-size: .54rem;
+    letter-spacing: .12em; padding: 3px 10px; cursor: pointer;
+    transition: all .12s;
+  }
+  .rec-vol-fbtn.on { color: var(--fc,#00ff41); border-color: var(--fc,#00ff41); text-shadow: 0 0 6px var(--fc,#00ff41); }
+  .rec-vol-fbtn:hover { border-color: var(--fc,#00ff41); color: var(--fc,#00ff41); }
+  #rec-vol-range { display: flex; gap: 4px; flex-shrink: 0; }
+  .rec-range-btn {
+    background: transparent; border: 1px solid rgba(0,255,65,.18); color: #004a18;
+    font-family: var(--font); font-size: .55rem; letter-spacing: .12em; padding: 3px 10px; cursor: pointer;
+  }
+  .rec-range-btn.active { border-color: var(--green-dim); color: var(--green-dim); }
+  #rec-vol-chart { width: 100%; min-height: 180px; }
+  #rec-vol-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .rec-vol-leg-item { display: flex; align-items: center; gap: 5px; font-size: .52rem; letter-spacing: .1em; }
+  .rec-vol-leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* History delete day */
+  #hist-del-day-btn {
+    background: transparent; border: 1px solid rgba(255,40,40,.25); color: rgba(255,60,60,.5);
+    font-family: var(--font); font-size: .58rem; letter-spacing: .12em;
+    padding: 3px 10px; cursor: pointer; margin-left: auto;
+  }
+  #hist-del-day-btn:hover { border-color: #ff4040; color: #ff4040; }
+  .rec-card {
+    background: rgba(0,8,0,0.72); border: 1px solid var(--border);
+    padding: 18px 16px 14px; display: flex; flex-direction: column;
+    align-items: center; gap: 8px; width: 162px; position: relative;
+    transition: border-color .4s, box-shadow .4s;
+  }
+  .rec-card.s-recovered { border-color: rgba(0,255,65,.28); }
+  .rec-card.s-recovering { border-color: rgba(255,170,0,.22); }
+  .rec-card.s-fatigued   { border-color: rgba(255,64,64,.22); }
+  .rec-card.s-untested   { border-color: rgba(0,229,255,.15); }
+  @keyframes rec-glow-pulse {
+    0%,100% { box-shadow: none; }
+    50% { box-shadow: inset 0 0 20px rgba(0,255,65,.05), 0 0 14px rgba(0,255,65,.07); }
+  }
+  .rec-card.s-recovered { animation: rec-glow-pulse 3.5s ease-in-out infinite; }
+  .rec-gauge-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+  .rec-gauge-wrap svg { width: 100px; height: 100px; display: block; }
+  .rec-gauge-bg { fill: none; stroke: rgba(0,255,65,.07); stroke-width: 7; }
+  .rec-gauge-arc { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
+  .rec-gauge-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .rec-gauge-pct { font-size: 1.3rem; letter-spacing: .03em; }
+  .rec-gauge-sub { font-size: .44rem; letter-spacing: .18em; color: var(--green-dim); margin-top: 1px; }
+  .rec-card-name { font-size: .68rem; letter-spacing: .22em; color: var(--green); }
+  .rec-status-badge { font-size: .52rem; letter-spacing: .18em; padding: 2px 9px; border: 1px solid currentColor; }
+  .rec-status-badge.s-recovered { color: var(--green); }
+  .rec-status-badge.s-recovering { color: #ffaa00; }
+  .rec-status-badge.s-fatigued { color: #ff4040; }
+  .rec-status-badge.s-untested { color: var(--cyan); }
+  .rec-time-text { font-size: .56rem; color: #005520; letter-spacing: .1em; }
+  .rec-eta-text { font-size: .52rem; letter-spacing: .08em; }
+  .rec-eta-text.rdy { color: var(--green-dim); }
+  .rec-eta-text.cnt { color: #004010; }
+  .rec-week-wrap { width: 100%; margin-top: 2px; }
+  .rec-week-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; width: 100%; }
+  .rec-week-bar { flex: 1; background: rgba(0,255,65,.08); border-radius: 1px; min-height: 2px; }
+  .rec-week-bar.trained { background: rgba(0,255,65,.36); }
+  .rec-week-bar.today-bar { background: var(--green); }
+  .rec-week-days { display: flex; gap: 2px; width: 100%; margin-top: 2px; }
+  .rec-week-day { flex: 1; font-size: .4rem; color: #003010; text-align: center; }
 </style>
 </head>
 <body>
@@ -527,19 +832,25 @@
 <div id="user-screen">
   <div id="user-panel">
     <div id="user-panel-header">
-      <div class="user-panel-eyebrow">PROJECT ARNOLD // AUTHENTICATION REQUIRED</div>
-      <div id="user-panel-title">IDENTIFY OPERATOR</div>
+      <div class="user-panel-eyebrow">PROJECT ARNOLD // IDENTIFY OPERATOR</div>
+      <div id="user-panel-title">SELECT USER</div>
     </div>
-
-    <div id="user-list"></div>
-
+    <div id="user-list-wrap">
+      <div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:8px 0;">LOADING...</div>
+    </div>
     <div id="user-panel-footer">
-      <button class="btn-ghost" id="toggle-create-btn" onclick="toggleCreateForm()">+ CREATE NEW OPERATOR</button>
-      <div id="create-form" style="display:none;">
-        <input id="new-name-input" type="text" placeholder="Operator name..." autocomplete="off" maxlength="32" />
-        <button class="btn-ghost" onclick="createUser()">CONFIRM</button>
-        <button class="btn-ghost" onclick="toggleCreateForm()">CANCEL</button>
+      <div id="add-user-form" style="display:none">
+        <div class="login-field">
+          <div class="login-label">NAME</div>
+          <input id="new-user-name" class="login-input" type="text" placeholder="Enter name" maxlength="32" autocomplete="off" />
+        </div>
+        <div id="add-user-error"></div>
+        <div id="add-user-row">
+          <button id="add-user-submit">CREATE OPERATOR</button>
+          <button id="add-user-cancel">CANCEL</button>
+        </div>
       </div>
+      <button id="toggle-add-user-btn">+ ADD NEW OPERATOR</button>
     </div>
   </div>
 </div>
@@ -549,9 +860,13 @@
 ══════════════════════════════════════ -->
 <div id="main-app">
   <header>
-    <div class="logo">PROJECT <span>ARNOLD</span></div>
+    <div class="logo">PROJECT <span>ARNOLD</span><span style="font-size:.48rem;letter-spacing:.22em;color:var(--green-dim);margin-left:14px;font-weight:normal;">v1.0</span></div>
     <div class="header-right">
       <div id="user-badge">OPERATOR: <strong id="user-name-display">—</strong></div>
+      <button class="btn btn-sm" id="history-btn">▦ HISTORY</button>
+      <button class="btn btn-sm" id="mic-toggle-btn">◉ MIC OFF</button>
+      <button class="btn btn-sm" id="tts-btn">♪ VOICE</button>
+      <button class="btn btn-sm" id="recovery-btn">⬡ RECOVERY</button>
       <button class="btn btn-sm" onclick="logout()">LOGOUT</button>
       <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
     </div>
@@ -564,6 +879,10 @@
         <span class="panel-header-label">Live Feed</span>
       </div>
       <div id="chat-scroll"></div>
+      <div id="voice-bar">
+        <span class="voice-dot"></span>
+        <span id="voice-interim">LISTENING...</span>
+      </div>
       <div id="input-box">
         <input id="cmd-input" type="text" placeholder="Type a command..." autocomplete="off" />
         <button class="btn" id="cmd-submit">SEND</button>
@@ -608,6 +927,16 @@
     </div>
   </main>
 
+  <!-- PRIORITY BAR -->
+  <div id="priority-bar">
+    <div id="priority-bar-label">★ PRIORITY</div>
+    <div id="priority-bar-track">
+      <div id="priority-bar-inner">
+        <span class="priority-empty">[ NO PRIORITY EXERCISES SET ]</span>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <span>TEXT INPUT // ENTER TO SEND</span>
     <span>LOCAL // OLLAMA + SQLITE</span>
@@ -638,7 +967,17 @@
 <div id="details-overlay">
   <div id="details-header">
     <div id="details-title">Exercise Details</div>
-    <button id="details-close">✕ CLOSE</button>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.68rem;letter-spacing:.18em;color:var(--green-dim);user-select:none;">
+        <input type="checkbox" id="details-isometric-cb" style="accent-color:var(--cyan);width:13px;height:13px;cursor:pointer;" />
+        ISOMETRIC
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.68rem;letter-spacing:.18em;color:var(--green-dim);user-select:none;">
+        <input type="checkbox" id="details-priority-cb" style="accent-color:var(--green);width:13px;height:13px;cursor:pointer;" />
+        PRIORITY
+      </label>
+      <button id="details-close">✕ CLOSE</button>
+    </div>
   </div>
 
   <div id="details-desc-block">
@@ -661,18 +1000,23 @@
       <div class="stat-value" id="stat-sessions">—</div>
       <div class="stat-sub" id="stat-sessions-sub"></div>
     </div>
+    <div class="stat-card" id="stat-1rm-card">
+      <div class="stat-label">EST. 1RM</div>
+      <div class="stat-value" id="stat-1rm" style="color:var(--cyan);text-shadow:0 0 14px rgba(0,229,255,.45);">—</div>
+      <div class="stat-sub" id="stat-1rm-sub">Epley formula</div>
+    </div>
     <div class="stat-card">
-      <div class="stat-label">MAX SET</div>
+      <div class="stat-label" id="stat-pr-label">MAX SET</div>
       <div class="stat-value" id="stat-pr">—</div>
       <div class="stat-sub" id="stat-pr-sub"></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">BEST SESSION VOLUME</div>
+      <div class="stat-label" id="stat-best-vol-label">BEST SESSION VOLUME</div>
       <div class="stat-value" id="stat-best-vol">—</div>
       <div class="stat-sub" id="stat-best-vol-sub"></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">TOTAL VOLUME LIFTED</div>
+      <div class="stat-label" id="stat-total-label">TOTAL VOLUME LIFTED</div>
       <div class="stat-value" id="stat-total">—</div>
       <div class="stat-sub" id="stat-total-sub"></div>
     </div>
@@ -684,6 +1028,92 @@
   </div>
 
   <div id="details-body"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HISTORY OVERLAY
+══════════════════════════════════════ -->
+<div id="history-overlay">
+  <div id="history-top-bar">
+    <div id="history-top-title">// WORKOUT HISTORY</div>
+    <button class="hist-nav-btn" id="hist-prev-btn">◀</button>
+    <div id="hist-month-label">— — —</div>
+    <button class="hist-nav-btn" id="hist-next-btn">▶</button>
+    <button id="history-close">✕ CLOSE</button>
+  </div>
+  <div id="history-main">
+    <!-- Calendar pane -->
+    <div id="hist-cal-wrap">
+      <div id="hist-muscle-filter"></div>
+      <div id="hist-dow-row">
+        <div class="hist-dow">SUN</div><div class="hist-dow">MON</div><div class="hist-dow">TUE</div>
+        <div class="hist-dow">WED</div><div class="hist-dow">THU</div><div class="hist-dow">FRI</div>
+        <div class="hist-dow">SAT</div>
+      </div>
+      <div id="hist-cal-grid"></div>
+    </div>
+    <!-- Day detail pane -->
+    <div id="hist-day-wrap">
+      <div id="hist-day-topbar">
+        <div id="hist-day-date">// SELECT A DAY</div>
+        <div id="hist-day-totvol"></div>
+        <button id="hist-del-day-btn" style="display:none" onclick="deleteHistDay()">✕ CLEAR DAY</button>
+      </div>
+      <div id="hist-day-scroll">
+        <div class="hist-no-sel">← SELECT A DAY FROM THE CALENDAR</div>
+      </div>
+      <div id="hist-day-footer" style="display:none">
+        <button id="hist-add-btn">+ ADD SET</button>
+        <div id="hist-add-form">
+          <div class="hist-add-row">
+            <select id="hist-add-exercise"><option value="">— exercise —</option></select>
+            <input type="number" id="hist-add-weight" placeholder="weight" min="0" step="5" />
+            <input type="number" id="hist-add-reps"   placeholder="reps"   min="1" />
+            <input type="number" id="hist-add-sets"   placeholder="sets"   min="1" value="1" />
+            <button class="hist-btn" id="hist-add-save">SAVE</button>
+            <button class="hist-btn" id="hist-add-cancel">CANCEL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RECOVERY OVERLAY
+══════════════════════════════════════ -->
+<div id="recovery-overlay">
+  <div id="recovery-header">
+    <div id="recovery-title">// RECOVERY STATUS</div>
+    <button id="recovery-close">✕ CLOSE</button>
+  </div>
+  <div id="rec-body">
+    <div id="recovery-banner">
+      <div class="rec-banner-block">
+        <div class="rec-banner-eyebrow">BODY READINESS SCORE</div>
+        <div class="rec-banner-score" id="rec-banner-score">—</div>
+        <div class="rec-banner-status" id="rec-banner-status" style="color:var(--green-dim);"></div>
+      </div>
+      <div class="rec-banner-divider"></div>
+      <div class="rec-banner-block">
+        <div class="rec-banner-meta" id="rec-banner-meta"></div>
+      </div>
+    </div>
+    <div id="recovery-grid"></div>
+    <div id="rec-vol-section">
+      <div id="rec-vol-top">
+        <div id="rec-vol-title">// DAILY VOLUME BY MUSCLE GROUP</div>
+        <div id="rec-vol-filters"></div>
+        <div id="rec-vol-range">
+          <button class="rec-range-btn" data-days="14">14D</button>
+          <button class="rec-range-btn active" data-days="30">30D</button>
+          <button class="rec-range-btn" data-days="60">60D</button>
+        </div>
+      </div>
+      <div id="rec-vol-chart"><div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">LOADING...</div></div>
+      <div id="rec-vol-legend"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -746,132 +1176,42 @@ async function checkSession() {
 function showUserScreen() {
   document.getElementById('user-screen').style.display = 'flex';
   document.getElementById('main-app').style.display = 'none';
-  loadUsers();
+  showAddUserForm(false);
+  loadUserList();
 }
 
 function showMainApp() {
   document.getElementById('user-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'flex';
   document.getElementById('user-name-display').textContent = currentUser.name;
+  document.getElementById('priority-bar').classList.add('visible');
+  _lastPriorityHash = '';
   document.getElementById('cmd-input').focus();
 }
 
-async function loadUsers() {
+async function loadUserList() {
+  const wrap = document.getElementById('user-list-wrap');
+  wrap.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:8px 0;">LOADING...</div>';
   const users = await fetch('/api/users').then(r => r.json());
-  const list = document.getElementById('user-list');
-  list.innerHTML = '';
-
+  wrap.innerHTML = '';
   if (!users.length) {
-    list.innerHTML = '<div class="empty-state" style="padding:24px;">[ NO OPERATORS FOUND — CREATE ONE BELOW ]</div>';
+    wrap.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.12em;padding:8px 0;">NO OPERATORS — ADD ONE BELOW</div>';
     return;
   }
-
   users.forEach(u => {
-    const row = document.createElement('div');
-    row.className = 'user-row';
-    const lastLogin = u.last_login
-      ? new Date(u.last_login).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})
-      : 'Never logged in';
-
-    row.innerHTML = `
-      <div class="user-row-name user-name-display" data-id="${u.id}" style="cursor:pointer;">${u.name}</div>
-      <div class="user-row-login">${lastLogin}</div>
-      <button class="btn-ghost" onclick="startEdit(${u.id}, this)">EDIT</button>
-    `;
-
-    row.querySelector('.user-name-display').addEventListener('click', () => loginAs(u.id));
-    list.appendChild(row);
+    const btn = document.createElement('button');
+    btn.className = 'user-btn';
+    const last = u.last_login ? new Date(u.last_login + 'Z').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : 'NEVER';
+    btn.innerHTML = `<span>${u.name.toUpperCase()}</span><span class="user-btn-meta">LAST: ${last}</span>`;
+    btn.addEventListener('click', () => selectUser(u.name));
+    wrap.appendChild(btn);
   });
 }
 
-function startEdit(uid, btn) {
-  const row = btn.closest('.user-row');
-  const nameEl = row.querySelector('.user-name-display');
-  const currentName = nameEl.textContent;
-
-  nameEl.style.display = 'none';
-  btn.style.display = 'none';
-
-  const form = document.createElement('div');
-  form.style.cssText = 'display:flex;align-items:center;gap:8px;grid-column:1 / -1;';
-  form.innerHTML = `
-    <input class="user-edit-input" type="text" value="${currentName}" maxlength="32" />
-    <button class="btn-ghost">SAVE</button>
-    <button class="btn-ghost" id="cancel-edit-${uid}">CANCEL</button>
-  `;
-  row.appendChild(form);
-
-  const input = form.querySelector('input');
-  const saveBtn = form.querySelector('button');
-  input.focus();
-  input.select();
-
-  const cancel = () => {
-    form.remove();
-    nameEl.style.display = '';
-    btn.style.display = '';
-  };
-
-  saveBtn.addEventListener('click', () => saveEdit(uid, input.value, cancel, nameEl));
-  form.querySelector(`#cancel-edit-${uid}`).addEventListener('click', cancel);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveBtn.click();
-    if (e.key === 'Escape') cancel();
-  });
-}
-
-async function saveEdit(uid, name, onCancel, nameEl) {
-  name = name.trim();
-  if (!name) return;
-  const res = await fetch(`/api/users/${uid}`, {
-    method: 'PUT',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name})
-  }).then(r => r.json());
-
-  if (res.error) { alert(res.error); return; }
-  nameEl.textContent = name;
-  onCancel();
-}
-
-function toggleCreateForm() {
-  const form = document.getElementById('create-form');
-  const btn = document.getElementById('toggle-create-btn');
-  const showing = form.style.display !== 'none';
-  form.style.display = showing ? 'none' : 'flex';
-  btn.style.display = showing ? '' : 'none';
-  if (!showing) {
-    document.getElementById('new-name-input').focus();
-  }
-}
-
-async function createUser() {
-  const input = document.getElementById('new-name-input');
-  const name = input.value.trim();
-  if (!name) return;
-
-  const res = await fetch('/api/users', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({name})
-  }).then(r => r.json());
-
-  if (res.error) { alert(res.error); return; }
-  input.value = '';
-  toggleCreateForm();
-  document.getElementById('toggle-create-btn').style.display = '';
-  loadUsers();
-}
-document.getElementById('new-name-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') createUser();
-  if (e.key === 'Escape') toggleCreateForm();
-});
-
-async function loginAs(userId) {
+async function selectUser(username) {
   const res = await fetch('/api/session/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({user_id: userId})
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username})
   }).then(r => r.json());
   if (res.error) { alert(res.error); return; }
   sessionToken = res.token;
@@ -880,11 +1220,42 @@ async function loginAs(userId) {
   showMainApp();
 }
 
+function showAddUserForm(show) {
+  document.getElementById('add-user-form').style.display = show ? '' : 'none';
+  document.getElementById('toggle-add-user-btn').style.display = show ? 'none' : '';
+  if (show) { document.getElementById('new-user-name').value = ''; showAddUserError(''); document.getElementById('new-user-name').focus(); }
+}
+function showAddUserError(msg) { const el = document.getElementById('add-user-error'); el.textContent = msg; el.style.display = msg ? '' : 'none'; }
+
+document.getElementById('toggle-add-user-btn').addEventListener('click', () => showAddUserForm(true));
+document.getElementById('add-user-cancel').addEventListener('click', () => showAddUserForm(false));
+
+async function addUser() {
+  const name = document.getElementById('new-user-name').value.trim();
+  showAddUserError('');
+  if (!name) { showAddUserError('Enter a name.'); return; }
+  const res = await fetch('/api/users', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name})
+  }).then(r => r.json());
+  if (res.error) { showAddUserError(res.error); return; }
+  showAddUserForm(false);
+  await loadUserList();
+}
+
+document.getElementById('add-user-submit').addEventListener('click', addUser);
+document.getElementById('new-user-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addUser();
+  if (e.key === 'Escape') showAddUserForm(false);
+});
+
 async function logout() {
   await authFetch('/api/session/logout', {method: 'POST'});
   sessionToken = null;
   localStorage.removeItem('arnold_token');
   currentUser = null;
+  document.getElementById('priority-bar').classList.remove('visible');
+  _lastPriorityHash = '';
   showUserScreen();
 }
 
@@ -900,6 +1271,7 @@ setInterval(async () => {
 // ══════════════════════════════════════
 let lastChatCount = 0;
 let currentExercise = null;
+let _lastPriorityHash = '';
 
 async function refreshChat() {
   try {
@@ -916,15 +1288,25 @@ async function refreshChat() {
       panel.appendChild(div);
     });
     panel.scrollTop = panel.scrollHeight;
+    // Speak new Arnold messages — skip history on first load
+    if (_ttsSpokenCount < 0) {
+      _ttsSpokenCount = msgs.length;
+    } else {
+      msgs.slice(_ttsSpokenCount).filter(m => m.role === 'arnold').forEach(m => arnoldSpeak(m.message));
+      _ttsSpokenCount = msgs.length;
+    }
   } catch(e) {}
 }
 
 let _exerciseNames = [];
+let _exerciseIsIsoMap = {};
 async function getExerciseNames() {
   if (_exerciseNames.length) return _exerciseNames;
   try {
     const data = await authFetch('/api/exercises').then(r => r.json());
     _exerciseNames = data.map(e => e.name);
+    _exerciseIsIsoMap = {};
+    data.forEach(e => { _exerciseIsIsoMap[e.name] = !!e.is_isometric; });
   } catch(e) {}
   return _exerciseNames;
 }
@@ -943,14 +1325,19 @@ async function refreshWorkouts() {
       div.className = 'workout-entry';
       div.style.flexWrap = 'wrap';
       const time = s.timestamp?.split(' ')[1]?.slice(0,5) || '';
+      const isIso = !!s.is_isometric;
       const wt = s.weight ? `${s.weight}lbs` : 'BW';
+      const repsDisp = isIso ? `${s.reps}s` : s.reps;
+      const statHtml = (isIso && !s.weight)
+        ? `<strong>${repsDisp}</strong>`
+        : `<strong>${wt}</strong> × <strong>${repsDisp}</strong>`;
 
       const exOpts = exNames.map(n => `<option value="${n}"${n===s.exercise?' selected':''}>${n}</option>`).join('');
 
       div.innerHTML = `
         <div class="ex-name">${s.exercise}</div>
         <div class="ex-stat"><strong>${s.sets}</strong> sets</div>
-        <div class="ex-stat"><strong>${wt}</strong> × <strong>${s.reps}</strong></div>
+        <div class="ex-stat">${statHtml}</div>
         <div class="ex-time">${time}</div>
         <div class="entry-actions">
           <button class="btn-entry btn-edit" data-id="${s.id}">✎ EDIT</button>
@@ -959,7 +1346,7 @@ async function refreshWorkouts() {
         <div class="entry-edit-form" data-id="${s.id}">
           <select class="ex-input">${exOpts}</select>
           <input type="number" class="f-weight" placeholder="weight" value="${s.weight || ''}" min="0" step="2.5" />
-          <input type="number" class="f-reps"   placeholder="reps"   value="${s.reps   || ''}" min="1" />
+          <input type="number" class="f-reps"   placeholder="${isIso ? 'seconds' : 'reps'}"   value="${s.reps   || ''}" min="1" />
           <input type="number" class="f-sets"   placeholder="sets"   value="${s.sets   || 1}"  min="1" />
           <button class="btn-entry btn-save">SAVE</button>
           <button class="btn-entry btn-cancel">CANCEL</button>
@@ -972,9 +1359,11 @@ async function refreshWorkouts() {
         div.querySelector('.entry-edit-form').classList.remove('open');
       });
       div.querySelector('.btn-del').addEventListener('click', async () => {
-        if (!confirm(`Delete this set (${s.exercise} ${wt} × ${s.reps})?`)) return;
+        const delDesc = isIso ? `${s.reps}s hold` : `${wt} × ${s.reps}`;
+        if (!confirm(`Delete this set (${s.exercise} — ${delDesc})?`)) return;
         await authFetch(`/api/workout/${s.id}`, {method: 'DELETE'});
         _exerciseNames = [];
+        _exerciseIsIsoMap = {};
         refreshWorkouts();
       });
       div.querySelector('.btn-save').addEventListener('click', async () => {
@@ -1008,19 +1397,31 @@ async function refreshHistory() {
       document.getElementById('history-title').textContent = `Last Session — ${name}`;
     }
 
-    const history = await authFetch(`/api/exercise/${encodeURIComponent(name)}/history`).then(r => r.json());
+    const last = await authFetch(`/api/exercise/${encodeURIComponent(name)}/last-session`).then(r => r.json());
     const panel = document.getElementById('history-scroll');
-    if (!history.length) { panel.innerHTML = '<div class="empty-state">[ NO HISTORY YET ]</div>'; return; }
+    if (!last) { panel.innerHTML = '<div class="empty-state">[ NO PRIOR SESSIONS ]</div>'; return; }
 
-    const last = history[0];
-    panel.innerHTML = `<div style="font-size:.62rem;color:#005520;letter-spacing:.15em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,255,65,.08);">${last.date} — VOL: ${last.volume.toLocaleString()} lbs${last.is_pr ? ' <span style="color:var(--green);border:1px solid var(--green);padding:1px 5px;font-size:.55rem;">PR</span>' : ''}</div>`;
+    panel.innerHTML = '';
+
+    // Header: date + volume
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:.62rem;color:#005520;letter-spacing:.15em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,255,65,.08);display:flex;gap:10px;align-items:center;';
+    const ormTag = (!last.is_isometric && last.one_rm)
+      ? `<span style="color:var(--cyan);text-shadow:0 0 6px rgba(0,229,255,.3);margin-left:auto;">1RM ~${last.one_rm} lbs</span>`
+      : '';
+    hdr.innerHTML = `<span>${last.date}</span><span>VOL: ${last.volume.toLocaleString()} lbs</span>${ormTag}`;
+    panel.appendChild(hdr);
+
+    // All sets from that session
+    const isIso = !!last.is_isometric;
     last.entries.forEach((e, i) => {
       const div = document.createElement('div');
       div.className = 'history-entry';
-      const wt = e.weight ? `${e.weight} lbs` : 'BW';
+      const wt = e.weight ? `${e.weight} lbs` : (isIso ? '' : 'BW');
+      const repsStr = isIso ? `${e.reps}s` : `${e.reps} reps`;
       div.innerHTML = `<span class="h-set">SET ${i+1}</span>
                        <span class="h-weight">${wt}</span>
-                       <span class="h-reps">${e.reps} reps</span>`;
+                       <span class="h-reps">${repsStr}</span>`;
       panel.appendChild(div);
     });
   } catch(e) {}
@@ -1036,21 +1437,89 @@ async function refreshDialogue() {
   } catch(e) {}
 }
 
+let _submitLastText = '';
+let _submitLastMs   = 0;
+
 async function submitInput() {
   const input = document.getElementById('cmd-input');
   const text = input.value.trim();
   if (!text) return;
+  const now = Date.now();
+  // Block same text within 2.5 s, or ANY text within 600 ms (double-fire guard)
+  if (now - _submitLastMs < 600) { input.value = ''; return; }
+  if (text.toLowerCase() === _submitLastText && now - _submitLastMs < 2500) { input.value = ''; return; }
+  _submitLastText = text.toLowerCase();
+  _submitLastMs   = now;
   input.value = '';
   try {
     await authFetch('/api/input', {method: 'POST', body: JSON.stringify({text})});
+    pollAll();
+    if (document.getElementById('details-overlay').classList.contains('open')) openDetails();
   } catch(e) {}
 }
 document.getElementById('cmd-submit').addEventListener('click', submitInput);
 document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitInput(); });
 
+async function refreshPriorityBar() {
+  if (!currentUser) return;
+  try {
+    const data = await authFetch('/api/exercises/priority').then(r => r.json());
+    const hash = JSON.stringify(data);
+    if (hash === _lastPriorityHash) return;
+    _lastPriorityHash = hash;
+
+    const inner = document.getElementById('priority-bar-inner');
+    const track = document.getElementById('priority-bar-track');
+    inner.style.animation = 'none';
+
+    if (!data.length) {
+      inner.innerHTML = '<span class="priority-empty">[ NO PRIORITY EXERCISES SET ]</span>';
+      return;
+    }
+
+    const buildChips = items => items.map(ex => {
+      const daysText = ex.days_since === null ? 'NEVER' : `${ex.days_since}d`;
+      const isUrgent = ex.days_since === null || ex.days_since >= 7;
+      const safeName = ex.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      const pct = ex.recovery_pct;
+      let daysColor;
+      if (ex.days_since === null) {
+        daysColor = '#ffdd00';
+      } else {
+        const t = Math.max(0, Math.min(1, pct / 100));
+        daysColor = `rgb(${Math.round(255*(1-t))},${Math.round(255*t)},0)`;
+      }
+      return `<span class="priority-chip" data-name="${safeName}">` +
+        `<span class="priority-chip-name">${safeName}</span>` +
+        `<span class="priority-chip-days" style="color:${daysColor}">${daysText}</span>` +
+        `</span>`;
+    }).join('');
+
+    inner.innerHTML = buildChips(data);
+
+    requestAnimationFrame(() => {
+      const contentW = inner.scrollWidth;
+      const trackW = track.clientWidth;
+      if (contentW > trackW) {
+        inner.innerHTML = buildChips(data) + buildChips(data);
+        const secs = (contentW / 55).toFixed(1);
+        inner.style.animation = `priority-scroll ${secs}s linear infinite`;
+      }
+      inner.querySelectorAll('.priority-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const name = chip.getAttribute('data-name');
+          currentExercise = name;
+          document.getElementById('history-title').textContent = `Last Session — ${name}`;
+          openDetails();
+        });
+      });
+    });
+  } catch(e) {}
+}
+
 function pollAll() {
   if (!currentUser) return;
-  refreshChat(); refreshWorkouts(); refreshHistory(); refreshDialogue();
+  refreshChat(); refreshWorkouts(); refreshHistory(); refreshDialogue(); refreshPriorityBar();
 }
 setInterval(pollAll, 1500);
 
@@ -1068,6 +1537,11 @@ document.getElementById('manual-log-btn').addEventListener('click', async () => 
   names.forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o); });
   // Pre-select current exercise if one is active
   if (currentExercise) sel.value = currentExercise;
+  const updateRepsHint = () => {
+    document.getElementById('me-reps').placeholder = _exerciseIsIsoMap[sel.value] ? 'seconds' : 'reps';
+  };
+  sel.onchange = updateRepsHint;
+  updateRepsHint();
   form.style.display = 'flex';
   document.getElementById('me-reps').focus();
 });
@@ -1099,7 +1573,7 @@ document.getElementById('me-save').addEventListener('click', async () => {
 // ══════════════════════════════════════
 document.getElementById('details-btn').addEventListener('click', openDetails);
 document.getElementById('details-close').addEventListener('click', closeDetails);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetails(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetails(); closeRecovery(); closeHistory(); } });
 
 function closeDetails() {
   document.getElementById('details-overlay').classList.remove('open');
@@ -1117,20 +1591,21 @@ async function openDetails() {
   document.getElementById('details-chart').innerHTML = '';
   document.getElementById('details-body').innerHTML = '';
 
-  // Load description
-  loadDescription(currentExercise);
-
   try {
-    const history = await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/history`).then(r => r.json());
+    const [isIso, history] = await Promise.all([
+      loadDescription(currentExercise),
+      authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/history`).then(r => r.json())
+    ]);
     if (!history.length) {
       document.getElementById('details-body').innerHTML = '<div class="no-data">[ NO HISTORY FOUND ]</div>';
-      ['stat-sessions','stat-pr','stat-best-vol','stat-total'].forEach(id => document.getElementById(id).textContent = '—');
+      ['stat-sessions','stat-1rm','stat-pr','stat-best-vol','stat-total'].forEach(id => document.getElementById(id).textContent = '—');
+      document.getElementById('stat-1rm-card').style.display = 'none';
       return;
     }
 
-    renderStats(history);
-    renderChart(history);
-    renderTable(history);
+    renderStats(history, isIso);
+    renderChart(history, isIso);
+    renderTable(history, isIso);
   } catch(e) {
     document.getElementById('details-body').innerHTML = '<div class="no-data">[ ERROR LOADING DATA ]</div>';
   }
@@ -1154,7 +1629,10 @@ async function loadDescription(name) {
       textEl.textContent = '[ NO DESCRIPTION ]';
     }
     inputEl.value = desc;
-  } catch(e) {}
+    document.getElementById('details-priority-cb').checked = !!info.is_priority;
+    document.getElementById('details-isometric-cb').checked = !!info.is_isometric;
+    return !!info.is_isometric;
+  } catch(e) { return false; }
 }
 
 // Description edit wiring
@@ -1178,37 +1656,97 @@ document.getElementById('details-desc-save').addEventListener('click', async () 
   loadDescription(currentExercise);
 });
 
-function renderStats(history) {
+document.getElementById('details-isometric-cb').addEventListener('change', async function() {
+  if (!currentExercise) return;
+  await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/isometric`, {
+    method: 'PUT',
+    body: JSON.stringify({isometric: this.checked})
+  });
+  _exerciseNames = [];
+  _exerciseIsIsoMap = {};
+});
+
+document.getElementById('details-priority-cb').addEventListener('change', async function() {
+  if (!currentExercise) return;
+  await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/priority`, {
+    method: 'PUT',
+    body: JSON.stringify({priority: this.checked})
+  });
+  _lastPriorityHash = '';
+  refreshPriorityBar();
+});
+
+function renderStats(history, isIso = false) {
   const sessions = history.length;
-
-  // Max set: find peak weight, then most reps logged at that weight across all sessions
-  const peakWeight = Math.max(...history.map(s => s.max_set?.weight || 0));
-  const peakReps = Math.max(
-    ...history.flatMap(s =>
-      (s.entries || []).filter(e => (e.weight || 0) === peakWeight).map(e => e.reps)
-    ).filter(r => r > 0)
-  );
-  const peakDate = history.find(s => s.max_set?.weight === peakWeight)?.date || '';
-
-  const volumes = history.map(s => s.volume);
-  const bestVol = Math.max(...volumes);
-  const bestVolDate = history.find(s => s.volume === bestVol)?.date || '';
-  const totalVol = volumes.reduce((a,b) => a + b, 0);
-  const totalLbs = totalVol >= 1000 ? `${(totalVol/1000).toFixed(1)}k` : totalVol.toLocaleString();
+  const fmtSecs = s => s >= 60 ? `${Math.floor(s/60)}m ${s % 60}s` : `${s}s`;
 
   document.getElementById('stat-sessions').textContent = sessions;
   document.getElementById('stat-sessions-sub').textContent = `since ${[...history].reverse()[0]?.date || ''}`;
-  document.getElementById('stat-pr').textContent = peakWeight ? `${peakWeight} × ${peakReps}` : '—';
-  document.getElementById('stat-pr-sub').textContent = peakDate ? `${peakWeight} lbs for ${peakReps} reps` : '';
-  document.getElementById('stat-best-vol').textContent = bestVol ? `${bestVol.toLocaleString()} lbs` : '—';
-  document.getElementById('stat-best-vol-sub').textContent = bestVolDate ? `on ${bestVolDate}` : '';
-  document.getElementById('stat-total').textContent = totalVol ? `${totalLbs} lbs` : '—';
-  document.getElementById('stat-total-sub').textContent = `across ${sessions} session${sessions !== 1 ? 's' : ''}`;
+
+  if (isIso) {
+    const allEntries = history.flatMap(s => s.entries || []);
+    const bestHold = Math.max(...allEntries.map(e => e.reps), 0);
+    const bestHoldDate = history.find(s => (s.entries||[]).some(e => e.reps === bestHold))?.date || '';
+    const sessionTotals = history.map(s => ({date: s.date, total: (s.entries||[]).reduce((a,e) => a+e.reps, 0)}));
+    const bestTotal = Math.max(...sessionTotals.map(s => s.total), 0);
+    const bestTotalDate = sessionTotals.find(s => s.total === bestTotal)?.date || '';
+    const grandTotal = sessionTotals.reduce((a,s) => a+s.total, 0);
+
+    document.getElementById('stat-pr-label').textContent = 'BEST HOLD';
+    document.getElementById('stat-pr').textContent = bestHold ? fmtSecs(bestHold) : '—';
+    document.getElementById('stat-pr-sub').textContent = bestHoldDate ? `on ${bestHoldDate}` : '';
+    document.getElementById('stat-best-vol-label').textContent = 'BEST SESSION TIME';
+    document.getElementById('stat-best-vol').textContent = bestTotal ? fmtSecs(bestTotal) : '—';
+    document.getElementById('stat-best-vol-sub').textContent = bestTotalDate ? `on ${bestTotalDate}` : '';
+    document.getElementById('stat-total-label').textContent = 'TOTAL HOLD TIME';
+    document.getElementById('stat-total').textContent = grandTotal ? fmtSecs(grandTotal) : '—';
+    document.getElementById('stat-total-sub').textContent = `across ${sessions} session${sessions !== 1 ? 's' : ''}`;
+    document.getElementById('stat-1rm-card').style.display = 'none';
+  } else {
+    const peakWeight = Math.max(...history.map(s => s.max_set?.weight || 0));
+    const peakReps = Math.max(
+      ...history.flatMap(s =>
+        (s.entries||[]).filter(e => (e.weight||0) === peakWeight).map(e => e.reps)
+      ).filter(r => r > 0)
+    );
+    const peakDate = history.find(s => s.max_set?.weight === peakWeight)?.date || '';
+    const volumes = history.map(s => s.volume);
+    const bestVol = Math.max(...volumes);
+    const bestVolDate = history.find(s => s.volume === bestVol)?.date || '';
+    const totalVol = volumes.reduce((a,b) => a+b, 0);
+    const totalLbs = totalVol >= 1000 ? `${(totalVol/1000).toFixed(1)}k` : totalVol.toLocaleString();
+
+    // Estimated 1RM (Epley: w × (1 + r/30)), best across all history
+    const allEntries1rm = history.flatMap(s => s.entries || []);
+    const best1rm = Math.max(...allEntries1rm
+      .filter(e => e.weight > 0 && e.reps > 0)
+      .map(e => e.weight * (1 + e.reps / 30))
+    , 0);
+    const card1rm = document.getElementById('stat-1rm-card');
+    if (best1rm > 0) {
+      document.getElementById('stat-1rm').textContent = `${Math.round(best1rm)} lbs`;
+      document.getElementById('stat-1rm-sub').textContent = 'Epley estimate';
+      card1rm.style.display = '';
+    } else {
+      card1rm.style.display = 'none';
+    }
+
+    document.getElementById('stat-pr-label').textContent = 'MAX SET';
+    document.getElementById('stat-pr').textContent = peakWeight ? `${peakWeight} × ${peakReps}` : '—';
+    document.getElementById('stat-pr-sub').textContent = peakDate ? `${peakWeight} lbs for ${peakReps} reps` : '';
+    document.getElementById('stat-best-vol-label').textContent = 'BEST SESSION VOLUME';
+    document.getElementById('stat-best-vol').textContent = bestVol ? `${bestVol.toLocaleString()} lbs` : '—';
+    document.getElementById('stat-best-vol-sub').textContent = bestVolDate ? `on ${bestVolDate}` : '';
+    document.getElementById('stat-total-label').textContent = 'TOTAL VOLUME LIFTED';
+    document.getElementById('stat-total').textContent = totalVol ? `${totalLbs} lbs` : '—';
+    document.getElementById('stat-total-sub').textContent = `across ${sessions} session${sessions !== 1 ? 's' : ''}`;
+  }
 }
 
-function renderChart(history) {
+function renderChart(history, isIso = false) {
   const el = document.getElementById('details-chart');
   const tooltip = document.getElementById('chart-tooltip');
+  const fmtSecs = s => s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`;
 
   // Oldest-first for chart
   const data = [...history].reverse();
@@ -1220,14 +1758,16 @@ function renderChart(history) {
   const CW = W - P.left - P.right;
   const CH = H - P.top - P.bottom;
 
-  const vols = data.map(s => s.volume);
+  const vols = isIso
+    ? data.map(s => (s.entries||[]).reduce((a,e) => a+e.reps, 0))
+    : data.map(s => s.volume);
   const maxV = Math.max(...vols);
   const minV = Math.max(0, Math.min(...vols) * 0.8);
 
   const x = i => P.left + (data.length > 1 ? (i / (data.length - 1)) * CW : CW / 2);
   const y = v => P.top + CH - ((v - minV) / ((maxV - minV) || 1)) * CH;
 
-  const pts = data.map((s, i) => [x(i), y(s.volume)]);
+  const pts = data.map((s, i) => [x(i), y(vols[i])]);
 
   // Smooth catmull-rom-ish curve via bezier
   let linePath = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
@@ -1246,7 +1786,7 @@ function renderChart(history) {
   for (let i = 0; i <= yTickCount; i++) {
     const v = minV + (maxV - minV) * (i / yTickCount);
     const yy = y(v).toFixed(1);
-    const label = v >= 1000 ? `${(v/1000).toFixed(1)}k` : Math.round(v);
+    const label = isIso ? fmtSecs(Math.round(v)) : (v >= 1000 ? `${(v/1000).toFixed(1)}k` : Math.round(v));
     yTicksHtml += `<line x1="${P.left}" y1="${yy}" x2="${(P.left+CW).toFixed(1)}" y2="${yy}" stroke="rgba(0,255,65,0.07)" stroke-width="1"/>
       <text x="${(P.left-8).toFixed(1)}" y="${(parseFloat(yy)+4).toFixed(1)}" text-anchor="end" fill="#005520" font-size="10" font-family="Share Tech Mono,monospace">${label}</text>`;
   }
@@ -1265,7 +1805,7 @@ function renderChart(history) {
     const r = isPR ? 6 : 4;
     const fill = isPR ? '#ffffff' : '#00ff41';
     const filter = isPR ? 'drop-shadow(0 0 5px #fff)' : 'drop-shadow(0 0 4px #00ff41)';
-    return `<circle cx="${x(i).toFixed(1)}" cy="${y(s.volume).toFixed(1)}" r="${r}" fill="${fill}" stroke="#000" stroke-width="1.5" class="chart-pt" data-idx="${i}" style="cursor:pointer;filter:${filter};"/>`;
+    return `<circle cx="${x(i).toFixed(1)}" cy="${y(vols[i]).toFixed(1)}" r="${r}" fill="${fill}" stroke="#000" stroke-width="1.5" class="chart-pt" data-idx="${i}" style="cursor:pointer;filter:${filter};"/>`;
   }).join('');
 
   el.innerHTML = `
@@ -1283,7 +1823,7 @@ function renderChart(history) {
     <path id="chart-line" d="${linePath}" fill="none" stroke="#00ff41" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     ${pointsHtml}
     ${xLabelsHtml}
-    <text x="${P.left}" y="${P.top-7}" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="0.15em">VOLUME (LBS)</text>
+    <text x="${P.left}" y="${P.top-7}" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="0.15em">${isIso ? 'HOLD TIME (S)' : 'VOLUME (LBS)'}</text>
   </svg>`;
 
   // Animate line draw using getTotalLength
@@ -1303,11 +1843,19 @@ function renderChart(history) {
       const i = parseInt(pt.getAttribute('data-idx'));
       const s = data[i];
       tooltip.style.display = 'block';
-      const ms = s.max_set;
-      const msStr = ms ? `${ms.weight} × ${ms.reps}` : '—';
-      tooltip.innerHTML = `<div class="tt-date">${s.date}${s.is_pr ? ' ★ PR' : ''}</div>
-        <div class="tt-row"><span class="tt-key">VOLUME</span><span class="tt-val">${s.volume.toLocaleString()} lbs</span></div>
-        <div class="tt-row"><span class="tt-key">MAX SET</span><span class="tt-val">${msStr}</span></div>
+      const sessionVol = vols[i];
+      let ttRow1, ttRow2;
+      if (isIso) {
+        const bestHold = Math.max(...(s.entries||[]).map(e => e.reps), 0);
+        ttRow1 = `<div class="tt-row"><span class="tt-key">HOLD TIME</span><span class="tt-val">${fmtSecs(sessionVol)}</span></div>`;
+        ttRow2 = `<div class="tt-row"><span class="tt-key">BEST HOLD</span><span class="tt-val">${fmtSecs(bestHold)}</span></div>`;
+      } else {
+        const ms = s.max_set;
+        ttRow1 = `<div class="tt-row"><span class="tt-key">VOLUME</span><span class="tt-val">${s.volume.toLocaleString()} lbs</span></div>`;
+        ttRow2 = `<div class="tt-row"><span class="tt-key">MAX SET</span><span class="tt-val">${ms ? `${ms.weight} × ${ms.reps}` : '—'}</span></div>`;
+      }
+      tooltip.innerHTML = `<div class="tt-date">${s.date}${s.is_pr && !isIso ? ' ★ PR' : ''}</div>
+        ${ttRow1}${ttRow2}
         <div class="tt-row"><span class="tt-key">SETS</span><span class="tt-val">${s.entries.length}</span></div>`;
     });
     pt.addEventListener('mousemove', e => {
@@ -1319,21 +1867,31 @@ function renderChart(history) {
   });
 }
 
-function renderTable(history) {
+function renderTable(history, isIso = false) {
   const body = document.getElementById('details-body');
   if (!history.length) { body.innerHTML = '<div class="no-data">[ NO DATA ]</div>'; return; }
+  const fmtSecs = s => s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`;
 
   const rows = history.map(s => {
-    const ms = s.max_set;
-    const maxSet = ms ? `${ms.weight} × ${ms.reps}` : '—';
-    const vol = s.volume ? `${s.volume.toLocaleString()} lbs` : '—';
-    const pr = s.is_pr ? '<span class="pr-badge">NEW PR</span>' : '';
+    let mainStat, sessionStat, badge;
+    if (isIso) {
+      const bestHold = Math.max(...(s.entries||[]).map(e => e.reps), 0);
+      const totalSecs = (s.entries||[]).reduce((a,e) => a+e.reps, 0);
+      mainStat = bestHold ? fmtSecs(bestHold) : '—';
+      sessionStat = totalSecs ? fmtSecs(totalSecs) : '—';
+      badge = '';
+    } else {
+      const ms = s.max_set;
+      mainStat = ms ? `${ms.weight} × ${ms.reps}` : '—';
+      sessionStat = s.volume ? `${s.volume.toLocaleString()} lbs` : '—';
+      badge = s.is_pr ? '<span class="pr-badge">NEW PR</span>' : '';
+    }
     return `<tr>
       <td class="td-date">${s.date}</td>
-      <td class="td-weight">${maxSet}</td>
-      <td class="td-vol">${vol}</td>
+      <td class="td-weight">${mainStat}</td>
+      <td class="td-vol">${sessionStat}</td>
       <td class="td-sets">${s.entries.length} sets</td>
-      <td style="text-align:center;">${pr}</td>
+      <td style="text-align:center;">${badge}</td>
     </tr>`;
   }).join('');
 
@@ -1342,8 +1900,8 @@ function renderTable(history) {
     <thead>
       <tr>
         <th>DATE</th>
-        <th>MAX SET</th>
-        <th>SESSION VOLUME</th>
+        <th>${isIso ? 'BEST HOLD' : 'MAX SET'}</th>
+        <th>${isIso ? 'SESSION TIME' : 'SESSION VOLUME'}</th>
         <th>SETS</th>
         <th></th>
       </tr>
@@ -1381,7 +1939,9 @@ async function renderExlist() {
   body.innerHTML = '<div style="color:#005520;letter-spacing:.1em;font-size:.7rem;">LOADING...</div>';
   try {
     _exlistData = await authFetch('/api/exercises').then(r => r.json());
-    _exerciseNames = _exlistData.map(e => e.name);  // keep dropdown cache in sync
+    _exerciseNames = _exlistData.map(e => e.name);
+    _exerciseIsIsoMap = {};
+    _exlistData.forEach(e => { _exerciseIsIsoMap[e.name] = !!e.is_isometric; });
   } catch(e) { body.innerHTML = '<div class="no-data">[ ERROR ]</div>'; return; }
 
   // Group by category
@@ -1416,7 +1976,15 @@ async function renderExlist() {
           </div>
           <textarea class="el-desc-inp" placeholder="Description / notes / cues (optional)">${ex.description || ''}</textarea>
         </div>
-        <button class="btn-entry el-edit-btn" style="margin-left:auto;">✎ EDIT</button>
+        <label class="exlist-isometric-label" style="margin-left:auto;" title="Isometric / timed hold">
+          <input type="checkbox" class="el-isometric-cb"${ex.is_isometric ? ' checked' : ''} style="accent-color:var(--cyan);cursor:pointer;" />
+          ⏱
+        </label>
+        <label class="exlist-priority-label" title="Toggle priority">
+          <input type="checkbox" class="el-priority-cb"${ex.is_priority ? ' checked' : ''} style="accent-color:var(--green);cursor:pointer;" />
+          ★
+        </label>
+        <button class="btn-entry el-edit-btn">✎ EDIT</button>
         <button class="btn-entry btn-del el-del-btn">✕ DELETE</button>`;
 
       const viewEls  = row.querySelectorAll('[data-view]');
@@ -1458,6 +2026,24 @@ async function renderExlist() {
         renderExlist();
       });
 
+      row.querySelector('.el-isometric-cb').addEventListener('change', async function() {
+        await authFetch(`/api/exercise/${encodeURIComponent(ex.name)}/isometric`, {
+          method: 'PUT',
+          body: JSON.stringify({isometric: this.checked})
+        });
+        _exerciseNames = [];
+        _exerciseIsIsoMap = {};
+      });
+
+      row.querySelector('.el-priority-cb').addEventListener('change', async function() {
+        await authFetch(`/api/exercise/${encodeURIComponent(ex.name)}/priority`, {
+          method: 'PUT',
+          body: JSON.stringify({priority: this.checked})
+        });
+        _lastPriorityHash = '';
+        refreshPriorityBar();
+      });
+
       sec.appendChild(row);
     });
     body.appendChild(sec);
@@ -1480,6 +2066,796 @@ document.getElementById('exlist-add-btn').addEventListener('click', async () => 
 document.getElementById('exlist-name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('exlist-add-btn').click();
 });
+
+// ══════════════════════════════════════
+// WORKOUT HISTORY CALENDAR
+// ══════════════════════════════════════
+let _histYear = new Date().getFullYear();
+let _histMonth = new Date().getMonth() + 1;
+let _histSelDate = null;
+
+const _HIST_MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Legs','Core','Grip'];
+let _histMuscleFilter = new Set(_HIST_MUSCLES); // all active by default
+
+function initHistMuscleFilter() {
+  const bar = document.getElementById('hist-muscle-filter');
+  bar.innerHTML = _HIST_MUSCLES.map(m =>
+    `<button class="hist-mf-btn active" data-muscle="${m}">${m.toUpperCase()}</button>`
+  ).join('') + `<button class="hist-mf-btn hist-mf-clear" id="hist-mf-clear-btn">CLEAR ALL</button>`;
+
+  const rerender = () => {
+    if (_histCalCache) renderHistCalendar(_histCalCache.days);
+    else loadHistMonth();
+  };
+
+  bar.querySelectorAll('.hist-mf-btn[data-muscle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const m = btn.dataset.muscle;
+      if (_histMuscleFilter.has(m)) { _histMuscleFilter.delete(m); btn.classList.remove('active'); }
+      else                          { _histMuscleFilter.add(m);    btn.classList.add('active'); }
+      rerender();
+    });
+  });
+
+  document.getElementById('hist-mf-clear-btn').addEventListener('click', () => {
+    _histMuscleFilter.clear();
+    bar.querySelectorAll('.hist-mf-btn[data-muscle]').forEach(b => b.classList.remove('active'));
+    rerender();
+  });
+}
+const _MONTH_NAMES = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+
+document.getElementById('history-btn').addEventListener('click', openHistory);
+document.getElementById('history-close').addEventListener('click', closeHistory);
+document.getElementById('hist-prev-btn').addEventListener('click', () => {
+  _histMonth--; if (_histMonth < 1) { _histMonth = 12; _histYear--; }
+  loadHistMonth();
+});
+document.getElementById('hist-next-btn').addEventListener('click', () => {
+  _histMonth++; if (_histMonth > 12) { _histMonth = 1; _histYear++; }
+  loadHistMonth();
+});
+
+function openHistory() {
+  const now = new Date();
+  _histYear = now.getFullYear(); _histMonth = now.getMonth() + 1; _histSelDate = null;
+  document.getElementById('hist-day-topbar').querySelector('#hist-day-date').textContent = '// SELECT A DAY';
+  document.getElementById('hist-day-totvol').textContent = '';
+  document.getElementById('hist-day-scroll').innerHTML = '<div class="hist-no-sel">← SELECT A DAY FROM THE CALENDAR</div>';
+  document.getElementById('hist-day-footer').style.display = 'none';
+  document.getElementById('history-overlay').classList.add('open');
+  initHistMuscleFilter();
+  loadHistMonth();
+}
+function closeHistory() {
+  document.getElementById('history-overlay').classList.remove('open');
+}
+
+function _lerpColor(a, b, t) {
+  t = Math.max(0, Math.min(1, t));
+  return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`;
+}
+function muscleBarColor(ratio) {
+  if (ratio <= 0)    return 'rgba(0,60,15,0.35)';
+  if (ratio < 0.4)  return _lerpColor([0,55,15],   [0,140,40],   ratio/0.4);
+  if (ratio < 0.9)  return _lerpColor([0,140,40],  [0,255,65],   (ratio-0.4)/0.5);
+  if (ratio < 1.0)  return _lerpColor([0,255,65],  [0,210,110],  (ratio-0.9)/0.1);
+  if (ratio < 1.03) return _lerpColor([0,210,110], [0,140,70],   (ratio-1.0)/0.03);
+  if (ratio < 1.07) return _lerpColor([0,140,70],  [255,200,0],  (ratio-1.03)/0.04);
+  return _lerpColor([255,200,0],[160,0,0], Math.min(1,(ratio-1.07)/0.07));
+}
+
+let _calMuscleMaxes = {};
+
+// Calendar tooltip — single element appended to body so it can't be clipped
+(function() {
+  const _tt = document.createElement('div');
+  _tt.id = 'cal-tooltip';
+  document.body.appendChild(_tt);
+
+  window._showCalTip = function(e, dateStr, info) {
+    const dt = new Date(dateStr + 'T12:00:00');
+    const dlbl = dt.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'}).toUpperCase();
+    const tv = info.volume >= 1000 ? `${(info.volume/1000).toFixed(1)}k` : `${Math.round(info.volume)}`;
+    let h = `<div class="ctt-date">${dlbl}</div>`;
+    h += `<div class="ctt-total">TOTAL ${tv} LBS &middot; ${info.set_count} SETS</div>`;
+    (info.muscles || []).forEach(m => {
+      const mx = _calMuscleMaxes[m.name] || 0;
+      const vol = m.volume >= 1000 ? `${(m.volume/1000).toFixed(1)}k` : `${Math.round(m.volume)}`;
+      const pct = mx ? ` &middot; ${Math.round(m.volume/mx*100)}%` : '';
+      const cls = mx ? 'ctt-vol' : 'ctt-vol ctt-new';
+      const tag = mx ? '' : ' NEW';
+      h += `<div class="ctt-row"><span class="ctt-muscle">${m.name.toUpperCase()}</span><span class="${cls}">${vol}${pct}${tag}</span></div>`;
+    });
+    _tt.innerHTML = h;
+    _tt.classList.add('vis');
+    window._moveCalTip(e);
+  };
+
+  window._moveCalTip = function(e) {
+    const pad = 14, tw = _tt.offsetWidth, th = _tt.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + tw > window.innerWidth  - 8) x = e.clientX - tw - pad;
+    if (y + th > window.innerHeight - 8) y = e.clientY - th - pad;
+    _tt.style.left = x + 'px';
+    _tt.style.top  = y + 'px';
+  };
+
+  window._hideCalTip = function() { _tt.classList.remove('vis'); };
+})();
+
+let _histCalCache = null; // {days, muscle_maxes} for current month
+
+async function loadHistMonth() {
+  document.getElementById('hist-month-label').textContent = `${_MONTH_NAMES[_histMonth-1]} ${_histYear}`;
+  const grid = document.getElementById('hist-cal-grid');
+  grid.innerHTML = '<div style="color:#004010;font-size:.6rem;letter-spacing:.15em;padding:18px;grid-column:1/-1;">LOADING...</div>';
+  try {
+    const data = await authFetch(`/api/calendar?year=${_histYear}&month=${_histMonth}`).then(r => r.json());
+    const days = Array.isArray(data) ? data : (data.days || []);
+    _calMuscleMaxes = data.muscle_maxes || {};
+    _histCalCache = { days, muscle_maxes: _calMuscleMaxes };
+    renderHistCalendar(days);
+  } catch(e) {
+    grid.innerHTML = '<div style="color:#ff4040;font-size:.6rem;padding:18px;grid-column:1/-1;">ERROR</div>';
+  }
+}
+
+function renderHistCalendar(dayData) {
+  const grid = document.getElementById('hist-cal-grid');
+  grid.innerHTML = '';
+  const dataMap = {};
+  dayData.forEach(d => dataMap[d.date] = d);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const firstDow = new Date(_histYear, _histMonth - 1, 1).getDay();
+  const daysInMonth = new Date(_histYear, _histMonth, 0).getDate();
+  const prevMonthDays = new Date(_histYear, _histMonth - 1, 0).getDate();
+
+  const _abbr = {'Chest':'CHST','Back':'BACK','Shoulders':'SHLD','Biceps':'BIC',
+                 'Triceps':'TRI','Legs':'LEGS','Core':'CORE','Grip':'GRIP'};
+
+  const mkCell = (dayNum, classes, dateStr, info) => {
+    const cell = document.createElement('div');
+    cell.className = classes;
+    if (dateStr) cell.dataset.date = dateStr;
+
+    let html = `<span class="cal-day-num">${dayNum}</span>`;
+
+    const visibleMuscles = info ? info.muscles.filter(m => _histMuscleFilter.has(m.name)) : [];
+    if (visibleMuscles.length) {
+      const rows = visibleMuscles.map(m => {
+        const lbl = _abbr[m.name] || m.name.slice(0,4).toUpperCase();
+        const vol = m.volume >= 1000 ? `${(m.volume/1000).toFixed(1)}k` : `${Math.round(m.volume)}`;
+        return `<div class="cal-ml-row"><span class="cal-ml-name">${lbl}</span><span class="cal-ml-vol">${vol}</span></div>`;
+      }).join('');
+      html += `<div class="cal-muscle-list">${rows}</div>`;
+    }
+
+    cell.innerHTML = html;
+    if (dateStr) cell.addEventListener('click', () => selectHistDay(dateStr));
+    return cell;
+  };
+
+  for (let i = 0; i < firstDow; i++)
+    grid.appendChild(mkCell(prevMonthDays - firstDow + 1 + i, 'cal-cell other-month'));
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${_histYear}-${String(_histMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const info = dataMap[ds];
+    const hasVisible = info && info.muscles.some(m => _histMuscleFilter.has(m.name));
+    let cls = 'cal-cell' + (hasVisible ? ' has-data' : '') + (ds === todayStr ? ' is-today' : '') + (ds === _histSelDate ? ' selected' : '');
+    grid.appendChild(mkCell(d, cls, ds, info));
+  }
+
+  const trailing = (7 - ((firstDow + daysInMonth) % 7)) % 7;
+  for (let i = 1; i <= trailing; i++)
+    grid.appendChild(mkCell(i, 'cal-cell other-month'));
+}
+
+async function selectHistDay(dateStr) {
+  _histSelDate = dateStr;
+  document.querySelectorAll('#hist-cal-grid .cal-cell').forEach(c =>
+    c.classList.toggle('selected', c.dataset.date === dateStr));
+  document.getElementById('hist-day-scroll').innerHTML = '<div class="hist-no-sel">LOADING...</div>';
+  document.getElementById('hist-day-footer').style.display = '';
+  document.getElementById('hist-del-day-btn').style.display = '';
+  document.getElementById('hist-add-form').classList.remove('open');
+  try {
+    const entries = await authFetch(`/api/calendar/day?date=${encodeURIComponent(dateStr)}`).then(r => r.json());
+    renderHistDayPanel(dateStr, entries);
+  } catch(e) {
+    document.getElementById('hist-day-scroll').innerHTML = '<div class="hist-no-sel">ERROR</div>';
+  }
+}
+
+function renderHistDayPanel(dateStr, entries) {
+  const dt = new Date(dateStr + 'T12:00:00');
+  document.getElementById('hist-day-date').textContent =
+    '// ' + dt.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'}).toUpperCase();
+  const totalVol = entries.reduce((a, e) => a + (e.weight || 0) * e.reps, 0);
+  document.getElementById('hist-day-totvol').textContent = totalVol ? `VOL: ${Math.round(totalVol).toLocaleString()} lbs` : '';
+
+  const scroll = document.getElementById('hist-day-scroll');
+  if (!entries.length) { scroll.innerHTML = '<div class="hist-empty">[ REST DAY — NO SETS LOGGED ]</div>'; return; }
+
+  const groups = {}, order = [];
+  entries.forEach(e => { if (!groups[e.exercise]) { groups[e.exercise] = []; order.push(e.exercise); } groups[e.exercise].push(e); });
+
+  scroll.innerHTML = '';
+  order.forEach(exName => {
+    const exEntries = groups[exName];
+    const isIso = exEntries[0].is_isometric;
+    const exVol = Math.round(exEntries.reduce((a, e) => a + (e.weight || 0) * e.reps, 0));
+    const grp = document.createElement('div');
+    grp.className = 'hist-ex-group';
+    const volTag = !isIso && exVol ? ` <span style="color:#004412;font-size:.5rem;">· ${exVol.toLocaleString()} lbs</span>` : '';
+    grp.innerHTML = `<div class="hist-ex-hdr">${exName}${volTag}</div>`;
+
+    exEntries.forEach(e => {
+      const row = document.createElement('div');
+      row.className = 'hist-set-row'; row.id = `hrow-${e.id}`;
+      row.dataset.exercise = e.exercise; row.dataset.iso = isIso ? '1' : '0';
+      let desc = isIso ? `${e.sets} set${e.sets>1?'s':''} — ${e.reps}s hold`
+               : e.weight ? `${e.sets} × ${e.weight}lbs × ${e.reps} reps`
+               : `${e.sets} × bodyweight × ${e.reps} reps`;
+      row.innerHTML =
+        `<span class="hist-set-desc">${desc}</span>` +
+        `<span class="hist-set-time">${e.time||''}</span>` +
+        `<button class="hist-btn" onclick="startHistEdit(${e.id},${e.weight||0},${e.reps},${e.sets})">✎</button>` +
+        `<button class="hist-btn del" onclick="deleteHistEntry(${e.id},'${dateStr}')">✕</button>`;
+      grp.appendChild(row);
+    });
+    scroll.appendChild(grp);
+  });
+}
+
+function startHistEdit(id, weight, reps, sets) {
+  const row = document.getElementById(`hrow-${id}`);
+  if (!row) return;
+  const isIso = row.dataset.iso === '1';
+  row.innerHTML = `<div class="hist-inline-form">
+    <input type="hidden" id="he-ex-${id}" value="${row.dataset.exercise}" />
+    ${!isIso ? `<span class="hist-ilabel">WT</span><input type="number" id="he-w-${id}" value="${weight}" min="0" step="5" />` : ''}
+    <span class="hist-ilabel">${isIso ? 'SECS' : 'REPS'}</span><input type="number" id="he-r-${id}" value="${reps}" min="1" />
+    <span class="hist-ilabel">SETS</span><input type="number" id="he-s-${id}" value="${sets}" min="1" />
+    <button class="hist-btn" onclick="saveHistEdit(${id},'${_histSelDate}',${isIso})">SAVE</button>
+    <button class="hist-btn" onclick="selectHistDay('${_histSelDate}')">CANCEL</button>
+  </div>`;
+  const focus = document.getElementById(isIso ? `he-r-${id}` : `he-w-${id}`);
+  if (focus) focus.focus();
+}
+
+async function saveHistEdit(id, dateStr, isIso) {
+  const exercise = document.getElementById(`he-ex-${id}`)?.value;
+  const w = isIso ? 0 : (parseFloat(document.getElementById(`he-w-${id}`)?.value) || 0);
+  const r = parseInt(document.getElementById(`he-r-${id}`)?.value) || 0;
+  const s = parseInt(document.getElementById(`he-s-${id}`)?.value) || 1;
+  if (!exercise || !r) return;
+  await authFetch(`/api/workout/${id}`, {method:'PUT', body: JSON.stringify({exercise, weight:w, reps:r, sets:s})});
+  await selectHistDay(dateStr);
+  loadHistMonth();
+}
+
+async function deleteHistEntry(id, dateStr) {
+  if (!confirm('Delete this set?')) return;
+  await authFetch(`/api/workout/${id}`, {method:'DELETE'});
+  await selectHistDay(dateStr);
+  loadHistMonth();
+}
+
+async function deleteHistDay() {
+  if (!_histSelDate) return;
+  if (!confirm(`Delete ALL sets logged on ${_histSelDate}?`)) return;
+  await authFetch(`/api/calendar/day?date=${encodeURIComponent(_histSelDate)}`, {method:'DELETE'});
+  _histSelDate = null;
+  document.getElementById('hist-day-date').textContent = '// SELECT A DAY';
+  document.getElementById('hist-day-totvol').textContent = '';
+  document.getElementById('hist-day-scroll').innerHTML = '<div class="hist-no-sel">← SELECT A DAY FROM THE CALENDAR</div>';
+  document.getElementById('hist-day-footer').style.display = 'none';
+  document.getElementById('hist-del-day-btn').style.display = 'none';
+  loadHistMonth();
+}
+
+document.getElementById('hist-add-btn').addEventListener('click', async () => {
+  const form = document.getElementById('hist-add-form');
+  if (form.classList.contains('open')) { form.classList.remove('open'); return; }
+  const sel = document.getElementById('hist-add-exercise');
+  sel.innerHTML = '<option value="">— exercise —</option>';
+  try {
+    const exList = await authFetch('/api/exercises').then(r => r.json());
+    exList.forEach(e => { const o = document.createElement('option'); o.value = e.name; o.textContent = e.name; sel.appendChild(o); });
+  } catch(_) {}
+  document.getElementById('hist-add-weight').value = '';
+  document.getElementById('hist-add-reps').value = '';
+  document.getElementById('hist-add-sets').value = '1';
+  form.classList.add('open');
+});
+document.getElementById('hist-add-cancel').addEventListener('click', () => document.getElementById('hist-add-form').classList.remove('open'));
+document.getElementById('hist-add-save').addEventListener('click', async () => {
+  if (!_histSelDate) return;
+  const exercise = document.getElementById('hist-add-exercise').value;
+  const weight   = parseFloat(document.getElementById('hist-add-weight').value) || 0;
+  const reps     = parseInt(document.getElementById('hist-add-reps').value) || 0;
+  const sets     = parseInt(document.getElementById('hist-add-sets').value) || 1;
+  if (!exercise || !reps) return;
+  await authFetch('/api/calendar/day', {method:'POST', body: JSON.stringify({date:_histSelDate, exercise, weight, reps, sets})});
+  document.getElementById('hist-add-form').classList.remove('open');
+  await selectHistDay(_histSelDate);
+  loadHistMonth();
+});
+
+// ══════════════════════════════════════
+
+// ══════════════════════════════════════
+// TEXT-TO-SPEECH (Arnold speaks back)
+// ══════════════════════════════════════
+let _ttsSpokenCount = -1;  // -1 = not yet initialised; skip history on first load
+let _ttsMuted = false;
+let _ttsVoice = null;
+
+function _loadVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  // Prefer a low male English voice to suit the character
+  const preferred = ['Microsoft David', 'Google UK English Male', 'Daniel', 'Fred', 'Alex', 'Thomas'];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name));
+    if (v) { _ttsVoice = v; return; }
+  }
+  _ttsVoice = voices.find(v => v.lang.startsWith('en') && /male/i.test(v.name))
+           || voices.find(v => v.lang.startsWith('en'))
+           || voices[0];
+}
+if (window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', _loadVoice);
+  _loadVoice();
+}
+
+function arnoldSpeak(text) {
+  if (_ttsMuted || !text || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (_ttsVoice) u.voice = _ttsVoice;
+  u.rate  = 1.05;
+  u.pitch = 0.88;
+  window.speechSynthesis.speak(u);
+}
+
+document.getElementById('tts-btn').addEventListener('click', () => {
+  _ttsMuted = !_ttsMuted;
+  const btn = document.getElementById('tts-btn');
+  btn.textContent = _ttsMuted ? '— VOICE' : '♪ VOICE';
+  btn.style.opacity = _ttsMuted ? '0.4' : '';
+  if (_ttsMuted) window.speechSynthesis.cancel();
+});
+
+// ══════════════════════════════════════
+// VOICE INPUT (Web Speech API)
+// ══════════════════════════════════════
+// VOICE INPUT — toggle-controlled continuous
+// ══════════════════════════════════════
+(function() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const voiceBar  = document.getElementById('voice-bar');
+  const interim   = document.getElementById('voice-interim');
+  const toggleBtn = document.getElementById('mic-toggle-btn');
+  if (!SpeechRecognition) { toggleBtn.style.display = 'none'; return; }
+
+  let rec        = null;
+  let micOn      = false;
+  let restarting = false;
+
+  function updateBtn() {
+    toggleBtn.textContent = micOn ? '◉ MIC ON' : '◉ MIC OFF';
+    toggleBtn.style.opacity = micOn ? '1' : '0.45';
+    toggleBtn.style.borderColor = micOn ? 'var(--green)' : '';
+    toggleBtn.style.color = micOn ? 'var(--green)' : '';
+  }
+
+  function buildRec() {
+    const r = new SpeechRecognition();
+    r.continuous      = true;
+    r.interimResults  = true;
+    r.lang            = 'en-US';
+    r.maxAlternatives = 1;
+
+    r.onstart = () => {
+      voiceBar.classList.add('active');
+      interim.textContent = 'LISTENING...';
+    };
+
+    let _recLastFinal = '';
+    let _recLastMs    = 0;
+    r.onresult = (e) => {
+      // Only look at the single newest result
+      const result = e.results[e.resultIndex];
+      if (!result) return;
+      const t = result[0].transcript;
+      if (!result.isFinal) {
+        interim.textContent = t.toUpperCase();
+        return;
+      }
+      const txt = t.trim();
+      if (!txt) return;
+      const now = Date.now();
+      // Ignore duplicate finals within 2.5 s (continuous mode can re-fire same result)
+      if (txt.toLowerCase() === _recLastFinal && now - _recLastMs < 2500) return;
+      _recLastFinal = txt.toLowerCase();
+      _recLastMs    = now;
+      interim.textContent = txt.toUpperCase();
+      document.getElementById('cmd-input').value = txt;
+      submitInput();
+      setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 900);
+    };
+
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        micOn = false; updateBtn();
+        voiceBar.classList.remove('active');
+        interim.textContent = 'MIC BLOCKED';
+      } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+        // network / audio-capture / other — show briefly then let onend restart
+        interim.textContent = e.error.toUpperCase();
+      }
+    };
+
+    // Browser ends continuous sessions after ~60s silence — auto-restart if still on
+    r.onend = () => {
+      if (!micOn || restarting) return;
+      restarting = true;
+      setTimeout(() => { restarting = false; if (micOn) tryStart(); }, 250);
+    };
+
+    return r;
+  }
+
+  function tryStart() {
+    try { rec = buildRec(); rec.start(); }
+    catch(err) { interim.textContent = 'ERR: ' + err.message; micOn = false; updateBtn(); }
+  }
+
+  function stopRec() {
+    voiceBar.classList.remove('active');
+    try { rec && rec.stop(); } catch(_) {}
+    rec = null;
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    micOn = !micOn;
+    updateBtn();
+    if (micOn) tryStart(); else stopRec();
+  });
+
+  updateBtn();
+})();
+
+// ══════════════════════════════════════
+// RECOVERY OVERLAY
+// ══════════════════════════════════════
+document.getElementById('recovery-btn').addEventListener('click', openRecovery);
+document.getElementById('recovery-close').addEventListener('click', closeRecovery);
+
+// ── Volume by muscle group chart ──
+const _VOL_COLORS = {
+  'Chest':'#00ff41','Back':'#00e5ff','Shoulders':'#ffaa00',
+  'Biceps':'#ff6688','Triceps':'#aa44ff','Legs':'#44ffcc',
+  'Core':'#ff5555','Grip':'#88aaff'
+};
+let _recVolDays = 30;
+let _recVolActive = new Set();
+let _recVolData   = [];
+
+document.querySelectorAll('.rec-range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rec-range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    _recVolDays = parseInt(btn.dataset.days);
+    loadRecoveryVolume();
+  });
+});
+
+async function loadRecoveryVolume() {
+  document.getElementById('rec-vol-chart').innerHTML =
+    '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">LOADING...</div>';
+  try {
+    const data = await authFetch(`/api/recovery/volume-history?days=${_recVolDays}`).then(r => r.json());
+    _recVolData = data;
+    // Init active set on first load
+    const muscles = [...new Set(data.map(d => d.muscle))];
+    if (_recVolActive.size === 0) muscles.forEach(m => _recVolActive.add(m));
+    renderVolFilters(muscles);
+    renderVolChart();
+  } catch(e) {
+    document.getElementById('rec-vol-chart').innerHTML =
+      '<div style="color:#ff4040;font-size:.62rem;padding:20px;">ERROR LOADING VOLUME DATA</div>';
+  }
+}
+
+function renderVolFilters(muscles) {
+  const container = document.getElementById('rec-vol-filters');
+  container.innerHTML = '';
+  // ALL muscles that have definitions, even if no data yet
+  const allMuscles = Object.keys(_VOL_COLORS);
+  allMuscles.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'rec-vol-fbtn' + (_recVolActive.has(m) ? ' on' : '');
+    btn.style.setProperty('--fc', _VOL_COLORS[m] || '#00ff41');
+    btn.textContent = m.slice(0,4).toUpperCase();
+    btn.title = m;
+    btn.addEventListener('click', () => {
+      if (_recVolActive.has(m)) _recVolActive.delete(m); else _recVolActive.add(m);
+      btn.classList.toggle('on');
+      renderVolChart();
+    });
+    container.appendChild(btn);
+  });
+}
+
+// Catmull-Rom → cubic Bezier smooth path through arbitrary points
+function _smoothPath(pts) {
+  if (pts.length === 0) return '';
+  if (pts.length === 1) return `M${pts[0].x},${pts[0].y}`;
+  if (pts.length === 2) return `M${pts[0].x},${pts[0].y} L${pts[1].x},${pts[1].y}`;
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+function renderVolChart() {
+  const data = _recVolData.filter(d => _recVolActive.has(d.muscle));
+  const chartEl = document.getElementById('rec-vol-chart');
+
+  if (!data.length) {
+    chartEl.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;text-align:center;">[ NO DATA — TOGGLE MUSCLE GROUPS ABOVE ]</div>';
+    document.getElementById('rec-vol-legend').innerHTML = '';
+    return;
+  }
+
+  // Build date range (last N days)
+  const dates = [];
+  for (let i = _recVolDays - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+
+  // Build lookup {muscle: {date: volume}}
+  const lookup = {};
+  data.forEach(d => {
+    if (!lookup[d.muscle]) lookup[d.muscle] = {};
+    lookup[d.muscle][d.date] = d.volume;
+  });
+
+  const muscles = [...new Set(data.map(d => d.muscle))];
+  const maxVol = Math.max(...data.map(d => d.volume), 1);
+
+  const W = 1000, H = 190;
+  const PAD = {top:14, right:16, bottom:30, left:54};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const xp = i => PAD.left + (dates.length > 1 ? (i / (dates.length-1)) * cW : cW/2);
+  const yp = v => PAD.top + cH - Math.min(1, v / maxVol) * cH;
+
+  let svg = '';
+
+  // Y grid + labels
+  for (let t = 0; t <= 4; t++) {
+    const v = (maxVol / 4) * t;
+    const yy = yp(v);
+    const lbl = v >= 1000 ? `${(v/1000).toFixed(1)}k` : `${Math.round(v)}`;
+    svg += `<line x1="${PAD.left}" y1="${yy}" x2="${W-PAD.right}" y2="${yy}" stroke="rgba(0,255,65,.05)"/>`;
+    svg += `<text x="${PAD.left-5}" y="${yy+4}" text-anchor="end" font-size="8" fill="#004a18">${lbl}</text>`;
+  }
+
+  // X labels (sparse)
+  const step = Math.ceil(dates.length / 10);
+  dates.forEach((d, i) => {
+    if (i % step === 0 || i === dates.length - 1) {
+      const dt = new Date(d + 'T12:00:00');
+      const lbl = dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      svg += `<text x="${xp(i)}" y="${H-5}" text-anchor="middle" font-size="7" fill="#004a18">${lbl}</text>`;
+    }
+  });
+
+  // Lines + dots per muscle — only through days with actual data, smoothed
+  muscles.forEach(m => {
+    const color = _VOL_COLORS[m] || '#00ff41';
+    const activePts = dates
+      .map((d, i) => ({x: xp(i), y: yp((lookup[m]||{})[d]||0), v: (lookup[m]||{})[d]||0}))
+      .filter(p => p.v > 0);
+    if (!activePts.length) return;
+
+    svg += `<path d="${_smoothPath(activePts)}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.55"/>`;
+    activePts.forEach(p => {
+      svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}" opacity="0.9"/>`;
+    });
+  });
+
+  chartEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" style="display:block;">${svg}</svg>`;
+
+  // Legend
+  const leg = document.getElementById('rec-vol-legend');
+  leg.innerHTML = muscles.map(m =>
+    `<div class="rec-vol-leg-item"><div class="rec-vol-leg-dot" style="background:${_VOL_COLORS[m]||'#00ff41'}"></div><span style="color:${_VOL_COLORS[m]||'#00ff41'};font-size:.52rem;letter-spacing:.1em;">${m.toUpperCase()}</span></div>`
+  ).join('');
+}
+
+function closeRecovery() {
+  document.getElementById('recovery-overlay').classList.remove('open');
+}
+
+async function openRecovery() {
+  document.getElementById('recovery-overlay').classList.add('open');
+  const grid = document.getElementById('recovery-grid');
+  const scoreEl = document.getElementById('rec-banner-score');
+  const statusEl = document.getElementById('rec-banner-status');
+  const metaEl = document.getElementById('rec-banner-meta');
+
+  grid.innerHTML = '<div style="color:#005520;letter-spacing:.15em;font-size:.7rem;padding:20px 0;">SCANNING MUSCLE GROUPS...</div>';
+  scoreEl.textContent = '—';
+  scoreEl.className = 'rec-banner-score';
+  statusEl.textContent = '';
+  metaEl.innerHTML = '';
+
+  try {
+    const data = await authFetch('/api/recovery').then(r => r.json());
+    renderRecovery(data);
+  } catch(e) {
+    grid.innerHTML = '<div style="color:#ff4040;padding:20px;">[ ERROR LOADING RECOVERY DATA ]</div>';
+  }
+  loadRecoveryVolume();
+}
+
+function renderRecovery(data) {
+  const grid = document.getElementById('recovery-grid');
+  const scoreEl = document.getElementById('rec-banner-score');
+  const statusEl = document.getElementById('rec-banner-status');
+  const metaEl = document.getElementById('rec-banner-meta');
+
+  const trained = data.filter(d => d.recovery_pct !== null);
+  const avgPct = trained.length
+    ? Math.round(trained.reduce((s, d) => s + d.recovery_pct, 0) / trained.length)
+    : null;
+
+  if (avgPct === null) {
+    scoreEl.textContent = '—';
+    scoreEl.className = 'rec-banner-score';
+    statusEl.textContent = 'NO TRAINING DATA';
+    statusEl.style.color = 'var(--green-dim)';
+  } else if (avgPct >= 80) {
+    scoreEl.textContent = avgPct + '%';
+    scoreEl.className = 'rec-banner-score rdy';
+    statusEl.textContent = 'READY TO TRAIN';
+    statusEl.style.color = 'var(--green)';
+  } else if (avgPct >= 40) {
+    scoreEl.textContent = avgPct + '%';
+    scoreEl.className = 'rec-banner-score rec';
+    statusEl.textContent = 'RECOVERING';
+    statusEl.style.color = '#ffaa00';
+  } else {
+    scoreEl.textContent = avgPct + '%';
+    scoreEl.className = 'rec-banner-score ftg';
+    statusEl.textContent = 'NEEDS REST';
+    statusEl.style.color = '#ff4040';
+  }
+
+  const weekGroups = data.filter(d => d.week_data && d.week_data.length > 0).length;
+  const weekSessions = data.reduce((s, d) => s + (d.week_data ? d.week_data.length : 0), 0);
+  metaEl.innerHTML =
+    (trained.length ? trained.length + ' OF ' + data.length + ' GROUPS TRACKED' : 'START LOGGING TO TRACK RECOVERY') + '<br>' +
+    weekGroups + ' GROUPS TRAINED THIS WEEK<br>' +
+    weekSessions + ' SESSION' + (weekSessions !== 1 ? 'S' : '') + ' IN LAST 7 DAYS<br>' +
+    'RECOVERY WINDOW: 72h';
+
+  grid.innerHTML = '';
+  const DAY_LETTERS = ['S','M','T','W','T','F','S'];
+
+  data.forEach(function(d) {
+    const pct = d.recovery_pct;
+    const isUntested = pct === null;
+
+    var sClass, statusLabel, arcColor;
+    if (isUntested)     { sClass = 's-untested';  statusLabel = 'UNTESTED';   arcColor = 'var(--cyan)'; }
+    else if (pct >= 80) { sClass = 's-recovered'; statusLabel = 'RECOVERED';  arcColor = '#00ff41'; }
+    else if (pct >= 40) { sClass = 's-recovering'; statusLabel = 'RECOVERING'; arcColor = '#ffaa00'; }
+    else                { sClass = 's-fatigued';  statusLabel = 'FATIGUED';   arcColor = '#ff4040'; }
+
+    // SVG gauge
+    const R = 40; const CX = 50; const CY = 50;
+    const circ = +(2 * Math.PI * R).toFixed(2);
+    const fraction = isUntested ? 0 : pct / 100;
+    const targetOffset = +(circ * (1 - fraction)).toFixed(2);
+
+    // Time text
+    var timeText = 'NO HISTORY';
+    if (d.hours_since !== null) {
+      timeText = d.hours_since < 24
+        ? Math.round(d.hours_since) + 'h AGO'
+        : Math.round(d.hours_since / 24) + 'd AGO';
+    }
+
+    // ETA text
+    var etaHtml = '';
+    if (!isUntested) {
+      if (pct >= 100) {
+        etaHtml = '<div class="rec-eta-text rdy">✓ FULLY RECOVERED</div>';
+      } else {
+        const hoursLeft = Math.round(Math.max(0, 72 - (d.hours_since || 0)));
+        etaHtml = '<div class="rec-eta-text cnt">READY IN ~' + hoursLeft + 'h</div>';
+      }
+    }
+
+    // Weekly bars (last 7 calendar days)
+    const bars = [];
+    for (var i = 6; i >= 0; i--) {
+      const dt = new Date();
+      dt.setDate(dt.getDate() - i);
+      const ds = dt.toISOString().split('T')[0];
+      const entry = d.week_data ? d.week_data.find(function(w) { return w.date === ds; }) : null;
+      bars.push({ vol: entry ? entry.volume : 0, isToday: i === 0, letter: DAY_LETTERS[dt.getDay()] });
+    }
+    const maxVol = Math.max.apply(null, bars.map(function(b) { return b.vol; }).concat([1]));
+    const barsHtml = bars.map(function(b) {
+      const h = b.vol > 0 ? Math.max(3, Math.round((b.vol / maxVol) * 16)) : 2;
+      const cls = b.isToday && b.vol > 0 ? 'today-bar' : b.vol > 0 ? 'trained' : '';
+      return '<div class="rec-week-bar ' + cls + '" style="height:' + h + 'px;"></div>';
+    }).join('');
+    const daysHtml = bars.map(function(b) {
+      return '<div class="rec-week-day">' + b.letter + '</div>';
+    }).join('');
+
+    const lastVolText = d.last_volume > 0
+      ? (d.last_volume >= 1000 ? (d.last_volume / 1000).toFixed(1) + 'k' : d.last_volume.toLocaleString()) + ' lbs'
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'rec-card ' + sClass;
+    card.innerHTML =
+      '<div class="rec-gauge-wrap">' +
+        '<svg viewBox="0 0 100 100">' +
+          '<circle class="rec-gauge-bg" cx="' + CX + '" cy="' + CY + '" r="' + R + '" transform="rotate(-90 ' + CX + ' ' + CY + ')"/>' +
+          '<circle class="rec-gauge-arc" cx="' + CX + '" cy="' + CY + '" r="' + R + '"' +
+            ' stroke="' + arcColor + '"' +
+            ' stroke-dasharray="' + circ + '"' +
+            ' stroke-dashoffset="' + circ + '"' +
+            ' data-target="' + targetOffset + '"' +
+            ' transform="rotate(-90 ' + CX + ' ' + CY + ')"/>' +
+        '</svg>' +
+        '<div class="rec-gauge-center">' +
+          '<div class="rec-gauge-pct" style="color:' + arcColor + ';">' + (isUntested ? '?' : pct + '%') + '</div>' +
+          '<div class="rec-gauge-sub">RECOVERY</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rec-card-name">' + d.category.toUpperCase() + '</div>' +
+      '<div class="rec-status-badge ' + sClass + '">' + statusLabel + '</div>' +
+      '<div class="rec-time-text">' + timeText + (lastVolText ? ' · ' + lastVolText : '') + '</div>' +
+      etaHtml +
+      '<div class="rec-week-wrap">' +
+        '<div class="rec-week-bars">' + barsHtml + '</div>' +
+        '<div class="rec-week-days">' + daysHtml + '</div>' +
+      '</div>';
+
+    grid.appendChild(card);
+  });
+
+  // Trigger arc draw animations (double rAF ensures initial render before transition)
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      grid.querySelectorAll('.rec-gauge-arc').forEach(function(arc) {
+        arc.style.strokeDashoffset = arc.getAttribute('data-target');
+      });
+    });
+  });
+}
 
 // ══════════════════════════════════════
 // INIT

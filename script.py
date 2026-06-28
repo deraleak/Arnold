@@ -10,6 +10,7 @@ import re
 import datetime
 import os
 import secrets
+import hashlib
 import threading
 import time
 
@@ -31,6 +32,20 @@ COOKIE_NAME = "arnold_session"
 # ─────────────────────────────────────────────
 # DATABASE
 # ─────────────────────────────────────────────
+def _hash_pw(password: str) -> str:
+    salt = secrets.token_hex(16)
+    h = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}:{h}"
+
+def _verify_pw(password: str, stored: str | None) -> bool:
+    if not stored:                        # no password set — allow blank only
+        return password == ""
+    try:
+        salt, h = stored.split(":", 1)
+        return hashlib.sha256((salt + password).encode()).hexdigest() == h
+    except Exception:
+        return False
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -45,9 +60,14 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            last_login DATETIME
+            last_login DATETIME,
+            password_hash TEXT
         )
     """)
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+    except sqlite3.OperationalError:
+        pass
 
     c.execute("""
         CREATE TABLE IF NOT EXISTS muscle_categories (
@@ -56,6 +76,29 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user_id INTEGER NOT NULL,
+            key     TEXT NOT NULL,
+            value   TEXT NOT NULL,
+            PRIMARY KEY (user_id, key)
+        )
+    """)
+    c.execute(
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('personality', ?)",
+        (
+            "You are Arnold, a direct and no-nonsense personal trainer. "
+            "After a user logs a set, acknowledge it in one punchy sentence (15 words max). "
+            "Reference the exercise and weight. Occasionally add a short motivational nudge.",
+        )
+    )
 
     c.execute("""
         CREATE TABLE IF NOT EXISTS exercises (
@@ -87,8 +130,16 @@ def init_db():
         c.execute("ALTER TABLE exercises ADD COLUMN description TEXT")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE exercises ADD COLUMN is_priority INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        c.execute("ALTER TABLE exercises ADD COLUMN is_isometric INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
 
-    default_categories = ["Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Grip"]
+    default_categories = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Core", "Grip"]
     for cat in default_categories:
         c.execute("INSERT OR IGNORE INTO muscle_categories (name) VALUES (?)", (cat,))
 
@@ -96,12 +147,25 @@ def init_db():
         ("Bench Press", "Chest"), ("Incline Bench Press", "Chest"), ("Dumbbell Flyes", "Chest"),
         ("Pull Up", "Back"), ("Deadlift", "Back"), ("Barbell Row", "Back"), ("Lat Pulldown", "Back"),
         ("Overhead Press", "Shoulders"), ("Lateral Raise", "Shoulders"), ("Face Pull", "Shoulders"),
-        ("Bicep Curl", "Arms"), ("Tricep Pushdown", "Arms"), ("Hammer Curl", "Arms"),
-        ("Squat", "Legs"), ("Leg Press", "Legs"), ("Romanian Deadlift", "Legs"), ("Leg Curl", "Legs"),
+        ("Bicep Curl", "Biceps"), ("Hammer Curl", "Biceps"),
+        ("Tricep Pushdown", "Triceps"),
+        ("Squat", "Legs"), ("Leg Press", "Legs"),
+        ("Romanian Deadlift", "Legs"), ("Leg Curl", "Legs"),
         ("Plank", "Core"), ("Cable Crunch", "Core"), ("Ab Wheel", "Core"),
     ]
     for name, cat in default_exercises:
         c.execute("INSERT OR IGNORE INTO exercises (name, muscle_category) VALUES (?, ?)", (name, cat))
+
+    # Migration: split Arms → Biceps/Triceps
+    for cat in ("Biceps", "Triceps"):
+        c.execute("INSERT OR IGNORE INTO muscle_categories (name) VALUES (?)", (cat,))
+    c.execute("UPDATE exercises SET muscle_category='Biceps' WHERE muscle_category='Arms'")
+    c.execute("DELETE FROM muscle_categories WHERE name='Arms'")
+
+    # Migration: merge Quads + Hamstrings → Legs
+    c.execute("INSERT OR IGNORE INTO muscle_categories (name) VALUES ('Legs')")
+    c.execute("UPDATE exercises SET muscle_category='Legs' WHERE muscle_category IN ('Quads', 'Hamstrings')")
+    c.execute("DELETE FROM muscle_categories WHERE name IN ('Quads', 'Hamstrings')")
 
     conn.commit()
     conn.close()
@@ -209,6 +273,30 @@ JSON:"""
             pass
     return {"intent": "unknown"}
 
+def get_personality(user_id: int) -> str:
+    """Returns this user's custom persona addendum (empty string if none set)."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT value FROM user_settings WHERE user_id=? AND key='persona'",
+        (user_id,)
+    ).fetchone()
+    conn.close()
+    return row["value"].strip() if row else ""
+
+def generate_set_response(exercise: str, weight, reps: int, sets: int, user_id: int) -> str:
+    conn = get_db()
+    ex_row = conn.execute("SELECT is_isometric FROM exercises WHERE name=?", (exercise,)).fetchone()
+    conn.close()
+    is_iso = bool(ex_row["is_isometric"]) if ex_row else False
+
+    if is_iso:
+        s = f" x {sets} sets" if sets > 1 else ""
+        return f"{exercise} held for {reps}s{s}"
+    else:
+        w = int(weight) if weight and weight == int(weight) else (weight or "BW")
+        s = f" x {sets} sets" if sets > 1 else ""
+        return f"{exercise} {w} x {reps}{s} logged"
+
 # ─────────────────────────────────────────────
 # COMMAND HANDLERS
 # ─────────────────────────────────────────────
@@ -261,8 +349,7 @@ def handle_log_set(parsed: dict, user_id: int):
     conn.close()
 
     current_exercise_by_user[user_id] = exercise
-    weight_str = f"{weight}lbs" if weight else "bodyweight"
-    add_chat("arnold", f"Logged {sets} set{'s' if sets > 1 else ''} of {exercise} — {weight_str} x {reps} reps.")
+    add_chat("arnold", generate_set_response(exercise, weight, reps, sets, user_id))
 
 def handle_list_categories():
     conn = get_db()
@@ -396,6 +483,16 @@ def process_input(text: str, user_id: int):
 # ─────────────────────────────────────────────
 # FASTAPI APP
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# ARNOLD BASE PROMPT — hardcoded, applies to all users, not editable
+# ─────────────────────────────────────────────
+ARNOLD_BASE_PROMPT = (
+    "You are Arnold, a no-nonsense AI personal trainer built into a workout logging app. "
+    "Your ONLY job is to acknowledge a logged set in ONE punchy sentence, 15 words max. "
+    "Always reference the exercise name and weight (or 'bodyweight' if no weight). "
+    "Be direct and motivating. Never ask questions. Plain text only — no quotes, no formatting."
+)
+
 app = FastAPI()
 
 @app.get("/", response_class=HTMLResponse)
@@ -423,7 +520,7 @@ async def create_user(request: Request):
     try:
         conn.execute("INSERT INTO users (name) VALUES (?)", (name,))
         conn.commit()
-        row = conn.execute("SELECT id FROM users WHERE name = ?", (name,)).fetchone()
+        row = conn.execute("SELECT id FROM users WHERE name=?", (name,)).fetchone()
         uid = row["id"]
     except sqlite3.IntegrityError:
         conn.close()
@@ -461,21 +558,21 @@ async def get_session(request: Request):
 @app.post("/api/session/login")
 async def session_login(request: Request):
     body = await request.json()
-    user_id = body.get("user_id")
+    username = body.get("username", "").strip()
+    if not username:
+        return JSONResponse({"error": "Name required"}, status_code=400)
     conn = get_db()
-    user = conn.execute("SELECT id, name FROM users WHERE id = ?", (user_id,)).fetchone()
+    user = conn.execute("SELECT id, name FROM users WHERE name=?", (username,)).fetchone()
     if not user:
         conn.close()
         return JSONResponse({"error": "User not found"}, status_code=404)
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    conn.execute("UPDATE users SET last_login = ? WHERE id = ?", (now, user_id))
+    conn.execute("UPDATE users SET last_login=? WHERE id=?", (now, user["id"]))
     conn.commit()
     conn.close()
-
     token = secrets.token_urlsafe(32)
-    active_sessions[token] = {"user_id": user_id, "last_activity": datetime.datetime.now()}
+    active_sessions[token] = {"user_id": user["id"], "last_activity": datetime.datetime.now()}
     add_chat("arnold", f"Welcome back, {user['name']}.")
-    # Return token so the client can store it and send as a header
     return JSONResponse({"id": user["id"], "name": user["name"], "token": token})
 
 @app.post("/api/session/logout")
@@ -498,7 +595,9 @@ async def get_today_workouts(request: Request):
     conn = get_db()
     today = datetime.date.today().isoformat()
     rows = conn.execute(
-        "SELECT id, exercise, weight, reps, sets, timestamp FROM workouts WHERE user_id = ? AND DATE(timestamp) = ? ORDER BY timestamp DESC",
+        "SELECT w.id, w.exercise, w.weight, w.reps, w.sets, w.timestamp, COALESCE(e.is_isometric,0) as is_isometric "
+        "FROM workouts w LEFT JOIN exercises e ON w.exercise=e.name "
+        "WHERE w.user_id=? AND DATE(w.timestamp)=? ORDER BY w.timestamp DESC",
         (user_id, today)
     ).fetchall()
     conn.close()
@@ -565,11 +664,11 @@ async def get_exercise_info(name: str, request: Request):
     if not user_id:
         return JSONResponse({"error": "Not logged in"}, status_code=401)
     conn = get_db()
-    row = conn.execute("SELECT name, description FROM exercises WHERE name=?", (name,)).fetchone()
+    row = conn.execute("SELECT name, description, is_priority, is_isometric FROM exercises WHERE name=?", (name,)).fetchone()
     conn.close()
     if not row:
-        return JSONResponse({"name": name, "description": ""})
-    return JSONResponse({"name": row["name"], "description": row["description"] or ""})
+        return JSONResponse({"name": name, "description": "", "is_priority": False, "is_isometric": False})
+    return JSONResponse({"name": row["name"], "description": row["description"] or "", "is_priority": bool(row["is_priority"]), "is_isometric": bool(row["is_isometric"])})
 
 @app.put("/api/exercise/{name}/description")
 async def update_exercise_description(name: str, request: Request):
@@ -584,12 +683,82 @@ async def update_exercise_description(name: str, request: Request):
     conn.close()
     return JSONResponse({"ok": True})
 
+@app.put("/api/exercise/{name}/isometric")
+async def set_exercise_isometric(name: str, request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    is_isometric = 1 if body.get("isometric") else 0
+    conn = get_db()
+    conn.execute("UPDATE exercises SET is_isometric=? WHERE name=?", (is_isometric, name))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+@app.put("/api/exercise/{name}/priority")
+async def set_exercise_priority(name: str, request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    is_priority = 1 if body.get("priority") else 0
+    conn = get_db()
+    conn.execute("UPDATE exercises SET is_priority=? WHERE name=?", (is_priority, name))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
 @app.get("/api/exercises")
 async def list_exercises_api():
     conn = get_db()
-    rows = conn.execute("SELECT name, muscle_category, description FROM exercises ORDER BY muscle_category, name").fetchall()
+    rows = conn.execute("SELECT name, muscle_category, description, is_priority, is_isometric FROM exercises ORDER BY muscle_category, name").fetchall()
     conn.close()
     return JSONResponse([dict(r) for r in rows])
+
+@app.get("/api/exercises/priority")
+async def get_priority_exercises(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse([])
+    today = datetime.date.today()
+    now = datetime.datetime.utcnow()
+    conn = get_db()
+    exercises = conn.execute(
+        "SELECT name, muscle_category FROM exercises WHERE is_priority=1 ORDER BY name"
+    ).fetchall()
+    result = []
+    for ex in exercises:
+        name = ex["name"]
+        muscle = ex["muscle_category"]
+        row = conn.execute(
+            "SELECT MAX(DATE(timestamp)) as last_date FROM workouts WHERE user_id=? AND exercise=?",
+            (user_id, name)
+        ).fetchone()
+        last_date_str = row["last_date"] if row else None
+        days_since = (today - datetime.date.fromisoformat(last_date_str)).days if last_date_str else None
+
+        # Recovery based on muscle group's last training timestamp
+        recovery_pct = None
+        if muscle:
+            ts_row = conn.execute(
+                "SELECT MAX(w.timestamp) as last_ts FROM workouts w "
+                "JOIN exercises e ON w.exercise=e.name "
+                "WHERE w.user_id=? AND e.muscle_category=?",
+                (user_id, muscle)
+            ).fetchone()
+            if ts_row and ts_row["last_ts"]:
+                try:
+                    last_dt = datetime.datetime.fromisoformat(ts_row["last_ts"][:19])
+                except ValueError:
+                    last_dt = datetime.datetime.strptime(ts_row["last_ts"][:10], "%Y-%m-%d")
+                hours_since = (now - last_dt).total_seconds() / 3600
+                recovery_pct = min(100, int((hours_since / 72) * 100))
+
+        result.append({"name": name, "days_since": days_since, "recovery_pct": recovery_pct})
+    conn.close()
+    result.sort(key=lambda x: x["days_since"] if x["days_since"] is not None else 9999, reverse=True)
+    return JSONResponse(result)
 
 @app.post("/api/exercises")
 async def create_exercise_api(request: Request):
@@ -718,6 +887,270 @@ async def get_exercise_history(name: str, request: Request):
             running_max = session["max_weight"]
             session["is_pr"] = True
 
+    return JSONResponse(result)
+
+@app.get("/api/exercise/{name}/last-session")
+async def get_last_session(name: str, request: Request):
+    """Returns all sets from the most recent session BEFORE today."""
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse(None)
+    today = datetime.date.today().isoformat()
+    conn = get_db()
+    # Find the most recent session date strictly before today
+    row = conn.execute(
+        "SELECT MAX(DATE(timestamp)) as last_date FROM workouts "
+        "WHERE user_id=? AND exercise=? AND DATE(timestamp) < ?",
+        (user_id, name, today)
+    ).fetchone()
+    last_date = row["last_date"] if row else None
+    if not last_date:
+        conn.close()
+        return JSONResponse(None)
+    rows = conn.execute(
+        "SELECT weight, reps, sets FROM workouts "
+        "WHERE user_id=? AND exercise=? AND DATE(timestamp)=? ORDER BY timestamp ASC",
+        (user_id, name, last_date)
+    ).fetchall()
+    ex_row = conn.execute("SELECT is_isometric FROM exercises WHERE name=?", (name,)).fetchone()
+    is_isometric = bool(ex_row["is_isometric"]) if ex_row else False
+    # Estimated 1RM across all history (Epley: weight × (1 + reps/30))
+    one_rm = None
+    if not is_isometric:
+        orm_rows = conn.execute(
+            "SELECT weight, reps FROM workouts WHERE user_id=? AND exercise=? AND weight > 0 AND reps > 0",
+            (user_id, name)
+        ).fetchall()
+        if orm_rows:
+            one_rm = round(max(r["weight"] * (1 + r["reps"] / 30) for r in orm_rows))
+    conn.close()
+    entries = [{"weight": r["weight"], "reps": r["reps"], "sets": r["sets"]} for r in rows]
+    volume = round(sum((e["weight"] or 0) * e["reps"] for e in entries))
+    return JSONResponse({"date": last_date, "entries": entries, "volume": volume, "is_isometric": is_isometric, "one_rm": one_rm})
+
+@app.get("/api/calendar")
+async def get_calendar_month(request: Request, year: int, month: int):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    first = datetime.date(year, month, 1).isoformat()
+    if month == 12:
+        last = (datetime.date(year + 1, 1, 1) - datetime.timedelta(days=1)).isoformat()
+    else:
+        last = (datetime.date(year, month + 1, 1) - datetime.timedelta(days=1)).isoformat()
+    conn = get_db()
+    # Per-muscle volumes for the requested month
+    month_rows = conn.execute(
+        """SELECT DATE(w.timestamp) as date,
+                  COALESCE(e.muscle_category,'') as muscle,
+                  ROUND(SUM(COALESCE(w.weight,0) * w.reps)) as volume,
+                  COUNT(*) as set_count
+           FROM workouts w
+           LEFT JOIN exercises e ON w.exercise = e.name
+           WHERE w.user_id=? AND DATE(w.timestamp) BETWEEN ? AND ?
+             AND e.muscle_category IS NOT NULL
+           GROUP BY DATE(w.timestamp), e.muscle_category
+           ORDER BY DATE(w.timestamp) ASC""",
+        (user_id, first, last)
+    ).fetchall()
+    # All-time max daily volume per muscle group
+    max_rows = conn.execute(
+        """SELECT muscle, MAX(vol) as max_vol FROM (
+               SELECT COALESCE(e.muscle_category,'') as muscle,
+                      ROUND(SUM(COALESCE(w.weight,0)*w.reps)) as vol
+               FROM workouts w
+               LEFT JOIN exercises e ON w.exercise = e.name
+               WHERE w.user_id=? AND e.muscle_category IS NOT NULL
+               GROUP BY DATE(w.timestamp), e.muscle_category
+           ) GROUP BY muscle""",
+        (user_id,)
+    ).fetchall()
+    conn.close()
+    muscle_maxes = {r["muscle"]: int(r["max_vol"] or 0) for r in max_rows}
+    days_map = {}
+    for r in month_rows:
+        d = r["date"]
+        if d not in days_map:
+            days_map[d] = {"muscles": [], "set_count": 0}
+        days_map[d]["muscles"].append({"name": r["muscle"], "volume": int(r["volume"] or 0)})
+        days_map[d]["set_count"] += int(r["set_count"] or 0)
+    days = [{"date": d, "volume": sum(m["volume"] for m in info["muscles"]),
+             "set_count": info["set_count"], "muscles": info["muscles"]}
+            for d, info in sorted(days_map.items())]
+    return JSONResponse({"days": days, "muscle_maxes": muscle_maxes})
+
+@app.get("/api/calendar/day")
+async def get_calendar_day(request: Request, date: str):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT id, exercise, weight, reps, sets,
+                  strftime('%H:%M', timestamp) as time
+           FROM workouts
+           WHERE user_id=? AND DATE(timestamp)=?
+           ORDER BY timestamp ASC""",
+        (user_id, date)
+    ).fetchall()
+    ex_names = list({r["exercise"] for r in rows})
+    iso_map = {}
+    for ex in ex_names:
+        ex_row = conn.execute("SELECT is_isometric FROM exercises WHERE name=?", (ex,)).fetchone()
+        iso_map[ex] = bool(ex_row["is_isometric"]) if ex_row else False
+    conn.close()
+    return JSONResponse([{
+        "id": r["id"], "exercise": r["exercise"],
+        "weight": r["weight"], "reps": r["reps"], "sets": r["sets"],
+        "time": r["time"], "is_isometric": iso_map.get(r["exercise"], False)
+    } for r in rows])
+
+@app.delete("/api/calendar/day")
+async def delete_calendar_day(request: Request, date: str):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    conn.execute("DELETE FROM workouts WHERE user_id=? AND DATE(timestamp)=?", (user_id, date))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+@app.get("/api/recovery/volume-history")
+async def get_recovery_volume_history(request: Request, days: int = 30):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    since = (datetime.date.today() - datetime.timedelta(days=days - 1)).isoformat()
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT DATE(w.timestamp) as date,
+                  COALESCE(e.muscle_category, 'Unknown') as muscle,
+                  ROUND(SUM(COALESCE(w.weight,0) * w.reps)) as volume
+           FROM workouts w
+           LEFT JOIN exercises e ON w.exercise = e.name
+           WHERE w.user_id=? AND DATE(w.timestamp) >= ? AND e.muscle_category IS NOT NULL
+           GROUP BY DATE(w.timestamp), e.muscle_category
+           ORDER BY DATE(w.timestamp) ASC""",
+        (user_id, since)
+    ).fetchall()
+    conn.close()
+    return JSONResponse([{"date": r["date"], "muscle": r["muscle"], "volume": int(r["volume"] or 0)} for r in rows])
+
+@app.post("/api/calendar/day")
+async def add_to_past_day(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    date     = body.get("date", "").strip()
+    exercise = body.get("exercise", "").strip()
+    weight   = body.get("weight") or 0
+    reps     = int(body.get("reps") or 0)
+    sets     = int(body.get("sets") or 1)
+    if not date or not exercise or not reps:
+        return JSONResponse({"error": "Missing required fields"}, status_code=400)
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO workouts (user_id, exercise, weight, reps, sets, timestamp) VALUES (?,?,?,?,?,?)",
+        (user_id, exercise, weight, reps, sets, f"{date} 12:00:00")
+    )
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+@app.get("/api/settings/personality")
+async def get_personality_api(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    return JSONResponse({"personality": get_personality(user_id)})
+
+@app.put("/api/settings/personality")
+async def update_personality_api(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    value = body.get("personality", "").strip()
+    conn = get_db()
+    conn.execute(
+        "INSERT OR REPLACE INTO user_settings (user_id, key, value) VALUES (?, 'persona', ?)",
+        (user_id, value)
+    )
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+@app.get("/api/recovery")
+async def get_recovery(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+
+    now = datetime.datetime.utcnow()
+    today = now.date()
+    week_start = (today - datetime.timedelta(days=6)).isoformat()
+
+    conn = get_db()
+    cats = [r["name"] for r in conn.execute("SELECT name FROM muscle_categories ORDER BY name").fetchall()]
+
+    result = []
+    for cat in cats:
+        row = conn.execute(
+            "SELECT MAX(w.timestamp) as last_ts FROM workouts w "
+            "JOIN exercises e ON w.exercise=e.name "
+            "WHERE w.user_id=? AND e.muscle_category=?",
+            (user_id, cat)
+        ).fetchone()
+        last_ts = row["last_ts"] if row else None
+
+        if last_ts:
+            last_date_str = last_ts[:10]
+            vol_row = conn.execute(
+                "SELECT COALESCE(SUM(COALESCE(w.weight,0) * w.reps), 0) as vol "
+                "FROM workouts w JOIN exercises e ON w.exercise=e.name "
+                "WHERE w.user_id=? AND e.muscle_category=? AND DATE(w.timestamp)=?",
+                (user_id, cat, last_date_str)
+            ).fetchone()
+            last_volume = round(float(vol_row["vol"] or 0))
+            try:
+                last_dt = datetime.datetime.fromisoformat(last_ts[:19])
+            except ValueError:
+                last_dt = datetime.datetime.strptime(last_ts[:10], "%Y-%m-%d")
+            hours_since = (now - last_dt).total_seconds() / 3600
+            recovery_pct = min(100, int((hours_since / 72) * 100))
+        else:
+            last_date_str = None
+            last_volume = 0
+            hours_since = None
+            recovery_pct = None
+
+        week_rows = conn.execute(
+            "SELECT DATE(w.timestamp) as d, "
+            "COALESCE(SUM(COALESCE(w.weight,0) * w.reps), 0) as vol "
+            "FROM workouts w JOIN exercises e ON w.exercise=e.name "
+            "WHERE w.user_id=? AND e.muscle_category=? AND DATE(w.timestamp) >= ? "
+            "GROUP BY DATE(w.timestamp) ORDER BY d",
+            (user_id, cat, week_start)
+        ).fetchall()
+        week_data = [{"date": r["d"], "volume": round(float(r["vol"] or 0))} for r in week_rows]
+
+        exercises = [r["name"] for r in conn.execute(
+            "SELECT name FROM exercises WHERE muscle_category=? ORDER BY name", (cat,)
+        ).fetchall()]
+
+        result.append({
+            "category": cat,
+            "exercises": exercises,
+            "last_date": last_date_str,
+            "hours_since": round(hours_since, 1) if hours_since is not None else None,
+            "recovery_pct": recovery_pct,
+            "last_volume": last_volume,
+            "week_data": week_data,
+        })
+
+    conn.close()
     return JSONResponse(result)
 
 # ─────────────────────────────────────────────
