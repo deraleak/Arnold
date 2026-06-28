@@ -706,6 +706,92 @@
   /* ══════════════════════════════════════
      RECOVERY OVERLAY
   ══════════════════════════════════════ */
+  /* ── BULK IMPORT OVERLAY ───────────────────────────────────── */
+  #import-overlay {
+    display: none; position: fixed; inset: 0; z-index: 130;
+    background: rgba(0,0,0,0.98); flex-direction: column; overflow: hidden;
+  }
+  #import-overlay.open { display: flex; }
+  #import-header {
+    display: flex; align-items: center; gap: 20px;
+    padding: 16px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #import-title { font-size: 1.1rem; letter-spacing: .32em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); flex: 1; }
+  #import-date-label { font-size: .55rem; letter-spacing: .14em; color: var(--green-dim); }
+  #import-date {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green);
+    font-family: var(--font); font-size: .6rem; padding: 5px 10px; cursor: pointer;
+    color-scheme: dark;
+  }
+  #import-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing: .12em;
+  }
+  #import-close:hover { border-color: var(--green); color: var(--green); }
+  #import-body {
+    flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0; overflow: hidden;
+  }
+  #import-input-pane {
+    padding: 24px 28px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;
+  }
+  #import-pane-label { font-size: .52rem; letter-spacing: .18em; color: var(--green-dim); }
+  #import-textarea {
+    flex: 1; background: transparent; border: 1px solid rgba(0,255,65,.15);
+    color: var(--green); font-family: var(--font); font-size: .78rem; line-height: 1.9;
+    padding: 14px 16px; resize: none; outline: none; letter-spacing: .04em;
+  }
+  #import-textarea:focus { border-color: rgba(0,255,65,.4); }
+  #import-textarea::placeholder { color: rgba(0,255,65,.2); }
+  #import-preview-pane {
+    padding: 24px 28px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+  }
+  #import-preview-label { font-size: .52rem; letter-spacing: .18em; color: var(--green-dim); }
+  #import-preview-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .imp-row {
+    display: grid; grid-template-columns: 1.6fr .5fr .5fr .5fr 1.2fr; gap: 8px;
+    align-items: center; padding: 6px 10px; border: 1px solid rgba(0,255,65,.08);
+    font-size: .6rem; letter-spacing: .06em;
+  }
+  .imp-row.ok   { border-color: rgba(0,255,65,.18); }
+  .imp-row.err  { border-color: rgba(255,64,64,.25); background: rgba(255,64,64,.03); }
+  .imp-row-name { color: var(--green); }
+  .imp-row-val  { color: var(--green-dim); text-align: right; }
+  .imp-row-status.ok  { color: var(--green); font-size: .5rem; letter-spacing: .1em; }
+  .imp-row-status.err { color: #ff4040;    font-size: .5rem; letter-spacing: .1em; }
+  .imp-row-wrap { display: flex; flex-direction: column; }
+  .imp-fix-bar {
+    display: flex; align-items: center; gap: 8px; padding: 5px 10px 7px;
+    background: rgba(255,64,64,.03); border: 1px solid rgba(255,64,64,.18); border-top: none;
+    flex-wrap: wrap;
+  }
+  .imp-fix-label { font-size: .48rem; letter-spacing: .1em; color: var(--green-dim); white-space: nowrap; }
+  .imp-fix-select, .imp-fix-cat {
+    background: #000; border: 1px solid rgba(0,255,65,.2); color: var(--green);
+    font-family: var(--font); font-size: .52rem; padding: 3px 6px; cursor: pointer; color-scheme: dark;
+  }
+  .imp-fix-select { flex: 1; min-width: 140px; max-width: 220px; }
+  .imp-fix-or { font-size: .46rem; color: var(--green-dim); letter-spacing: .1em; }
+  .imp-fix-use, .imp-fix-create {
+    background: transparent; border: 1px solid rgba(0,255,65,.3); color: var(--green);
+    font-family: var(--font); font-size: .48rem; padding: 3px 8px; cursor: pointer;
+    letter-spacing: .08em; white-space: nowrap;
+  }
+  .imp-fix-use:hover, .imp-fix-create:hover { border-color: var(--green); }
+  #import-footer {
+    display: flex; align-items: center; gap: 16px; padding: 14px 28px;
+    border-top: 1px solid rgba(0,255,65,.08); flex-shrink: 0;
+  }
+  #import-summary { font-size: .55rem; letter-spacing: .12em; color: var(--green-dim); flex: 1; }
+  #import-summary .ok-count  { color: var(--green); }
+  #import-summary .err-count { color: #ff4040; }
+  #import-btn {
+    background: transparent; border: 1px solid var(--green); color: var(--green);
+    font-family: var(--font); font-size: .7rem; padding: 8px 28px; cursor: pointer; letter-spacing: .14em;
+  }
+  #import-btn:hover { background: rgba(0,255,65,.07); }
+  #import-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
+  #import-result { font-size: .6rem; letter-spacing: .1em; color: var(--green); min-height: 1.2em; }
+
   #recovery-overlay {
     display: none; position: fixed; inset: 0; z-index: 120;
     background: rgba(0,0,0,0.98); flex-direction: column; overflow: hidden;
@@ -867,6 +953,7 @@
       <button class="btn btn-sm" id="mic-toggle-btn">◉ MIC OFF</button>
       <button class="btn btn-sm" id="tts-btn">♪ VOICE</button>
       <button class="btn btn-sm" id="recovery-btn">⬡ RECOVERY</button>
+      <button class="btn btn-sm" id="import-btn-nav">⬆ IMPORT</button>
       <button class="btn btn-sm" onclick="logout()">LOGOUT</button>
       <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
     </div>
@@ -1076,6 +1163,33 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     BULK IMPORT OVERLAY
+══════════════════════════════════════ -->
+<div id="import-overlay">
+  <div id="import-header">
+    <div id="import-title">// BULK IMPORT</div>
+    <span id="import-date-label">DATE //</span>
+    <input type="date" id="import-date">
+    <button id="import-close">✕ CLOSE</button>
+  </div>
+  <div id="import-body">
+    <div id="import-input-pane">
+      <div id="import-pane-label">// PASTE WORKOUT SETS</div>
+      <textarea id="import-textarea" placeholder="Deadlift 315 x 6 x 4&#10;Bulgarian Split Squat 70 x 8 x 3&#10;Close Grip Bench 225 x 8 x 4&#10;Bent Over Row 185 x 10 x 3" spellcheck="false"></textarea>
+    </div>
+    <div id="import-preview-pane">
+      <div id="import-preview-label">// PREVIEW</div>
+      <div id="import-preview-list"></div>
+    </div>
+  </div>
+  <div id="import-footer">
+    <div id="import-summary"></div>
+    <div id="import-result"></div>
+    <button id="import-btn" disabled>⬆ IMPORT</button>
   </div>
 </div>
 
@@ -2445,6 +2559,11 @@ document.getElementById('tts-btn').addEventListener('click', () => {
   let micOn      = false;
   let restarting = false;
 
+  // Dedup state lives outside buildRec so it survives mic restarts
+  let _recLastFinal  = '';
+  let _recLastMs     = 0;
+  let _voiceCooldownUntil = 0; // ms timestamp — no submissions before this
+
   function updateBtn() {
     toggleBtn.textContent = micOn ? '◉ MIC ON' : '◉ MIC OFF';
     toggleBtn.style.opacity = micOn ? '1' : '0.45';
@@ -2464,13 +2583,11 @@ document.getElementById('tts-btn').addEventListener('click', () => {
       interim.textContent = 'LISTENING...';
     };
 
-    let _recLastFinal = '';
-    let _recLastMs    = 0;
     r.onresult = (e) => {
-      // Only look at the single newest result
       const result = e.results[e.resultIndex];
       if (!result) return;
-      const t = result[0].transcript;
+      const alt = result[0];
+      const t   = alt.transcript;
       if (!result.isFinal) {
         interim.textContent = t.toUpperCase();
         return;
@@ -2478,10 +2595,31 @@ document.getElementById('tts-btn').addEventListener('click', () => {
       const txt = t.trim();
       if (!txt) return;
       const now = Date.now();
-      // Ignore duplicate finals within 2.5 s (continuous mode can re-fire same result)
-      if (txt.toLowerCase() === _recLastFinal && now - _recLastMs < 2500) return;
+
+      // 1. Reject low-confidence audio (ambient noise, unclear speech)
+      if (alt.confidence > 0 && alt.confidence < 0.82) {
+        interim.textContent = `LOW CONF (${Math.round(alt.confidence*100)}%)`;
+        setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 1200);
+        return;
+      }
+
+      // 2. Dedup — ignore same phrase within 15s (survives mic restarts)
+      if (txt.toLowerCase() === _recLastFinal && now - _recLastMs < 15000) return;
+
+      // 3. Post-log cooldown — prevent re-triggering right after a submission
+      if (now < _voiceCooldownUntil) return;
+
+      // 4. Require at least one digit — exercise logs always contain numbers (weight/reps)
+      if (!/\d/.test(txt)) {
+        document.getElementById('cmd-input').value = txt;
+        submitInput();
+        setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 900);
+        return;
+      }
+
       _recLastFinal = txt.toLowerCase();
       _recLastMs    = now;
+      _voiceCooldownUntil = now + 5000; // 5s cooldown after any numeric command
       interim.textContent = txt.toUpperCase();
       document.getElementById('cmd-input').value = txt;
       submitInput();
@@ -2527,6 +2665,215 @@ document.getElementById('tts-btn').addEventListener('click', () => {
   });
 
   updateBtn();
+})();
+
+// ══════════════════════════════════════
+// BULK IMPORT
+// ══════════════════════════════════════
+(function() {
+  const overlay   = document.getElementById('import-overlay');
+  const textarea  = document.getElementById('import-textarea');
+  const dateInput = document.getElementById('import-date');
+  const previewEl = document.getElementById('import-preview-list');
+  const summaryEl = document.getElementById('import-summary');
+  const resultEl  = document.getElementById('import-result');
+  const importBtn = document.getElementById('import-btn');
+
+  dateInput.value = new Date().toISOString().slice(0, 10);
+
+  const MUSCLES = ['Back','Biceps','Chest','Core','Grip','Legs','Shoulders','Triceps'];
+
+  // _entries: parsed entries sent to server (aligned with parseable textarea lines)
+  // _lineMap[i]: which raw textarea line index produced _entries[i]
+  // _nameMap: { 'bench'.toLowerCase() → 'Bench Press' } user-supplied remaps
+  // _unknownKeys: Set of lowercased exercise names the server rejected
+  // _knownExNames: flat sorted list of exercise names from /api/exercises
+  let _entries = [], _lineMap = [], _nameMap = {}, _unknownKeys = new Set(), _knownExNames = [];
+
+  document.getElementById('import-btn-nav').addEventListener('click', openImport);
+  document.getElementById('import-close').addEventListener('click', closeImport);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImport(); });
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+  async function openImport() {
+    overlay.classList.add('open');
+    resultEl.textContent = '';
+    resultEl.style.color = 'var(--green)';
+    _unknownKeys.clear();
+    _nameMap = {};
+    parseAndPreview();
+    // Load exercise names for fix dropdowns (non-blocking)
+    try {
+      const data = await authFetch('/api/exercises').then(r => r.json());
+      _knownExNames = (Array.isArray(data) ? data : Object.values(data).flat()).map(r => r.name || r).filter(Boolean).sort();
+    } catch(e) {}
+  }
+
+  function closeImport() { overlay.classList.remove('open'); }
+
+  const LINE_RE = /^(.*?)\s+(\d+(?:\.\d+)?)\s*[xX×]\s*(\d+)(?:\s*[xX×]\s*(\d+))?\s*$/;
+  function parseLine(line) {
+    const m = LINE_RE.exec(line.trim());
+    if (!m) return null;
+    return { exercise: m[1].trim(), weight: parseFloat(m[2]), reps: parseInt(m[3]), sets: m[4] ? parseInt(m[4]) : 1 };
+  }
+
+  function parseAndPreview() {
+    const rawLines = textarea.value.split('\n');
+    _entries = []; _lineMap = [];
+    let parseErrCount = 0, needFixCount = 0;
+    const rows = [];
+
+    rawLines.forEach((rawLine, lineIdx) => {
+      const line = rawLine.trim();
+      if (!line) return;
+      const p = parseLine(line);
+      if (!p) {
+        parseErrCount++;
+        rows.push(`<div class="imp-row-wrap"><div class="imp-row err">
+          <span class="imp-row-name" style="color:#ff6040;grid-column:1/5">${esc(line)}</span>
+          <span class="imp-row-status err">PARSE ERR</span>
+        </div></div>`);
+        return;
+      }
+      const key = p.exercise.toLowerCase();
+      const remapped = _nameMap[key];
+      const effectiveName = remapped || p.exercise;
+      const isUnknown = _unknownKeys.has(key) && !remapped;
+
+      _entries.push({ ...p, exercise: effectiveName });
+      _lineMap.push(lineIdx);
+
+      const wDisp = Number.isInteger(p.weight) ? p.weight : p.weight.toFixed(1);
+      const entryIdx = _entries.length - 1;
+
+      if (isUnknown) {
+        needFixCount++;
+        const exOpts = _knownExNames.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+        const catOpts = MUSCLES.map(m => `<option>${m}</option>`).join('');
+        rows.push(`<div class="imp-row-wrap">
+          <div class="imp-row err">
+            <span class="imp-row-name">${esc(p.exercise)}</span>
+            <span class="imp-row-val">${wDisp}lbs</span>
+            <span class="imp-row-val">${p.reps} reps</span>
+            <span class="imp-row-val">${p.sets} sets</span>
+            <span class="imp-row-status err">✗ UNKNOWN</span>
+          </div>
+          <div class="imp-fix-bar">
+            <span class="imp-fix-label">REMAP →</span>
+            <select class="imp-fix-select" data-idx="${entryIdx}" data-key="${esc(key)}">
+              <option value="">-- select existing --</option>${exOpts}
+            </select>
+            <button class="imp-fix-use" data-idx="${entryIdx}">USE</button>
+            <span class="imp-fix-or">OR CREATE AS</span>
+            <select class="imp-fix-cat" data-idx="${entryIdx}">${catOpts}</select>
+            <button class="imp-fix-create" data-idx="${entryIdx}" data-name="${esc(p.exercise)}">+ "${esc(p.exercise)}"</button>
+          </div>
+        </div>`);
+      } else {
+        rows.push(`<div class="imp-row-wrap"><div class="imp-row ok">
+          <span class="imp-row-name">${esc(effectiveName)}</span>
+          <span class="imp-row-val">${wDisp}lbs</span>
+          <span class="imp-row-val">${p.reps} reps</span>
+          <span class="imp-row-val">${p.sets} sets</span>
+          <span class="imp-row-status ok">✓ READY</span>
+        </div></div>`);
+      }
+    });
+
+    previewEl.innerHTML = rows.join('');
+    wireFixHandlers();
+
+    const readyCount = _entries.length - needFixCount;
+    if (!_entries.length && !parseErrCount) {
+      summaryEl.innerHTML = ''; importBtn.disabled = true;
+    } else {
+      summaryEl.innerHTML =
+        (readyCount ? `<span class="ok-count">${readyCount} READY</span>` : '') +
+        (needFixCount ? `${readyCount ? '&nbsp;·&nbsp;' : ''}<span class="err-count">${needFixCount} NEED FIX</span>` : '') +
+        (parseErrCount ? `&nbsp;·&nbsp;<span class="err-count">${parseErrCount} PARSE ERR</span>` : '');
+      importBtn.disabled = readyCount === 0 || needFixCount > 0;
+      importBtn.textContent = `⬆ IMPORT ${readyCount} SET${readyCount !== 1 ? 'S' : ''}`;
+    }
+    resultEl.textContent = '';
+  }
+
+  function wireFixHandlers() {
+    previewEl.querySelectorAll('.imp-fix-use').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        const sel = previewEl.querySelector(`.imp-fix-select[data-idx="${idx}"]`);
+        const chosen = sel.value;
+        if (!chosen) return;
+        const key = sel.dataset.key;
+        _nameMap[key] = chosen;
+        _unknownKeys.delete(key);
+        parseAndPreview();
+      });
+    });
+
+    previewEl.querySelectorAll('.imp-fix-create').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx   = parseInt(btn.dataset.idx);
+        const name  = btn.dataset.name;
+        const catEl = previewEl.querySelector(`.imp-fix-cat[data-idx="${idx}"]`);
+        btn.textContent = 'CREATING...'; btn.disabled = true;
+        try {
+          await authFetch('/api/exercises', { method: 'POST', body: JSON.stringify({ name, category: catEl.value }) });
+          _nameMap[name.toLowerCase()] = name;
+          _unknownKeys.delete(name.toLowerCase());
+          _knownExNames = [...new Set([..._knownExNames, name])].sort();
+          parseAndPreview();
+        } catch(e) { btn.textContent = 'ERR'; btn.disabled = false; }
+      });
+    });
+  }
+
+  let _parseTimer = null;
+  textarea.addEventListener('input', () => {
+    _unknownKeys.clear(); _nameMap = {};
+    clearTimeout(_parseTimer);
+    _parseTimer = setTimeout(parseAndPreview, 220);
+  });
+  dateInput.addEventListener('change', parseAndPreview);
+
+  importBtn.addEventListener('click', async () => {
+    if (!_entries.length) return;
+    importBtn.disabled = true; importBtn.textContent = 'IMPORTING...';
+    resultEl.textContent = ''; resultEl.style.color = 'var(--green)';
+    try {
+      const res = await authFetch('/api/bulk-import', {
+        method: 'POST',
+        body: JSON.stringify({ entries: _entries, date: dateInput.value })
+      }).then(r => r.json());
+
+      if (res.inserted === _entries.length) {
+        // Full success — clear everything
+        textarea.value = ''; _entries = []; _lineMap = []; _nameMap = {}; _unknownKeys.clear();
+        previewEl.innerHTML = ''; summaryEl.innerHTML = '';
+        importBtn.disabled = true; importBtn.textContent = '⬆ IMPORT';
+        resultEl.textContent = `✓ ${res.inserted} SET${res.inserted !== 1 ? 'S' : ''} IMPORTED`;
+        pollAll();
+      } else {
+        // Partial — mark failed names, remove succeeded lines from textarea
+        res.results.forEach(r => { if (r.status === 'error') _unknownKeys.add(r.exercise.toLowerCase()); });
+        const succeededLineIdxs = new Set();
+        _entries.forEach((e, i) => {
+          if (!_unknownKeys.has(e.exercise.toLowerCase())) succeededLineIdxs.add(_lineMap[i]);
+        });
+        const rawLines = textarea.value.split('\n');
+        textarea.value = rawLines.filter((_, i) => !succeededLineIdxs.has(i)).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+        parseAndPreview();
+        resultEl.style.color = '#ffaa00';
+        resultEl.textContent = `✓ ${res.inserted} IMPORTED  ·  ${res.results.filter(r=>r.status==='error').length} UNKNOWN — fix below`;
+        pollAll();
+      }
+    } catch(e) {
+      resultEl.style.color = '#ff4040'; resultEl.textContent = 'IMPORT FAILED';
+      importBtn.disabled = false; importBtn.textContent = `⬆ IMPORT ${_entries.length} SETS`;
+    }
+  });
 })();
 
 // ══════════════════════════════════════

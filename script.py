@@ -760,6 +760,44 @@ async def get_priority_exercises(request: Request):
     result.sort(key=lambda x: x["days_since"] if x["days_since"] is not None else 9999, reverse=True)
     return JSONResponse(result)
 
+@app.post("/api/bulk-import")
+async def bulk_import(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    entries  = body.get("entries", [])
+    date_str = body.get("date", datetime.date.today().isoformat())
+    try:
+        datetime.date.fromisoformat(date_str)
+    except ValueError:
+        return JSONResponse({"error": "Invalid date"}, status_code=400)
+    timestamp = f"{date_str} 12:00:00"
+    conn = get_db()
+    # Build case-insensitive name → canonical name map
+    ex_rows = conn.execute("SELECT name FROM exercises").fetchall()
+    ex_map  = {r["name"].lower(): r["name"] for r in ex_rows}
+    results  = []
+    inserted = 0
+    for entry in entries:
+        raw  = (entry.get("exercise") or "").strip()
+        canonical = ex_map.get(raw.lower())
+        if not canonical:
+            results.append({"exercise": raw, "status": "error", "message": "Unknown exercise"})
+            continue
+        weight = entry.get("weight")
+        reps   = int(entry.get("reps", 0))
+        sets   = int(entry.get("sets", 1))
+        conn.execute(
+            "INSERT INTO workouts (user_id, exercise, weight, reps, sets, timestamp) VALUES (?,?,?,?,?,?)",
+            (user_id, canonical, weight, reps, sets, timestamp)
+        )
+        inserted += 1
+        results.append({"exercise": canonical, "status": "ok"})
+    conn.commit()
+    conn.close()
+    return JSONResponse({"inserted": inserted, "results": results})
+
 @app.post("/api/exercises")
 async def create_exercise_api(request: Request):
     user_id = _get_user_id(_token(request))
