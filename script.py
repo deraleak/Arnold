@@ -68,6 +68,12 @@ def init_db():
         c.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    # Grant admin to Deric
+    c.execute("UPDATE users SET is_admin=1 WHERE LOWER(name)='deric'")
 
     c.execute("""
         CREATE TABLE IF NOT EXISTS muscle_categories (
@@ -138,23 +144,50 @@ def init_db():
         c.execute("ALTER TABLE exercises ADD COLUMN is_isometric INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE exercises ADD COLUMN is_bodyweight INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    # Per-user priority table
+    c.execute("""CREATE TABLE IF NOT EXISTS user_priorities (
+        user_id INTEGER NOT NULL REFERENCES users(id),
+        exercise TEXT NOT NULL,
+        PRIMARY KEY (user_id, exercise)
+    )""")
 
     default_categories = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Core", "Grip"]
     for cat in default_categories:
         c.execute("INSERT OR IGNORE INTO muscle_categories (name) VALUES (?)", (cat,))
 
-    default_exercises = [
-        ("Bench Press", "Chest"), ("Incline Bench Press", "Chest"), ("Dumbbell Flyes", "Chest"),
-        ("Pull Up", "Back"), ("Deadlift", "Back"), ("Barbell Row", "Back"), ("Lat Pulldown", "Back"),
-        ("Overhead Press", "Shoulders"), ("Lateral Raise", "Shoulders"), ("Face Pull", "Shoulders"),
-        ("Bicep Curl", "Biceps"), ("Hammer Curl", "Biceps"),
-        ("Tricep Pushdown", "Triceps"),
-        ("Squat", "Legs"), ("Leg Press", "Legs"),
-        ("Romanian Deadlift", "Legs"), ("Leg Curl", "Legs"),
-        ("Plank", "Core"), ("Cable Crunch", "Core"), ("Ab Wheel", "Core"),
-    ]
-    for name, cat in default_exercises:
-        c.execute("INSERT OR IGNORE INTO exercises (name, muscle_category) VALUES (?, ?)", (name, cat))
+    # Only seed default exercises on a fresh database — never re-insert after user deletions
+    if c.execute("SELECT COUNT(*) FROM exercises").fetchone()[0] == 0:
+        default_exercises = [
+            ("Bench Press", "Chest"), ("Incline Bench Press", "Chest"), ("Dumbbell Flyes", "Chest"),
+            ("Pull Up", "Back", 1), ("Deadlift", "Back"), ("Barbell Row", "Back"), ("Lat Pulldown", "Back"),
+            ("Overhead Press", "Shoulders"), ("Lateral Raise", "Shoulders"), ("Face Pull", "Shoulders"),
+            ("Bicep Curl", "Biceps"), ("Hammer Curl", "Biceps"),
+            ("Tricep Pushdown", "Triceps"),
+            ("Squat", "Legs"), ("Leg Press", "Legs"),
+            ("Romanian Deadlift", "Legs"), ("Leg Curl", "Legs"),
+            ("Plank", "Core"), ("Cable Crunch", "Core"), ("Ab Wheel", "Core"),
+        ]
+        for entry in default_exercises:
+            is_bw = entry[2] if len(entry) > 2 else 0
+            c.execute("INSERT INTO exercises (name, muscle_category, is_bodyweight) VALUES (?, ?, ?)",
+                      (entry[0], entry[1], is_bw))
+
+    # Migration: mark known bodyweight exercises that exist in the DB
+    for bw_name in ["Pull Up", "Rope Pull Ups", "Push Up", "Dip", "Chin Up"]:
+        c.execute("UPDATE exercises SET is_bodyweight=1 WHERE LOWER(name)=LOWER(?) AND is_bodyweight=0", (bw_name,))
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS body_weight (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            weight REAL NOT NULL,
+            recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
     # Migration: split Arms → Biceps/Triceps
     for cat in ("Biceps", "Triceps"):
@@ -244,17 +277,24 @@ Known exercises: {exercise_list}
 
 Intents:
 - log_set: user is logging a set. Extract: exercise, weight (lbs), reps, sets, confident (bool)
-  Set confident=false if the exercise name is ambiguous or not clearly in the known list.
+  CRITICAL RULES:
+  - ONLY extract values that are EXPLICITLY stated in the text. NEVER invent, infer, or assume any value.
+  - If weight is not explicitly stated, set weight to null.
+  - If reps is not explicitly stated, set reps to null.
+  - If sets is not explicitly stated, set sets to 1.
+  - If the exercise name is not explicitly stated, set exercise to null.
+  - Set confident=false if the exercise name is ambiguous or not clearly in the known list.
+  - Word numbers are valid: "five" = 5, "two" = 2, "ten" = 10, etc.
 - create_exercise: user wants to create a new exercise
 - create_muscle_category: user wants to create a new muscle category
 - list_categories: user wants to see all muscle categories
-- list_exercises: user wants to see all exercises
 - edit_exercise: user wants to rename an exercise. Extract: old_name, new_name
 - unknown: anything else
 
 Return JSON only, no explanation. Examples:
-{{"intent": "log_set", "exercise": "Deadlift", "weight": 315, "reps": 5, "sets": 3, "confident": true}}
-{{"intent": "log_set", "exercise": "Bench", "weight": 135, "reps": 8, "sets": 1, "confident": false}}
+{{"intent": "log_set", "exercise": "Squat", "weight": 225, "reps": 8, "sets": 3, "confident": true}}
+{{"intent": "log_set", "exercise": "Bench Press", "weight": null, "reps": null, "sets": 1, "confident": false}}
+{{"intent": "log_set", "exercise": null, "weight": 95, "reps": 10, "sets": 2, "confident": false}}
 {{"intent": "create_exercise"}}
 {{"intent": "list_categories"}}
 {{"intent": "edit_exercise", "old_name": "Bench", "new_name": "Bench Press"}}
@@ -304,9 +344,9 @@ dialogue_state: dict = {"active": False, "type": None, "step": None, "data": {}}
 current_exercise_by_user: dict = {}  # user_id -> exercise name
 _exerciseNames_cache: list = []  # cleared on exercise add/edit/delete
 
-# Matches shorthand like "225x5", "135 x 8", "100 x 10 x 3", "225lbs x 5"
+# Matches shorthand like "225x5", "135 x 8", "95 by 10", "95 times 10", "225lbs x 5"
 _SHORTHAND_RE = re.compile(
-    r'^(\d+(?:\.\d+)?)\s*(?:lbs?)?\s*[x×*]\s*(\d+)(?:\s*[x×*]\s*(\d+))?$',
+    r'^(\d+(?:\.\d+)?)\s*(?:lbs?)?\s*(?:[x×*]|by|times|for)\s*(\d+)(?:\s*(?:[x×*]|by|times)\s*(\d+))?$',
     re.IGNORECASE
 )
 
@@ -340,11 +380,10 @@ def handle_log_set(parsed: dict, user_id: int):
         return
 
     conn = get_db()
-    for _ in range(sets):
-        conn.execute(
-            "INSERT INTO workouts (user_id, exercise, weight, reps, sets) VALUES (?, ?, ?, ?, ?)",
-            (user_id, exercise, weight, reps, sets)
-        )
+    conn.execute(
+        "INSERT INTO workouts (user_id, exercise, weight, reps, sets) VALUES (?, ?, ?, ?, ?)",
+        (user_id, exercise, weight, reps, sets)
+    )
     conn.commit()
     conn.close()
 
@@ -360,17 +399,6 @@ def handle_list_categories():
     else:
         add_chat("arnold", "No muscle categories found.")
 
-def handle_list_exercises():
-    conn = get_db()
-    rows = conn.execute("SELECT name, muscle_category FROM exercises ORDER BY muscle_category, name").fetchall()
-    conn.close()
-    if rows:
-        grouped: dict = {}
-        for r in rows:
-            grouped.setdefault(r["muscle_category"] or "Uncategorized", []).append(r["name"])
-        add_chat("arnold", " | ".join(f"{cat}: {', '.join(exs)}" for cat, exs in grouped.items()))
-    else:
-        add_chat("arnold", "No exercises found.")
 
 def handle_edit_exercise(parsed: dict):
     old = parsed.get("old_name", "")
@@ -439,29 +467,203 @@ def handle_dialogue_input(text: str, user_id: int = None):
                 conn.close()
             dialogue_state.update({"active": False, "type": None, "step": None, "data": {}})
 
-def process_input(text: str, user_id: int):
+_NAV_PATTERNS = {
+    "recovery":  ["open volume", "open recovery"],
+    "history":   ["open history"],
+    "import":    ["open import"],
+    "help":      ["open help"],
+    "details":   ["open details", "open exercise details"],
+    "ex_list":   ["open exercise list"],
+    "stats":     ["open stats"],
+    "scroll_up":   ["scroll up"],
+    "scroll_down": ["scroll down"],
+    "close":     ["close", "go back", "main page"],
+}
+
+def _detect_nav(text: str):
+    lower = text.lower().strip().rstrip('.,!?;:')
+    # Exact-match close words first (avoid "close grip bench" triggering nav)
+    if lower in ("close", "exit", "closed", "clothes", "cloths", "main", "home"):
+        return "close"
+    # "help" alone → quick popup; "open help" etc. → full help page
+    if lower == "help":
+        return "quick_help"
+    for nav, patterns in _NAV_PATTERNS.items():
+        if any(p in lower for p in patterns):
+            return nav
+    return None
+
+def process_input(text: str, user_id: int, source: str = "text"):
     add_chat("you", text)
+
+    nav = _detect_nav(text)
+    if nav:
+        labels = {"recovery": "Opening volume.", "history": "Opening history.",
+                  "import": "Opening import.", "help": "Opening help.",
+                  "details": "Opening exercise details.",
+                  "ex_list": "Opening exercise list.", "stats": "Opening stats.",
+                  "quick_help": "", "close": "Back to main.",
+                  "scroll_up": "", "scroll_down": ""}
+        msg = labels.get(nav, "")
+        if msg:
+            add_chat("arnold", msg)
+        return nav
+
+    # Delete last set
+    _DELETE_PATTERNS = ["delete last", "undo last", "remove last", "delete that", "undo that", "remove that", "delete set"]
+    if any(p in text.lower() for p in _DELETE_PATTERNS):
+        conn = get_db()
+        row = conn.execute(
+            "SELECT id, exercise, weight, reps FROM workouts WHERE user_id=? ORDER BY id DESC LIMIT 1",
+            (user_id,)
+        ).fetchone()
+        if row:
+            conn.execute("DELETE FROM workouts WHERE id=?", (row["id"],))
+            conn.commit()
+            wt = f"{int(row['weight'])} lbs × " if row["weight"] else ""
+            add_chat("arnold", f"Deleted: {row['exercise']} — {wt}{row['reps']} reps.")
+        else:
+            add_chat("arnold", "Nothing to delete.")
+        conn.close()
+        return None
+
+    # ── VOICE DIGIT INTERCEPT ──────────────────────────────────────────────────
+    # Voice commands with numbers ALWAYS log to the active exercise only.
+    # Exercise name in spoken text is intentionally ignored — use Select Exercise to change.
+    # Exception: an explicit "select/set [exercise], ..." prefix switches the active
+    # exercise (via deterministic fuzzy match, no LLM) and logs in the same breath.
+    if source == "voice" and re.search(r'\d', text):
+        raw = text.strip()
+        exercise = current_exercise_by_user.get(user_id)
+
+        sel_m = re.match(r'^(?:select|set)\b[,:]?\s+(.+)$', raw, re.IGNORECASE)
+        if sel_m:
+            remainder = sel_m.group(1)
+            digit_pos = re.search(r'\d', remainder)
+            if digit_pos:
+                name_part = remainder[:digit_pos.start()].strip(' ,')
+                if name_part:
+                    exercise = fuzzy_match_exercise(name_part)
+                    current_exercise_by_user[user_id] = exercise
+                    raw = remainder[digit_pos.start():].strip()
+
+        if not exercise:
+            add_chat("arnold", "No active exercise. Use Select Exercise first.")
+            return None
+
+        conn = get_db()
+        ex_flags = conn.execute("SELECT is_isometric, is_bodyweight FROM exercises WHERE LOWER(name)=LOWER(?)", (exercise,)).fetchone()
+        conn.close()
+        is_iso = bool(ex_flags and ex_flags["is_isometric"])
+        is_bw  = bool(ex_flags and ex_flags["is_bodyweight"])
+
+        # BW exercises: only reps, no weight ever
+        if is_bw:
+            reps_m = re.search(r'\b(\d+)\b', raw)
+            if reps_m:
+                handle_log_set({"exercise": exercise, "weight": None, "reps": int(reps_m.group(1)), "sets": 1}, user_id)
+            else:
+                add_chat("arnold", f"{exercise} is bodyweight — just say the number of reps.")
+            return None
+
+        # Isometric hold: "60 seconds", "45 secs", "30s"
+        sec_m = re.search(r'(\d+(?:\.\d+)?)\s*s(?:ec(?:ond)?s?)?\b', raw, re.IGNORECASE)
+        if sec_m and is_iso:
+            wt_m = re.search(
+                r'(?:(?:plus|with|\+|and)\s+)?(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?)\b',
+                raw, re.IGNORECASE
+            )
+            iso_weight = float(wt_m.group(1)) if wt_m else None
+            handle_log_set({
+                "exercise": exercise,
+                "weight": iso_weight,
+                "reps": int(float(sec_m.group(1))),
+                "sets": 1,
+            }, user_id)
+            return None
+
+        m = re.search(
+            r'(\d+(?:\.\d+)?)\s*(?:lbs?)?\s*(?:[x×*]|by|times|for)\s*(\d+)'
+            r'(?:\s*(?:[x×*]|by|times)\s*(\d+))?',
+            raw, re.IGNORECASE
+        )
+        if m:
+            handle_log_set({
+                "exercise": exercise,
+                "weight":   float(m.group(1)),
+                "reps":     int(m.group(2)),
+                "sets":     int(m.group(3)) if m.group(3) else 1,
+            }, user_id)
+        else:
+            add_chat("arnold", "Couldn't parse that. Try saying '95 x 10'.")
+        return None
+    # ───────────────────────────────────────────────────────────────────────────
+
     if dialogue_state["active"]:
         handle_dialogue_input(text, user_id)
-        return
+        return None
 
-    # Shorthand: "225 x 5" or "135x8x3" — skip Ollama, use current exercise
+    # Shorthand: "225 x 5" or "135x8x3" — blocked for BW exercises
     shorthand = _parse_shorthand(text)
-    if shorthand:
-        if user_id in current_exercise_by_user:
-            shorthand["exercise"] = current_exercise_by_user[user_id]
+    bare_reps_m = re.match(r'^(\d+)\s*(?:reps?)?\s*$', text.strip(), re.IGNORECASE)
+    if shorthand or bare_reps_m:
+        exercise = current_exercise_by_user.get(user_id)
+        if not exercise:
+            add_chat("arnold", "No active exercise. Select one first.")
+            return None
+        conn = get_db()
+        ex_flags = conn.execute("SELECT is_bodyweight FROM exercises WHERE LOWER(name)=LOWER(?)", (exercise,)).fetchone()
+        conn.close()
+        is_bw = bool(ex_flags and ex_flags["is_bodyweight"])
+        if is_bw:
+            # BW: always reps-only — extract first number from whatever was typed
+            reps_m = re.search(r'\b(\d+)\b', text)
+            reps = int(reps_m.group(1)) if reps_m else None
+            if reps:
+                handle_log_set({"exercise": exercise, "weight": None, "reps": reps, "sets": 1}, user_id)
+            else:
+                add_chat("arnold", f"{exercise} is bodyweight — just enter the number of reps.")
+        elif shorthand:
+            shorthand["exercise"] = exercise
             handle_log_set(shorthand, user_id)
         else:
-            add_chat("arnold", "No active exercise — log one by name first, e.g. 'deadlift 225 x 5'.")
-        return
+            handle_log_set({"exercise": exercise, "weight": None, "reps": int(bare_reps_m.group(1)), "sets": 1}, user_id)
+        return None
 
     parsed = parse_intent(text)
     intent = parsed.get("intent", "unknown")
     if intent == "log_set":
+        # Hard gate: no digits in text = LLM hallucinated the intent entirely
+        if not re.search(r'\d', text):
+            add_chat("arnold", "I didn't understand that.")
+            return None
+
+        weight = parsed.get("weight")
+        reps   = parsed.get("reps")
+        exercise = parsed.get("exercise")
+
+        # Require reps always; weight only required for non-isometric, non-bodyweight exercises
+        is_iso_ex = False
+        is_bw_ex  = False
+        if exercise:
+            conn = get_db()
+            row = conn.execute("SELECT is_isometric, is_bodyweight FROM exercises WHERE LOWER(name)=LOWER(?)", (exercise,)).fetchone()
+            conn.close()
+            is_iso_ex = bool(row and row["is_isometric"])
+            is_bw_ex  = bool(row and row["is_bodyweight"])
+
+        if not reps or (not weight and not is_iso_ex and not is_bw_ex):
+            add_chat("arnold", "I need weight and reps to log a set. Say something like 'deadlift 225 x 5'.")
+            return None
+
+        # Voice block: exercise name must appear explicitly, UNLESS a current exercise is already active
+        if source == "voice" and not exercise:
+            if not current_exercise_by_user.get(user_id):
+                add_chat("arnold", "No exercise selected. Say the full name, e.g. 'deadlift 225 x 5', or use 'select exercise' first.")
+                return None
+            # else: fall through — handle_log_set will pick up current_exercise_by_user
+
         if not parsed.get("confident", True):
-            exercise = parsed.get("exercise", "?")
-            weight = parsed.get("weight", "?")
-            reps = parsed.get("reps", "?")
             sets = parsed.get("sets", 1)
             add_chat("arnold", f"Did you mean: {exercise} — {weight}lbs x {reps} reps x {sets} set(s)? Reply yes to confirm or correct me.")
             dialogue_state.update({"active": True, "type": "confirm_log", "step": None, "data": parsed})
@@ -473,12 +675,11 @@ def process_input(text: str, user_id: int):
         start_create_category_dialogue()
     elif intent == "list_categories":
         handle_list_categories()
-    elif intent == "list_exercises":
-        handle_list_exercises()
     elif intent == "edit_exercise":
         handle_edit_exercise(parsed)
     else:
         add_chat("arnold", "I didn't understand that. Try: 'deadlift 225 3x5', 'create exercise', 'list exercises', etc.")
+    return None
 
 # ─────────────────────────────────────────────
 # FASTAPI APP
@@ -551,7 +752,7 @@ async def get_session(request: Request):
     if not user_id:
         return JSONResponse({"user": None})
     conn = get_db()
-    user = conn.execute("SELECT id, name FROM users WHERE id = ?", (user_id,)).fetchone()
+    user = conn.execute("SELECT id, name, is_admin FROM users WHERE id = ?", (user_id,)).fetchone()
     conn.close()
     return JSONResponse({"user": dict(user) if user else None})
 
@@ -562,7 +763,7 @@ async def session_login(request: Request):
     if not username:
         return JSONResponse({"error": "Name required"}, status_code=400)
     conn = get_db()
-    user = conn.execute("SELECT id, name FROM users WHERE name=?", (username,)).fetchone()
+    user = conn.execute("SELECT id, name, is_admin FROM users WHERE name=?", (username,)).fetchone()
     if not user:
         conn.close()
         return JSONResponse({"error": "User not found"}, status_code=404)
@@ -573,7 +774,7 @@ async def session_login(request: Request):
     token = secrets.token_urlsafe(32)
     active_sessions[token] = {"user_id": user["id"], "last_activity": datetime.datetime.now()}
     add_chat("arnold", f"Welcome back, {user['name']}.")
-    return JSONResponse({"id": user["id"], "name": user["name"], "token": token})
+    return JSONResponse({"id": user["id"], "name": user["name"], "is_admin": user["is_admin"], "token": token})
 
 @app.post("/api/session/logout")
 async def session_logout(request: Request):
@@ -595,9 +796,24 @@ async def get_today_workouts(request: Request):
     conn = get_db()
     today = datetime.date.today().isoformat()
     rows = conn.execute(
-        "SELECT w.id, w.exercise, w.weight, w.reps, w.sets, w.timestamp, COALESCE(e.is_isometric,0) as is_isometric "
-        "FROM workouts w LEFT JOIN exercises e ON w.exercise=e.name "
-        "WHERE w.user_id=? AND DATE(w.timestamp)=? ORDER BY w.timestamp DESC",
+        """SELECT w.id, w.exercise, w.weight, w.reps, w.sets, w.timestamp,
+                  COALESCE(e.is_isometric,0) as is_isometric,
+                  CASE
+                    WHEN COALESCE(e.is_isometric,0)=1 THEN
+                      CASE WHEN w.reps > COALESCE(
+                        (SELECT MAX(p.reps) FROM workouts p
+                         WHERE p.user_id=w.user_id AND p.exercise=w.exercise AND p.id < w.id), 0)
+                      THEN 1 ELSE 0 END
+                    WHEN w.weight IS NOT NULL AND w.weight > 0 THEN
+                      CASE WHEN (w.weight*(1.0+w.reps/30.0)) > COALESCE(
+                        (SELECT MAX(p.weight*(1.0+p.reps/30.0)) FROM workouts p
+                         WHERE p.user_id=w.user_id AND p.exercise=w.exercise AND p.id < w.id
+                           AND p.weight IS NOT NULL AND p.weight > 0), 0)
+                      THEN 1 ELSE 0 END
+                    ELSE 0
+                  END as is_pr
+           FROM workouts w LEFT JOIN exercises e ON w.exercise=e.name
+           WHERE w.user_id=? AND DATE(w.timestamp)=? ORDER BY w.timestamp DESC""",
         (user_id, today)
     ).fetchall()
     conn.close()
@@ -664,11 +880,16 @@ async def get_exercise_info(name: str, request: Request):
     if not user_id:
         return JSONResponse({"error": "Not logged in"}, status_code=401)
     conn = get_db()
-    row = conn.execute("SELECT name, description, is_priority, is_isometric FROM exercises WHERE name=?", (name,)).fetchone()
+    row = conn.execute("SELECT name, description, is_isometric, is_bodyweight FROM exercises WHERE name=?", (name,)).fetchone()
+    is_priority = False
+    if user_id and row:
+        prow = conn.execute("SELECT 1 FROM user_priorities WHERE user_id=? AND LOWER(exercise)=LOWER(?)", (user_id, name)).fetchone()
+        is_priority = bool(prow)
     conn.close()
     if not row:
-        return JSONResponse({"name": name, "description": "", "is_priority": False, "is_isometric": False})
-    return JSONResponse({"name": row["name"], "description": row["description"] or "", "is_priority": bool(row["is_priority"]), "is_isometric": bool(row["is_isometric"])})
+        return JSONResponse({"name": name, "description": "", "is_priority": False, "is_isometric": False, "is_bodyweight": False})
+    return JSONResponse({"name": row["name"], "description": row["description"] or "", "is_priority": is_priority,
+                         "is_isometric": bool(row["is_isometric"]), "is_bodyweight": bool(row["is_bodyweight"])})
 
 @app.put("/api/exercise/{name}/description")
 async def update_exercise_description(name: str, request: Request):
@@ -696,25 +917,77 @@ async def set_exercise_isometric(name: str, request: Request):
     conn.close()
     return JSONResponse({"ok": True})
 
+@app.put("/api/exercise/{name}/bodyweight")
+async def set_exercise_bodyweight(name: str, request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    is_bodyweight = 1 if body.get("bodyweight") else 0
+    conn = get_db()
+    conn.execute("UPDATE exercises SET is_bodyweight=? WHERE name=?", (is_bodyweight, name))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
 @app.put("/api/exercise/{name}/priority")
 async def set_exercise_priority(name: str, request: Request):
     user_id = _get_user_id(_token(request))
     if not user_id:
         return JSONResponse({"error": "Not logged in"}, status_code=401)
     body = await request.json()
-    is_priority = 1 if body.get("priority") else 0
     conn = get_db()
-    conn.execute("UPDATE exercises SET is_priority=? WHERE name=?", (is_priority, name))
+    if body.get("priority"):
+        conn.execute("INSERT OR IGNORE INTO user_priorities (user_id, exercise) VALUES (?, ?)", (user_id, name))
+    else:
+        conn.execute("DELETE FROM user_priorities WHERE user_id=? AND LOWER(exercise)=LOWER(?)", (user_id, name))
     conn.commit()
     conn.close()
     return JSONResponse({"ok": True})
 
 @app.get("/api/exercises")
-async def list_exercises_api():
+async def list_exercises_api(request: Request):
+    user_id = _get_user_id(_token(request))
     conn = get_db()
-    rows = conn.execute("SELECT name, muscle_category, description, is_priority, is_isometric FROM exercises ORDER BY muscle_category, name").fetchall()
+    rows = conn.execute("SELECT name, muscle_category, description, is_isometric, is_bodyweight FROM exercises ORDER BY muscle_category, name").fetchall()
+    priorities = set()
+    if user_id:
+        prows = conn.execute("SELECT LOWER(exercise) FROM user_priorities WHERE user_id=?", (user_id,)).fetchall()
+        priorities = {r[0] for r in prows}
     conn.close()
-    return JSONResponse([dict(r) for r in rows])
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["is_priority"] = 1 if r["name"].lower() in priorities else 0
+        result.append(d)
+    return JSONResponse(result)
+
+@app.get("/api/exercises/with-last-performed")
+async def exercises_with_last_performed(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    exercises = conn.execute(
+        "SELECT name, muscle_category, is_isometric FROM exercises ORDER BY name"
+    ).fetchall()
+    last_rows = conn.execute(
+        """SELECT exercise, MAX(DATE(timestamp)) as last_date
+           FROM workouts WHERE user_id=?
+           GROUP BY exercise""",
+        (user_id,)
+    ).fetchall()
+    conn.close()
+    today = datetime.date.today()
+    last_map = {r["exercise"]: r["last_date"] for r in last_rows}
+    result = []
+    for e in exercises:
+        last = last_map.get(e["name"])
+        days = (today - datetime.date.fromisoformat(last)).days if last else None
+        result.append({"name": e["name"], "muscle_category": e["muscle_category"],
+                        "is_isometric": bool(e["is_isometric"]),
+                        "last_date": last, "days_since": days})
+    return JSONResponse(result)
 
 @app.get("/api/exercises/priority")
 async def get_priority_exercises(request: Request):
@@ -725,12 +998,18 @@ async def get_priority_exercises(request: Request):
     now = datetime.datetime.utcnow()
     conn = get_db()
     exercises = conn.execute(
-        "SELECT name, muscle_category FROM exercises WHERE is_priority=1 ORDER BY name"
+        """SELECT e.name, e.muscle_category, e.is_isometric, e.is_bodyweight
+           FROM exercises e
+           JOIN user_priorities up ON LOWER(e.name)=LOWER(up.exercise) AND up.user_id=?
+           ORDER BY e.name""",
+        (user_id,)
     ).fetchall()
     result = []
     for ex in exercises:
         name = ex["name"]
         muscle = ex["muscle_category"]
+        is_iso = bool(ex["is_isometric"])
+        is_bw  = bool(ex["is_bodyweight"])
         row = conn.execute(
             "SELECT MAX(DATE(timestamp)) as last_date FROM workouts WHERE user_id=? AND exercise=?",
             (user_id, name)
@@ -755,7 +1034,25 @@ async def get_priority_exercises(request: Request):
                 hours_since = (now - last_dt).total_seconds() / 3600
                 recovery_pct = min(100, int((hours_since / 72) * 100))
 
-        result.append({"name": name, "days_since": days_since, "recovery_pct": recovery_pct})
+        # Best PR set: highest 1RM for weighted, longest hold for isometric, most reps for bodyweight
+        pr_row = conn.execute("""
+            SELECT w.weight, w.reps,
+                   MAX(CASE WHEN COALESCE(e2.is_isometric,0)=1
+                            THEN CAST(w.reps AS REAL)
+                            WHEN w.weight IS NOT NULL AND w.weight > 0
+                            THEN w.weight*(1.0+w.reps/30.0)
+                            ELSE CAST(w.reps AS REAL) END) as best_score
+            FROM workouts w
+            LEFT JOIN exercises e2 ON LOWER(w.exercise)=LOWER(e2.name)
+            WHERE w.user_id=? AND LOWER(w.exercise)=LOWER(?)
+              AND w.reps IS NOT NULL AND w.reps > 0
+        """, (user_id, name)).fetchone()
+        pr_weight = float(pr_row["weight"]) if pr_row and pr_row["weight"] is not None else None
+        pr_reps   = int(pr_row["reps"])     if pr_row and pr_row["reps"]   is not None else None
+
+        result.append({"name": name, "days_since": days_since, "recovery_pct": recovery_pct,
+                        "is_isometric": is_iso, "is_bodyweight": is_bw,
+                        "pr_weight": pr_weight, "pr_reps": pr_reps})
     conn.close()
     result.sort(key=lambda x: x["days_since"] if x["days_since"] is not None else 9999, reverse=True)
     return JSONResponse(result)
@@ -875,14 +1172,26 @@ async def post_input(request: Request):
     if not user_id:
         add_chat("arnold", "Please select a user first.")
         return JSONResponse({"ok": True})
-    process_input(text, user_id)
-    return JSONResponse({"ok": True})
+    source = body.get("source", "text")
+    nav = process_input(text, user_id, source=source)
+    return JSONResponse({"ok": True, "nav": nav})
 
 @app.get("/api/exercise/current")
 async def get_current_exercise(request: Request):
     user_id = _get_user_id(_token(request))
     exercise = current_exercise_by_user.get(user_id) if user_id else None
     return JSONResponse({"exercise": exercise})
+
+@app.post("/api/exercise/set-current")
+async def set_current_exercise(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    exercise = body.get("exercise", "").strip()
+    if exercise:
+        current_exercise_by_user[user_id] = exercise
+    return JSONResponse({"ok": True})
 
 @app.get("/api/exercise/{name}/history")
 async def get_exercise_history(name: str, request: Request):
@@ -909,12 +1218,18 @@ async def get_exercise_history(name: str, request: Request):
             (e["reps"] for e in entries if (e["weight"] or 0) == max_weight),
             default=0
         )
+        # Count only sets performed at the max set's exact weight × reps
+        max_set_count = sum(
+            (e.get("sets") or 1) for e in entries
+            if (e["weight"] or 0) == max_weight and e["reps"] == best_reps
+        )
         result.append({
             "date": date,
             "entries": entries,
             "volume": volume,
             "max_weight": max_weight,
             "max_set": {"weight": max_weight, "reps": best_reps},
+            "max_set_count": max_set_count,
             "is_pr": False,
         })
 
@@ -926,6 +1241,34 @@ async def get_exercise_history(name: str, request: Request):
             session["is_pr"] = True
 
     return JSONResponse(result)
+
+@app.get("/api/user/last-pr")
+async def get_user_last_pr(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT DATE(timestamp) as date, exercise, MAX(weight) as max_w
+           FROM workouts
+           WHERE user_id=? AND weight IS NOT NULL AND weight > 0
+           GROUP BY DATE(timestamp), exercise
+           ORDER BY DATE(timestamp) ASC""",
+        (user_id,)
+    ).fetchall()
+    conn.close()
+    running = {}
+    last_pr = None
+    for r in rows:
+        ex, w, d = r["exercise"], r["max_w"], r["date"]
+        if w > running.get(ex, 0):
+            running[ex] = w
+            if not last_pr or d >= last_pr["date"]:
+                last_pr = {"date": d, "exercise": ex, "weight": w}
+    if not last_pr:
+        return JSONResponse({"days_since": None, "date": None, "exercise": None, "weight": None})
+    days_since = (datetime.date.today() - datetime.date.fromisoformat(last_pr["date"])).days
+    return JSONResponse({**last_pr, "days_since": days_since})
 
 @app.get("/api/exercise/{name}/last-session")
 async def get_last_session(name: str, request: Request):
@@ -982,7 +1325,7 @@ async def get_calendar_month(request: Request, year: int, month: int):
         """SELECT DATE(w.timestamp) as date,
                   COALESCE(e.muscle_category,'') as muscle,
                   ROUND(SUM(COALESCE(w.weight,0) * w.reps)) as volume,
-                  COUNT(*) as set_count
+                  SUM(COALESCE(w.sets,1)) as set_count
            FROM workouts w
            LEFT JOIN exercises e ON w.exercise = e.name
            WHERE w.user_id=? AND DATE(w.timestamp) BETWEEN ? AND ?
@@ -1016,6 +1359,25 @@ async def get_calendar_month(request: Request, year: int, month: int):
              "set_count": info["set_count"], "muscles": info["muscles"]}
             for d, info in sorted(days_map.items())]
     return JSONResponse({"days": days, "muscle_maxes": muscle_maxes})
+
+@app.get("/api/calendar/year")
+async def get_calendar_year(request: Request, year: int):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT CAST(strftime('%m', timestamp) AS INTEGER) as month,
+                  ROUND(SUM(COALESCE(weight,0) * reps)) as volume,
+                  COUNT(DISTINCT DATE(timestamp)) as session_days
+           FROM workouts
+           WHERE user_id=? AND strftime('%Y', timestamp)=?
+           GROUP BY month ORDER BY month""",
+        (user_id, str(year))
+    ).fetchall()
+    conn.close()
+    months = {r["month"]: {"volume": int(r["volume"] or 0), "session_days": r["session_days"]} for r in rows}
+    return JSONResponse([{"month": m, **months.get(m, {"volume": 0, "session_days": 0})} for m in range(1, 13)])
 
 @app.get("/api/calendar/day")
 async def get_calendar_day(request: Request, date: str):
@@ -1075,6 +1437,26 @@ async def get_recovery_volume_history(request: Request, days: int = 30):
     conn.close()
     return JSONResponse([{"date": r["date"], "muscle": r["muscle"], "volume": int(r["volume"] or 0)} for r in rows])
 
+@app.get("/api/recovery/exercise-volume")
+async def get_exercise_volume_history(request: Request, muscle: str, days: int = 30):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    since = (datetime.date.today() - datetime.timedelta(days=days - 1)).isoformat()
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT DATE(w.timestamp) as date, w.exercise,
+                  ROUND(SUM(COALESCE(w.weight,0) * w.reps)) as volume
+           FROM workouts w
+           JOIN exercises e ON LOWER(w.exercise) = LOWER(e.name)
+           WHERE w.user_id=? AND LOWER(e.muscle_category)=LOWER(?) AND DATE(w.timestamp) >= ?
+           GROUP BY DATE(w.timestamp), w.exercise
+           ORDER BY DATE(w.timestamp) ASC""",
+        (user_id, muscle, since)
+    ).fetchall()
+    conn.close()
+    return JSONResponse([{"date": r["date"], "exercise": r["exercise"], "volume": int(r["volume"] or 0)} for r in rows])
+
 @app.post("/api/calendar/day")
 async def add_to_past_day(request: Request):
     user_id = _get_user_id(_token(request))
@@ -1119,6 +1501,106 @@ async def update_personality_api(request: Request):
     conn.commit()
     conn.close()
     return JSONResponse({"ok": True})
+
+@app.post("/api/stats/bodyweight")
+async def log_bodyweight(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    body = await request.json()
+    weight = body.get("weight")
+    if not weight or float(weight) <= 0:
+        return JSONResponse({"error": "Invalid weight"}, status_code=400)
+    conn = get_db()
+    conn.execute("INSERT INTO body_weight (user_id, weight) VALUES (?, ?)", (user_id, float(weight)))
+    conn.commit()
+    conn.close()
+    return JSONResponse({"ok": True})
+
+@app.get("/api/stats/bodyweight")
+async def get_bodyweight(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT id, weight, DATE(recorded_at) as date, recorded_at "
+        "FROM body_weight WHERE user_id=? ORDER BY recorded_at ASC",
+        (user_id,)
+    ).fetchall()
+    conn.close()
+    return JSONResponse([dict(r) for r in rows])
+
+@app.get("/api/recent-prs")
+async def get_recent_prs(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    # One row per exercise: the set with the highest 1RM estimate (Epley) for weighted,
+    # or longest hold for isometric. SQLite returns bare columns from the MAX() row.
+    rows = conn.execute("""
+        SELECT w.exercise,
+               COALESCE(e.is_isometric, 0) as is_isometric,
+               w.weight, w.reps,
+               DATE(w.timestamp) as date,
+               MAX(CASE WHEN COALESCE(e.is_isometric,0)=1
+                        THEN CAST(w.reps AS REAL)
+                        ELSE w.weight*(1.0+w.reps/30.0) END) as best_score
+        FROM workouts w
+        LEFT JOIN exercises e ON LOWER(w.exercise) = LOWER(e.name)
+        WHERE w.user_id = ?
+          AND (COALESCE(e.is_isometric,0)=1
+               OR (w.weight IS NOT NULL AND w.weight > 0))
+        GROUP BY LOWER(w.exercise)
+        ORDER BY best_score DESC
+    """, (user_id,)).fetchall()
+    conn.close()
+    return JSONResponse([dict(r) for r in rows])
+
+@app.get("/api/stats/prs")
+async def get_prs(request: Request):
+    user_id = _get_user_id(_token(request))
+    if not user_id:
+        return JSONResponse({"error": "Not logged in"}, status_code=401)
+    conn = get_db()
+    # Get all priority exercises
+    priority_exs = conn.execute(
+        "SELECT name, is_isometric FROM exercises WHERE is_priority=1 ORDER BY name"
+    ).fetchall()
+    results = []
+    for ex in priority_exs:
+        name = ex["name"]
+        is_iso = bool(ex["is_isometric"])
+        if is_iso:
+            # PR = longest hold (max reps = max seconds)
+            row = conn.execute(
+                "SELECT weight, reps, DATE(timestamp) as date "
+                "FROM workouts WHERE user_id=? AND exercise=? ORDER BY reps DESC LIMIT 1",
+                (user_id, name)
+            ).fetchone()
+        else:
+            # PR = best estimated 1RM (Epley: w*(1+r/30)), show the actual set
+            row = conn.execute(
+                "SELECT weight, reps, DATE(timestamp) as date, "
+                "ROUND(weight * (1.0 + reps / 30.0)) as estimated_1rm "
+                "FROM workouts WHERE user_id=? AND exercise=? AND weight IS NOT NULL AND weight > 0 "
+                "ORDER BY (weight * (1.0 + reps / 30.0)) DESC LIMIT 1",
+                (user_id, name)
+            ).fetchone()
+        if row:
+            results.append({
+                "exercise": name,
+                "is_isometric": is_iso,
+                "weight": row["weight"],
+                "reps": row["reps"],
+                "date": row["date"],
+                "estimated_1rm": None if is_iso else int(row["estimated_1rm"] or 0),
+            })
+        else:
+            results.append({"exercise": name, "is_isometric": is_iso, "weight": None, "reps": None, "date": None, "estimated_1rm": None})
+    conn.close()
+    return JSONResponse(results)
 
 @app.get("/api/recovery")
 async def get_recovery(request: Request):

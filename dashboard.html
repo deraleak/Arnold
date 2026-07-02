@@ -165,6 +165,11 @@
   #user-badge strong { color: var(--green); }
 
   #clock { font-size: 0.85rem; color: var(--green-dim); letter-spacing: 0.1em; }
+  .admin-only { display: none !important; }
+  body.is-admin .admin-only { display: '' !important; }
+  body.is-admin .admin-only.btn, body.is-admin .admin-only.btn-entry,
+  body.is-admin button.admin-only { display: inline-flex !important; }
+  body.is-admin div.admin-only { display: flex !important; }
   .status-dot {
     width: 7px; height: 7px;
     background: var(--green);
@@ -176,21 +181,46 @@
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ── GRID ── */
-  main {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 10px;
-    padding: 10px 18px;
-    overflow: hidden;
-    min-height: 0;
+  /* ── CHAT BANNER ── */
+  #chat-banner {
+    display: flex; flex-direction: column;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,8,0,0.97);
+    flex-shrink: 0;
+    height: 90px; overflow: hidden;
+  }
+  .cb-row {
+    display: flex; align-items: center;
+    padding: 0 18px; height: 45px; gap: 10px;
+    border-bottom: 1px solid rgba(0,255,65,.05);
+  }
+  .cb-row:last-child { border-bottom: none; }
+  .cb-prefix {
+    font-size: .58rem; letter-spacing: .2em;
+    color: var(--green-dim); white-space: nowrap; flex-shrink: 0;
+  }
+  .cb-prefix.you { color: #4af; }
+  #cb-last-reply {
+    font-size: .68rem; letter-spacing: .06em; color: var(--green);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
   }
 
-  .panel-chat    { grid-column: 1; grid-row: 1; }
-  .panel-history { grid-column: 1; grid-row: 2; }
-  .panel-today   { grid-column: 2; grid-row: 1 / 3; }
+  /* ── LAYOUT ── */
+  main {
+    flex: 1; display: flex; flex-direction: row;
+    gap: 10px; padding: 10px 18px;
+    min-height: 0; overflow: hidden;
+  }
+  #left-col {
+    flex: 1; display: flex; flex-direction: column;
+    min-height: 0; gap: 0;
+  }
+  #right-col {
+    flex: 1; display: flex; flex-direction: column; min-height: 0; gap: 0;
+  }
+  .panel-history { flex: 1; min-height: 0; }
+  .panel-today   { flex: 1; min-height: 0; }
+
 
   .panel {
     background: var(--panel-bg);
@@ -205,7 +235,7 @@
   .panel-header {
     padding: 7px 14px;
     border-bottom: 1px solid var(--border);
-    font-size: 0.65rem;
+    font-size: 1.1rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--green-dim);
@@ -216,35 +246,16 @@
   }
   .panel-header-label::before { content: '// '; opacity: 0.5; }
 
-  /* ── CHAT ── */
-  #chat-scroll {
-    flex: 1; overflow-y: auto; padding: 10px 14px;
-    display: flex; flex-direction: column; gap: 8px;
-    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
-    min-height: 0;
-  }
-  .msg { display: flex; flex-direction: column; gap: 2px; }
-  .msg-meta { font-size: 0.6rem; color: var(--green-dim); letter-spacing: 0.1em; }
-  .msg-text { font-size: 0.82rem; line-height: 1.45; padding: 5px 9px; border-left: 2px solid var(--border); }
-  .msg.you .msg-meta { color: #4af; }
-  .msg.you .msg-text { border-color: #4af; color: #cef; }
-  .msg.arnold .msg-text { border-color: var(--green); color: var(--green); text-shadow: 0 0 5px rgba(0,255,65,.3); }
 
-  /* ── INPUT ── */
+  /* ── INPUT ── (lives in banner YOU row) */
   #input-box {
-    display: flex; gap: 8px; align-items: center;
-    padding: 9px 14px;
-    border-top: 1px solid var(--border);
-    background: rgba(0,15,0,0.9);
-    flex-shrink: 0;
-    transition: border-color .2s;
+    display: flex; gap: 6px; align-items: center; flex: 1; min-width: 0;
   }
-  #input-box.dialogue-active { border-top-color: var(--green); }
   #cmd-input {
-    flex: 1; background: transparent;
-    border: 1px solid var(--green-dim);
-    color: var(--green); font-family: var(--font); font-size: 0.82rem;
-    padding: 5px 9px; outline: none; border-radius: 2px;
+    flex: 1; min-width: 0; background: transparent;
+    border: none; border-bottom: 1px solid rgba(0,255,65,.25);
+    color: var(--green); font-family: var(--font); font-size: .68rem;
+    padding: 2px 4px; outline: none; letter-spacing: .06em;
   }
   #cmd-input::placeholder { color: var(--green-dim); opacity: .45; }
   #cmd-input:focus { border-color: var(--green); box-shadow: 0 0 7px rgba(0,255,65,.2); }
@@ -265,25 +276,48 @@
     min-height: 0;
   }
   .history-entry {
-    display: grid; grid-template-columns: 40px 1fr auto;
+    display: grid; grid-template-columns: 60px 1fr auto;
     gap: 10px; align-items: center;
-    padding: 5px 0; border-bottom: 1px solid rgba(0,255,65,.06);
-    font-size: 0.8rem;
+    padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.06);
+    font-size: 1.5rem;
   }
   .history-entry:last-child { border-bottom: none; }
-  .h-set { color: #004d18; font-size: 0.68rem; }
+  .h-set { color: #004d18; font-size: 1.2rem; }
   .h-weight { color: var(--green); }
-  .h-reps { color: var(--green-dim); font-size: 0.75rem; text-align: right; }
+  .h-reps { color: var(--green-dim); font-size: 1.35rem; text-align: right; }
 
   /* ── TODAY'S SESSION ── */
+  #active-ex-badge {
+    display: flex; align-items: center; gap: 6px;
+    margin-left: 14px; padding: 4px 14px;
+    border: 1px solid var(--green); border-radius: 2px;
+    cursor: pointer; transition: all .15s;
+    background: rgba(0,255,65,.05);
+    box-shadow: 0 0 10px rgba(0,255,65,.12);
+  }
+  #active-ex-badge:hover { background: rgba(0,255,65,.12); box-shadow: 0 0 16px rgba(0,255,65,.25); }
+  #active-ex-badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    background: var(--green); box-shadow: 0 0 6px var(--green);
+    animation: pulse 1.8s infinite;
+  }
+  #active-ex-badge:not([data-set])::before { background: #ff6040; box-shadow: 0 0 6px #ff6040; }
+  #active-ex-label {
+    font-size: .72rem; letter-spacing: .2em;
+    color: var(--green); white-space: nowrap;
+    text-shadow: 0 0 8px rgba(0,255,65,.4);
+  }
+  #active-ex-badge:not([data-set]) #active-ex-label { color: #ff6040; text-shadow: none; }
+
   .entry-actions { display: flex; gap: 6px; margin-left: auto; }
   .btn-entry { background: none; border: 1px solid rgba(0,255,65,.2); color: var(--green-dim);
-    font-family: var(--font); font-size: .65rem; padding: 2px 7px; cursor: pointer; letter-spacing:.05em; }
+    font-family: var(--font); font-size: 1.0rem; padding: 3px 9px; cursor: pointer; letter-spacing:.05em; }
   .btn-entry:hover { border-color: var(--green); color: var(--green); }
   .btn-del:hover { border-color: #ff4040; color: #ff4040; }
 
   /* Inline edit form */
-  .entry-edit-form { display: none; flex-wrap: wrap; gap: 6px; padding: 6px 0; align-items: center; }
+  .entry-edit-form { display: none; flex-wrap: wrap; gap: 6px; padding: 4px 0; align-items: center;
+    grid-column: 1 / -1; }
   .entry-edit-form.open { display: flex; }
   .entry-edit-form input, .entry-edit-form select {
     background: rgba(0,20,0,.9); border: 1px solid var(--green-dim);
@@ -301,19 +335,22 @@
     min-height: 0;
   }
   .workout-entry {
-    display: grid; grid-template-columns: 1fr auto auto auto;
-    gap: 10px; align-items: center;
-    padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.07);
-    font-size: 0.82rem;
+    display: grid; grid-template-columns: 1fr auto auto auto auto auto;
+    gap: 8px; align-items: center;
+    padding: 4px 0; border-bottom: 1px solid rgba(0,255,65,.07);
+    font-size: 1.5rem;
   }
   .workout-entry:last-child { border-bottom: none; }
   .ex-name { color: var(--green); }
-  .ex-stat { color: var(--green-dim); font-size: 0.74rem; text-align: right; }
-  .ex-stat strong { color: var(--green); font-size: 0.82rem; }
-  .ex-time { color: #004010; font-size: 0.65rem; }
+  .ex-name-link { cursor: pointer; }
+  .ex-name-link:hover { text-shadow: 0 0 10px rgba(0,255,65,.6); text-decoration: underline; }
+  .ex-stat { color: var(--green-dim); font-size: 1.3rem; text-align: right; }
+  .ex-stat strong { color: var(--green); font-size: 1.5rem; }
+  .ex-time { color: #004010; font-size: 1.0rem; }
+  .pr-star { color: #ffdd00; font-size: 1.1rem; text-shadow: 0 0 8px rgba(255,220,0,.7); line-height:1; }
 
   .empty-state {
-    color: var(--green-dim); font-size: 0.75rem; opacity: .4;
+    color: var(--green-dim); font-size: 1.3rem; opacity: .4;
     padding: 16px 0; text-align: center; letter-spacing: .1em;
   }
 
@@ -379,6 +416,20 @@
   .stat-value { font-size: 1.45rem; color: var(--green); text-shadow: 0 0 14px rgba(0,255,65,.45); letter-spacing: .05em; }
   .stat-sub { font-size: 0.62rem; color: #005520; letter-spacing: .1em; margin-top: 2px; }
 
+  /* Rep PR table */
+  #details-rep-prs {
+    display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    padding: 0;
+  }
+  .rep-pr-card {
+    flex: 1; padding: 10px 20px; border-right: 1px solid rgba(0,255,65,.08);
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .rep-pr-card:last-child { border-right: none; }
+  .rep-pr-label { font-size: .48rem; letter-spacing: .22em; color: #004010; }
+  .rep-pr-val { font-size: 1.05rem; letter-spacing: .04em; color: var(--green); }
+  .rep-pr-sub { font-size: .5rem; color: #004a18; letter-spacing: .08em; }
+
   /* Chart */
   #details-chart-wrap {
     padding: 18px 32px 0;
@@ -428,6 +479,57 @@
   .no-data { color: var(--green-dim); opacity: .4; font-size: .75rem; padding: 30px 0; text-align: center; letter-spacing: .1em; }
 
   /* ══════════════════════════════════════
+     STATS OVERLAY
+  ══════════════════════════════════════ */
+  #stats-overlay {
+    display: none; position: fixed; inset: 0; z-index: 110;
+    background: rgba(0,0,0,0.97); flex-direction: column; overflow-y: auto;
+  }
+  #stats-overlay.open { display: flex; }
+  #stats-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #stats-title { font-size: 1.1rem; letter-spacing: .28em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); }
+  #stats-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing:.12em;
+  }
+  #stats-close:hover { border-color: var(--green); color: var(--green); }
+  #stats-body { flex: 1; padding: 28px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 900px) { #stats-body { grid-template-columns: 1fr; } }
+  .stats-section { display: flex; flex-direction: column; gap: 14px; }
+  .stats-section-title { font-size: .72rem; letter-spacing: .3em; color: var(--green); border-bottom: 1px solid rgba(0,255,65,.15); padding-bottom: 8px; }
+  /* Body weight entry */
+  #bw-entry-row { display: flex; gap: 8px; align-items: center; }
+  #bw-input {
+    background: rgba(0,20,0,.9); border: 1px solid var(--green-dim); color: var(--green);
+    font-family: var(--font); font-size: 1.1rem; padding: 6px 10px; width: 110px; outline: none;
+    letter-spacing: .06em;
+  }
+  #bw-input:focus { border-color: var(--green); }
+  #bw-log-btn {
+    background: rgba(0,255,65,.07); border: 1px solid var(--green); color: var(--green);
+    font-family: var(--font); font-size: .7rem; padding: 6px 18px; cursor: pointer; letter-spacing: .15em;
+  }
+  #bw-log-btn:hover { background: rgba(0,255,65,.15); }
+  #bw-last { font-size: .62rem; color: var(--green-dim); letter-spacing: .1em; }
+  #bw-chart-wrap { position: relative; width: 100%; height: 180px; }
+  #bw-chart { width: 100%; height: 100%; overflow: visible; }
+  /* PR table */
+  .pr-row {
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 10px; align-items: baseline;
+    padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.06); font-size: .78rem;
+  }
+  .pr-row:last-child { border-bottom: none; }
+  .pr-name { color: var(--green); letter-spacing: .05em; }
+  .pr-val { color: var(--cyan); font-size: .85rem; letter-spacing: .06em; white-space: nowrap; }
+  .pr-1rm { color: #005520; font-size: .6rem; letter-spacing: .1em; white-space: nowrap; }
+  .pr-none { color: #003010; font-size: .65rem; letter-spacing: .1em; }
+  .pr-date { color: #004010; font-size: .6rem; letter-spacing: .06em; }
+
+  /* ══════════════════════════════════════
      EXERCISE LIST OVERLAY
   ══════════════════════════════════════ */
   #exlist-overlay {
@@ -440,11 +542,23 @@
     padding: 18px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
   #exlist-title { font-size: 1.1rem; letter-spacing: .28em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); }
-  #exlist-close {
+  #exlist-close, #exlist-edit-toggle {
     background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
     font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing:.12em;
   }
-  #exlist-close:hover { border-color: var(--green); color: var(--green); }
+  #exlist-close:hover, #exlist-edit-toggle:hover { border-color: var(--green); color: var(--green); }
+  #exlist-overlay.edit-mode #exlist-edit-toggle { border-color: var(--green); color: var(--green); }
+
+  /* EDIT button: only visible for admins */
+  body:not(.is-admin) #exlist-edit-toggle { display: none !important; }
+
+  /* Hide admin edit controls when not in edit mode */
+  #exlist-overlay:not(.edit-mode) .el-edit-btn          { display: none !important; }
+  #exlist-overlay:not(.edit-mode) .el-del-btn           { display: none !important; }
+  #exlist-overlay:not(.edit-mode) #exlist-add-bar       { display: none !important; }
+  #exlist-overlay:not(.edit-mode) .exlist-isometric-label  { display: none !important; }
+  #exlist-overlay:not(.edit-mode) .exlist-bodyweight-label { display: none !important; }
+  /* Priority star always visible so any user can toggle their own priorities */
 
   /* Add-exercise bar */
   #exlist-add-bar {
@@ -475,7 +589,8 @@
     padding: 6px 0; border-bottom: 1px solid rgba(0,255,65,.04);
   }
   .exlist-row:hover { background: rgba(0,255,65,.02); }
-  .exlist-name { flex: 1; font-size: .82rem; color: var(--green); letter-spacing: .05em; }
+  .exlist-name { flex: 1; font-size: .82rem; color: var(--green); letter-spacing: .05em; cursor: pointer; }
+  .exlist-name:hover { text-shadow: 0 0 10px rgba(0,255,65,.6); text-decoration: underline; }
   .exlist-cat-tag { font-size: .6rem; color: #005520; letter-spacing: .1em; width: 120px; }
   .exlist-edit-inline { display: none; flex: 1; flex-direction: column; gap: 6px; }
   .exlist-edit-inline.open { display: flex; }
@@ -498,6 +613,11 @@
     font-size: .7rem; color: var(--green-dim); user-select: none; padding: 0 6px;
   }
   .exlist-isometric-label:has(.el-isometric-cb:checked) { color: var(--cyan); text-shadow: 0 0 6px rgba(0,229,255,.4); }
+  .exlist-bodyweight-label {
+    display: flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: .7rem; color: var(--green-dim); user-select: none; padding: 0 6px;
+  }
+  .exlist-bodyweight-label:has(.el-bodyweight-cb:checked) { color: #ffdd00; text-shadow: 0 0 6px rgba(255,220,0,.4); }
 
   /* ── PRIORITY BAR ── */
   #priority-bar {
@@ -506,14 +626,14 @@
     border-top: 1px solid var(--border);
     background: rgba(0,3,0,0.92);
     flex-shrink: 0;
-    height: 34px;
+    height: 46px;
     overflow: hidden;
     position: relative;
     z-index: 10;
   }
   #priority-bar.visible { display: flex; }
   #priority-bar-label {
-    font-size: .54rem;
+    font-size: .9rem;
     letter-spacing: .22em;
     color: var(--green-dim);
     padding: 0 14px;
@@ -541,18 +661,19 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 0 12px;
+    padding: 0 14px;
     margin: 0 4px;
     border: 1px solid rgba(0,255,65,0.12);
-    height: 22px;
+    height: 34px;
     cursor: pointer;
     transition: border-color .15s, background .15s;
     white-space: nowrap;
   }
   .priority-chip:hover { border-color: var(--green); background: rgba(0,255,65,0.05); }
-  .priority-chip-name { font-size: .68rem; letter-spacing: .07em; color: var(--green); }
-  .priority-chip-days { font-size: .58rem; color: var(--green-dim); letter-spacing: .05em; }
+  .priority-chip-name { font-size: 1.05rem; letter-spacing: .07em; color: var(--green); }
+  .priority-chip-days { font-size: .9rem; color: var(--green-dim); letter-spacing: .05em; }
   .priority-chip-days.overdue { color: #ff6040; text-shadow: 0 0 6px rgba(255,60,40,0.4); }
+  .priority-chip-pr { font-size: .78rem; color: var(--green-dim); letter-spacing: .05em; opacity: .75; }
   .priority-empty { font-size: .65rem; color: #003010; letter-spacing: .12em; padding: 0 16px; }
   @keyframes priority-scroll {
     0% { transform: translateX(0); }
@@ -582,6 +703,21 @@
   }
   #history-close:hover { border-color: var(--green); color: var(--green); }
   #history-main { display: flex; flex: 1; overflow: hidden; }
+
+  /* Monthly vol in header */
+  #hist-month-vol {
+    font-size: .7rem; letter-spacing: .18em; color: var(--green);
+    opacity: 0.7; margin-left: 4px;
+  }
+
+  /* Year chart strip */
+  #hist-year-wrap {
+    flex-shrink: 0; padding: 10px 20px 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 18px;
+  }
+  #hist-year-label { font-size: .55rem; letter-spacing: .22em; color: #004a18; white-space: nowrap; }
+  #hist-year-chart { flex: 1; height: 56px; }
 
   /* Calendar pane */
   #hist-cal-wrap {
@@ -620,6 +756,8 @@
   .cal-cell.is-today .cal-day-num { color: var(--green); font-weight: bold; }
   .cal-cell.selected { border-color: var(--green); box-shadow: 0 0 16px rgba(0,255,65,.1) inset; }
   .cal-day-num { font-size: 1.32rem; letter-spacing: .04em; color: var(--green-dim); flex-shrink: 0; }
+  .cal-day-hdr { display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+  .cal-set-cnt { font-size: .58rem; letter-spacing: .1em; color: rgba(0,255,65,.45); padding-top: 3px; }
   .cal-muscle-list { display: flex; flex-direction: column; gap: 3px; flex: 1; justify-content: flex-end; }
   .cal-ml-row { display: flex; justify-content: space-between; align-items: baseline; gap: 2px; }
   .cal-ml-name { font-size: 13.2px; font-family: var(--font); color: rgba(0,255,65,.38); letter-spacing: .05em; }
@@ -675,6 +813,7 @@
 
 
   /* ── VOICE INPUT ── */
+  #cmd-submit { font-size: 1.2rem; padding: 5px 18px; }
   #mic-btn { min-width: 52px; letter-spacing: .1em; user-select: none; }
   #mic-btn.listening {
     border-color: var(--green); color: var(--green);
@@ -685,27 +824,125 @@
     0%,100% { box-shadow: 0 0 5px rgba(0,255,65,.2); }
     50%      { box-shadow: 0 0 18px rgba(0,255,65,.55); }
   }
+  /* voice status lives inline in the banner YOU row */
   #voice-bar {
-    display: none; padding: 6px 14px; flex-shrink: 0;
-    border-top: 1px solid rgba(0,255,65,.35);
-    background: rgba(0,12,0,.95);
-    align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
   }
-  #voice-bar.active { display: flex; }
   .voice-dot {
-    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-    background: var(--green); box-shadow: 0 0 7px var(--green);
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    background: var(--green); box-shadow: 0 0 6px var(--green);
     animation: pulse 1s infinite;
   }
   #voice-interim {
-    font-size: .75rem; color: var(--green-dim); letter-spacing: .06em;
-    font-style: italic; flex: 1; min-width: 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: .62rem; color: var(--green-dim); letter-spacing: .1em;
+    white-space: nowrap;
   }
 
   /* ══════════════════════════════════════
      RECOVERY OVERLAY
   ══════════════════════════════════════ */
+  /* ── QUICK HELP POPUP ──────────────────────────────────────── */
+  #quick-help-popup {
+    display: none; position: fixed; top: 56px; right: 20px; z-index: 400;
+    background: rgba(0,6,0,0.97); border: 1px solid var(--green);
+    box-shadow: 0 0 28px rgba(0,255,65,.18); min-width: 320px; max-width: 420px;
+    animation: qhFadeIn .15s ease;
+  }
+  #quick-help-popup.visible { display: block; }
+  @keyframes qhFadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+  #qh-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid rgba(0,255,65,.12);
+  }
+  #qh-title { font-size: .62rem; letter-spacing: .26em; color: var(--green); }
+  #qh-close {
+    background: none; border: none; color: var(--green-dim); font-size: .8rem;
+    cursor: pointer; padding: 0 2px; line-height: 1;
+  }
+  #qh-close:hover { color: var(--green); }
+  #qh-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .qh-row { display: flex; align-items: baseline; gap: 10px; }
+  .qh-cmd { font-size: .65rem; color: var(--green); letter-spacing: .04em; flex-shrink: 0; }
+  .qh-desc { font-size: .55rem; color: #005520; letter-spacing: .1em; }
+  #qh-live-area {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-top: 1px solid rgba(0,255,65,.12);
+    background: rgba(0,18,0,.7);
+  }
+  #qh-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    background: #0af; box-shadow: 0 0 6px #0af; animation: pulse .8s infinite;
+  }
+  #qh-live-text {
+    font-size: .68rem; color: #0af; letter-spacing: .1em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+  }
+  #qh-footer {
+    padding: 6px 14px 10px; font-size: .45rem; letter-spacing: .14em;
+    color: #003010; border-top: 1px solid rgba(0,255,65,.06);
+  }
+  #qh-progress {
+    height: 2px; background: rgba(0,255,65,.12);
+    position: relative; overflow: hidden;
+  }
+  #qh-progress-bar {
+    height: 100%; background: var(--green); width: 100%;
+    transition: width linear;
+  }
+
+  /* ── EXERCISE SELECT OVERLAY ───────────────────────────────── */
+  #exsel-overlay {
+    display: none; position: fixed; inset: 0; z-index: 135;
+    background: rgba(0,2,0,0.98); flex-direction: column; overflow: hidden;
+  }
+  #exsel-overlay.open { display: flex; }
+  #exsel-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+  }
+  #exsel-title { font-size: .9rem; letter-spacing: .28em; color: var(--green); margin-right: 8px; }
+  #exsel-filters { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .exsel-fbtn {
+    background: none; border: 1px solid rgba(0,255,65,.25); color: #004a18;
+    font-family: inherit; font-size: .5rem; letter-spacing: .14em;
+    padding: 3px 10px; cursor: pointer; transition: all .15s;
+  }
+  .exsel-fbtn.on { border-color: var(--green); color: var(--green); }
+  #exsel-close {
+    background: none; border: 1px solid var(--border); color: var(--green-dim);
+    font-family: inherit; font-size: .62rem; letter-spacing: .14em;
+    padding: 4px 14px; cursor: pointer; margin-left: auto;
+  }
+  #exsel-close:hover { border-color: var(--green); color: var(--green); }
+  #exsel-search-wrap {
+    padding: 10px 24px; flex-shrink: 0; border-bottom: 1px solid rgba(0,255,65,.06);
+  }
+  #exsel-search {
+    background: rgba(0,12,0,.9); border: 1px solid rgba(0,255,65,.2);
+    color: var(--green); font-family: inherit; font-size: .8rem;
+    letter-spacing: .08em; padding: 7px 14px; width: 100%; max-width: 400px;
+    outline: none;
+  }
+  #exsel-search:focus { border-color: var(--green); }
+  #exsel-list {
+    flex: 1; overflow-y: auto; padding: 8px 24px 24px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px; align-content: start;
+    scrollbar-width: thin; scrollbar-color: var(--green-dim) transparent;
+  }
+  .exsel-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border: 1px solid rgba(0,255,65,.07); cursor: pointer;
+    transition: border-color .12s, background .12s; gap: 12px;
+  }
+  .exsel-row:hover { border-color: var(--green); background: rgba(0,255,65,.03); }
+  .exsel-row.is-current { border-color: var(--green); background: rgba(0,255,65,.06); }
+  .exsel-row-name { font-size: .88rem; letter-spacing: .05em; color: var(--green); }
+  .exsel-row-cat { font-size: .48rem; letter-spacing: .14em; color: #004010; margin-top: 2px; }
+  .exsel-row-days { font-size: .62rem; letter-spacing: .08em; text-align: right; flex-shrink: 0; }
+  .exsel-days-num { color: var(--green-dim); }
+  .exsel-days-label { font-size: .45rem; color: #004010; letter-spacing: .1em; }
+  .exsel-days-never { font-size: .55rem; color: #003010; letter-spacing: .12em; }
+
   /* ── BULK IMPORT OVERLAY ───────────────────────────────────── */
   #import-overlay {
     display: none; position: fixed; inset: 0; z-index: 130;
@@ -792,6 +1029,48 @@
   #import-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
   #import-result { font-size: .6rem; letter-spacing: .1em; color: var(--green); min-height: 1.2em; }
 
+  /* ── HELP OVERLAY ───────────────────────────────────────────── */
+  #help-overlay {
+    display: none; position: fixed; inset: 0; z-index: 130;
+    background: rgba(0,0,0,0.98); flex-direction: column; overflow: hidden;
+  }
+  #help-overlay.open { display: flex; }
+  #help-header {
+    display: flex; align-items: center; padding: 16px 32px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #help-title { font-size: 1.1rem; letter-spacing: .32em; color: var(--green); text-shadow: 0 0 18px rgba(0,255,65,.5); flex: 1; }
+  #help-close {
+    background: transparent; border: 1px solid var(--green-dim); color: var(--green-dim);
+    font-family: var(--font); font-size: .75rem; padding: 6px 18px; cursor: pointer; letter-spacing: .12em;
+  }
+  #help-close:hover { border-color: var(--green); color: var(--green); }
+  #help-body { flex: 1; overflow-y: auto; padding: 32px 48px; display: flex; flex-direction: column; gap: 36px; }
+  .help-section { display: flex; flex-direction: column; gap: 12px; }
+  .help-section-title {
+    font-size: .6rem; letter-spacing: .28em; color: var(--green);
+    border-bottom: 1px solid rgba(0,255,65,.12); padding-bottom: 6px;
+  }
+  .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 48px; }
+  .help-row { display: flex; flex-direction: column; gap: 3px; }
+  .help-cmd {
+    font-size: .72rem; color: var(--green); letter-spacing: .06em;
+    background: rgba(0,255,65,.05); border: 1px solid rgba(0,255,65,.12);
+    padding: 5px 10px; border-left: 2px solid var(--green);
+  }
+  .help-desc { font-size: .52rem; color: var(--green-dim); letter-spacing: .08em; padding: 0 2px; }
+  .help-tip {
+    font-size: .56rem; color: rgba(0,255,65,.5); letter-spacing: .08em; line-height: 1.8;
+    border: 1px solid rgba(0,255,65,.08); padding: 12px 16px; background: rgba(0,255,65,.02);
+  }
+  .help-tip strong { color: var(--green-dim); }
+  .help-format {
+    font-size: .78rem; color: var(--green); letter-spacing: .06em;
+    border: 1px solid rgba(0,255,65,.2); padding: 12px 18px; text-align: center;
+    background: rgba(0,255,65,.03); margin-bottom: 4px;
+  }
+  .help-format span { color: var(--green-dim); }
+
   #recovery-overlay {
     display: none; position: fixed; inset: 0; z-index: 120;
     background: rgba(0,0,0,0.98); flex-direction: column; overflow: hidden;
@@ -812,13 +1091,6 @@
     background: rgba(0,5,0,0.6); flex-shrink: 0;
   }
   .rec-banner-block { padding: 14px 32px; display: flex; flex-direction: column; justify-content: center; }
-  .rec-banner-eyebrow { font-size: .52rem; letter-spacing: .3em; color: var(--green-dim); margin-bottom: 4px; }
-  .rec-banner-score { font-size: 2.6rem; letter-spacing: .04em; line-height: 1; transition: color .5s, text-shadow .5s; color: var(--green-dim); }
-  .rec-banner-score.rdy { color: var(--green); text-shadow: 0 0 30px rgba(0,255,65,.5); }
-  .rec-banner-score.rec { color: #ffaa00; text-shadow: 0 0 20px rgba(255,170,0,.35); }
-  .rec-banner-score.ftg { color: #ff4040; text-shadow: 0 0 20px rgba(255,64,64,.35); }
-  .rec-banner-status { font-size: .68rem; letter-spacing: .25em; margin-top: 5px; }
-  .rec-banner-divider { width: 1px; background: var(--border); flex-shrink: 0; }
   .rec-banner-meta { font-size: .6rem; color: #005520; letter-spacing: .1em; line-height: 2.2; }
   #rec-body {
     flex: 1; overflow-y: auto;
@@ -857,6 +1129,16 @@
   #rec-vol-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
   .rec-vol-leg-item { display: flex; align-items: center; gap: 5px; font-size: .52rem; letter-spacing: .1em; }
   .rec-vol-leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .rec-vol-fbtn.selected { outline: 1px solid currentColor; outline-offset: 2px; }
+  #rec-ex-section { padding: 12px 28px 8px; border-top: 1px solid var(--border); }
+  #rec-ex-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  #rec-ex-title { font-size: .7rem; letter-spacing: .28em; color: var(--green); }
+  #rec-ex-chart { width: 100%; min-height: 180px; }
+  #rec-ex-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding: 0 2px 6px; }
+  .rec-ex-fbtn { background: none; border: 1px solid; padding: 3px 10px;
+    font-family: inherit; font-size: .48rem; letter-spacing: .14em;
+    cursor: pointer; opacity: 0.28; transition: opacity .18s; }
+  .rec-ex-fbtn.on { opacity: 1; }
   /* History delete day */
   #hist-del-day-btn {
     background: transparent; border: 1px solid rgba(255,40,40,.25); color: rgba(255,60,60,.5);
@@ -866,8 +1148,8 @@
   #hist-del-day-btn:hover { border-color: #ff4040; color: #ff4040; }
   .rec-card {
     background: rgba(0,8,0,0.72); border: 1px solid var(--border);
-    padding: 18px 16px 14px; display: flex; flex-direction: column;
-    align-items: center; gap: 8px; width: 162px; position: relative;
+    padding: 18px 20px 16px; display: flex; flex-direction: column;
+    align-items: flex-start; gap: 10px; width: 190px; position: relative;
     transition: border-color .4s, box-shadow .4s;
   }
   .rec-card.s-recovered { border-color: rgba(0,255,65,.28); }
@@ -879,33 +1161,22 @@
     50% { box-shadow: inset 0 0 20px rgba(0,255,65,.05), 0 0 14px rgba(0,255,65,.07); }
   }
   .rec-card.s-recovered { animation: rec-glow-pulse 3.5s ease-in-out infinite; }
-  .rec-gauge-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
-  .rec-gauge-wrap svg { width: 100px; height: 100px; display: block; }
-  .rec-gauge-bg { fill: none; stroke: rgba(0,255,65,.07); stroke-width: 7; }
-  .rec-gauge-arc { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
-  .rec-gauge-center {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; pointer-events: none;
-  }
-  .rec-gauge-pct { font-size: 1.3rem; letter-spacing: .03em; }
-  .rec-gauge-sub { font-size: .44rem; letter-spacing: .18em; color: var(--green-dim); margin-top: 1px; }
-  .rec-card-name { font-size: .68rem; letter-spacing: .22em; color: var(--green); }
-  .rec-status-badge { font-size: .52rem; letter-spacing: .18em; padding: 2px 9px; border: 1px solid currentColor; }
-  .rec-status-badge.s-recovered { color: var(--green); }
-  .rec-status-badge.s-recovering { color: #ffaa00; }
-  .rec-status-badge.s-fatigued { color: #ff4040; }
-  .rec-status-badge.s-untested { color: var(--cyan); }
-  .rec-time-text { font-size: .56rem; color: #005520; letter-spacing: .1em; }
-  .rec-eta-text { font-size: .52rem; letter-spacing: .08em; }
+  .rec-card-name { font-size: 1.45rem; letter-spacing: .12em; color: var(--green); line-height: 1; text-shadow: 0 0 12px rgba(0,255,65,.3); }
+  .rec-last-trained { display: flex; flex-direction: column; gap: 2px; border-top: 1px solid rgba(0,255,65,.08); padding-top: 8px; width: 100%; }
+  .rec-last-label { font-size: .5rem; letter-spacing: .2em; color: #004010; }
+  .rec-last-val { font-size: 1.05rem; letter-spacing: .06em; color: var(--green-dim); }
+  .rec-vol-line { font-size: .62rem; color: #004a18; letter-spacing: .08em; }
+  .rec-time-text { display: none; }
+  .rec-eta-text { font-size: .68rem; letter-spacing: .08em; }
   .rec-eta-text.rdy { color: var(--green-dim); }
   .rec-eta-text.cnt { color: #004010; }
-  .rec-week-wrap { width: 100%; margin-top: 2px; }
-  .rec-week-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; width: 100%; }
+  .rec-week-wrap { width: 100%; margin-top: 4px; }
+  .rec-week-bars { display: flex; align-items: flex-end; gap: 2px; height: 22px; width: 100%; }
   .rec-week-bar { flex: 1; background: rgba(0,255,65,.08); border-radius: 1px; min-height: 2px; }
   .rec-week-bar.trained { background: rgba(0,255,65,.36); }
   .rec-week-bar.today-bar { background: var(--green); }
-  .rec-week-days { display: flex; gap: 2px; width: 100%; margin-top: 2px; }
-  .rec-week-day { flex: 1; font-size: .4rem; color: #003010; text-align: center; }
+  .rec-week-days { display: flex; gap: 2px; width: 100%; margin-top: 3px; }
+  .rec-week-day { flex: 1; font-size: .5rem; color: #003010; text-align: center; }
 </style>
 </head>
 <body>
@@ -918,7 +1189,7 @@
 <div id="user-screen">
   <div id="user-panel">
     <div id="user-panel-header">
-      <div class="user-panel-eyebrow">PROJECT ARNOLD // IDENTIFY OPERATOR</div>
+      <div class="user-panel-eyebrow">PROJECT ARNOLD // IDENTIFY USER</div>
       <div id="user-panel-title">SELECT USER</div>
     </div>
     <div id="user-list-wrap">
@@ -946,54 +1217,64 @@
 ══════════════════════════════════════ -->
 <div id="main-app">
   <header>
-    <div class="logo">PROJECT <span>ARNOLD</span><span style="font-size:.48rem;letter-spacing:.22em;color:var(--green-dim);margin-left:14px;font-weight:normal;">v1.0</span></div>
+    <div class="logo">PROJECT <span>ARNOLD</span></div>
     <div class="header-right">
-      <div id="user-badge">OPERATOR: <strong id="user-name-display">—</strong></div>
-      <button class="btn btn-sm" id="history-btn">▦ HISTORY</button>
       <button class="btn btn-sm" id="mic-toggle-btn">◉ MIC OFF</button>
-      <button class="btn btn-sm" id="tts-btn">♪ VOICE</button>
-      <button class="btn btn-sm" id="recovery-btn">⬡ RECOVERY</button>
-      <button class="btn btn-sm" id="import-btn-nav">⬆ IMPORT</button>
+      <div id="user-badge">USER: <strong id="user-name-display">—</strong></div>
+      <button class="btn btn-sm" id="stats-btn">◈ STATS</button>
+      <button class="btn btn-sm" id="history-btn">▦ HISTORY</button>
+      <button class="btn btn-sm" id="recovery-btn">⬡ VOLUME</button>
+      <button class="btn btn-sm" id="exsel-btn" onclick="openExerciseList()">☰ EXERCISE LIST</button>
+      <button class="btn btn-sm admin-only" id="import-btn-nav">⬆ IMPORT</button>
+      <button class="btn btn-sm" id="help-btn">? HELP</button>
       <button class="btn btn-sm" onclick="logout()">LOGOUT</button>
+      <button class="btn btn-sm" id="exercise-list-btn" style="display:none;">☰ EXERCISE LIST</button>
       <div><span class="status-dot"></span><span id="clock">--:--:--</span></div>
     </div>
   </header>
 
   <main>
-    <!-- TOP LEFT: Chat -->
-    <div class="panel panel-chat">
-      <div class="panel-header">
-        <span class="panel-header-label">Live Feed</span>
+    <!-- LEFT COLUMN: Chat banner + Exercise History -->
+    <div id="left-col">
+      <div id="chat-banner">
+        <div class="cb-row">
+          <span class="cb-prefix you">YOU //</span>
+          <div id="voice-bar">
+            <span class="voice-dot"></span>
+            <span id="voice-interim">SAY: HEY ARNOLD</span>
+          </div>
+          <div id="input-box">
+            <input id="cmd-input" type="text" placeholder="OR TYPE A COMMAND..." autocomplete="off" />
+          </div>
+        </div>
+        <div class="cb-row">
+          <span class="cb-prefix">ARNOLD //</span>
+          <span id="cb-last-reply">READY</span>
+        </div>
       </div>
-      <div id="chat-scroll"></div>
-      <div id="voice-bar">
-        <span class="voice-dot"></span>
-        <span id="voice-interim">LISTENING...</span>
-      </div>
-      <div id="input-box">
-        <input id="cmd-input" type="text" placeholder="Type a command..." autocomplete="off" />
-        <button class="btn" id="cmd-submit">SEND</button>
-      </div>
-    </div>
-
-    <!-- BOTTOM LEFT: Exercise History -->
-    <div class="panel panel-history">
+      <!-- LEFT: Exercise History -->
+      <div class="panel panel-history">
       <div class="panel-header">
         <span class="panel-header-label" id="history-title">Last Session</span>
-        <button class="btn btn-sm" id="details-btn">EXERCISE DETAILS</button>
+        <span id="history-vol" style="font-size:.62rem;color:var(--cyan);letter-spacing:.12em;margin-left:10px;display:none;"></span>
+        <button class="btn btn-sm" id="details-btn" style="margin-left:auto;">EXERCISE DETAILS</button>
       </div>
       <div id="history-scroll">
         <div class="empty-state">[ LOG A SET TO SEE HISTORY ]</div>
       </div>
     </div>
+    </div><!-- /#left-col -->
 
-    <!-- RIGHT: Today's Session -->
-    <div class="panel panel-today">
+    <!-- RIGHT COLUMN: Today's Session -->
+    <div id="right-col">
+      <!-- RIGHT: Today's Session -->
+      <div class="panel panel-today">
       <div class="panel-header">
-        <span class="panel-header-label">Today's Session</span>
-        <div style="margin-left:auto;display:flex;gap:6px;">
-          <button id="exercise-list-btn" class="btn-entry" style="padding:3px 12px;font-size:.7rem;">☰ EXERCISE LIST</button>
-          <button id="manual-log-btn" class="btn-entry" style="padding:3px 12px;font-size:.7rem;">+ LOG SET</button>
+        <span class="panel-header-label" id="today-title">Today's Session</span>
+        <span id="today-vol" style="font-size:.62rem;color:var(--cyan);letter-spacing:.12em;margin-left:10px;display:none;"></span>
+        <!-- badge kept in DOM for JS compat, hidden visually -->
+        <div id="active-ex-badge" style="display:none;">
+          <span id="active-ex-label">NO EXERCISE SELECTED</span>
         </div>
       </div>
       <!-- Manual entry form (hidden until + LOG SET clicked) -->
@@ -1012,6 +1293,7 @@
         <div class="empty-state">[ NO SETS LOGGED YET ]</div>
       </div>
     </div>
+    </div><!-- /#right-col -->
   </main>
 
   <!-- PRIORITY BAR -->
@@ -1024,11 +1306,35 @@
     </div>
   </div>
 
-  <footer>
-    <span>TEXT INPUT // ENTER TO SEND</span>
-    <span>LOCAL // OLLAMA + SQLITE</span>
-    <span>localhost:8000</span>
-  </footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     STATS OVERLAY
+══════════════════════════════════════ -->
+<div id="stats-overlay">
+  <div id="stats-header">
+    <div id="stats-title">// STATS</div>
+    <button id="stats-close">✕ CLOSE</button>
+  </div>
+  <div id="stats-body">
+    <!-- Body Weight -->
+    <div class="stats-section">
+      <div class="stats-section-title">// BODY WEIGHT</div>
+      <div id="bw-entry-row">
+        <input id="bw-input" type="number" placeholder="lbs" min="50" max="500" step="0.1" />
+        <button id="bw-log-btn">LOG</button>
+      </div>
+      <div id="bw-last"></div>
+      <div id="bw-chart-wrap">
+        <svg id="bw-chart" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+    <!-- Priority PRs -->
+    <div class="stats-section">
+      <div class="stats-section-title">// PERSONAL RECORDS — PRIORITY LIFTS</div>
+      <div id="pr-list"><div class="pr-none">LOADING...</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -1036,10 +1342,16 @@
 ══════════════════════════════════════ -->
 <div id="exlist-overlay">
   <div id="exlist-header">
-    <div id="exlist-title">MASTER EXERCISE LIST</div>
-    <button id="exlist-close">✕ CLOSE</button>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div id="exlist-title">MASTER EXERCISE LIST</div>
+      <span id="exlist-filter-label" style="display:none;font-size:.6rem;letter-spacing:.2em;color:var(--cyan);border:1px solid var(--cyan);padding:2px 10px;cursor:pointer;" title="Click to clear filter"></span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="exlist-edit-toggle">✎ EDIT</button>
+      <button id="exlist-close">✕ CLOSE</button>
+    </div>
   </div>
-  <div id="exlist-add-bar">
+  <div id="exlist-add-bar" class="admin-only">
     <span style="font-size:.6rem;letter-spacing:.2em;color:var(--green-dim);">ADD EXERCISE:</span>
     <input id="exlist-name-input" type="text" placeholder="exercise name" />
     <select id="exlist-cat-select"><option value="">— category —</option></select>
@@ -1055,10 +1367,6 @@
   <div id="details-header">
     <div id="details-title">Exercise Details</div>
     <div style="display:flex;align-items:center;gap:20px;">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.68rem;letter-spacing:.18em;color:var(--green-dim);user-select:none;">
-        <input type="checkbox" id="details-isometric-cb" style="accent-color:var(--cyan);width:13px;height:13px;cursor:pointer;" />
-        ISOMETRIC
-      </label>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.68rem;letter-spacing:.18em;color:var(--green-dim);user-select:none;">
         <input type="checkbox" id="details-priority-cb" style="accent-color:var(--green);width:13px;height:13px;cursor:pointer;" />
         PRIORITY
@@ -1107,7 +1415,14 @@
       <div class="stat-value" id="stat-total">—</div>
       <div class="stat-sub" id="stat-total-sub"></div>
     </div>
+    <div class="stat-card" id="stat-days-pr-card">
+      <div class="stat-label">DAYS SINCE PR</div>
+      <div class="stat-value" id="stat-days-pr" style="color:var(--cyan);text-shadow:0 0 14px rgba(0,229,255,.45);">—</div>
+      <div class="stat-sub" id="stat-days-pr-sub"></div>
+    </div>
   </div>
+
+  <div id="details-rep-prs" style="display:none;"></div>
 
   <div id="details-chart-wrap">
     <div id="details-chart"></div>
@@ -1126,7 +1441,12 @@
     <button class="hist-nav-btn" id="hist-prev-btn">◀</button>
     <div id="hist-month-label">— — —</div>
     <button class="hist-nav-btn" id="hist-next-btn">▶</button>
+    <div id="hist-month-vol"></div>
     <button id="history-close">✕ CLOSE</button>
+  </div>
+  <div id="hist-year-wrap">
+    <div id="hist-year-label">// <span id="hist-year-num"></span> — MONTHLY VOLUME</div>
+    <div id="hist-year-chart"></div>
   </div>
   <div id="history-main">
     <!-- Calendar pane -->
@@ -1166,6 +1486,35 @@
   </div>
 </div>
 
+<!-- Quick Help Popup -->
+<div id="quick-help-popup">
+  <div id="qh-header">
+    <span id="qh-title">// VOICE COMMANDS</span>
+    <button id="qh-close">✕</button>
+  </div>
+  <div id="qh-body"></div>
+  <div id="qh-live-area">
+    <span id="qh-live-dot"></span>
+    <span id="qh-live-text">WAITING...</span>
+  </div>
+  <div id="qh-footer">SAY "HEY ARNOLD OPEN HELP" FOR FULL GUIDE</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     EXERCISE SELECT OVERLAY
+══════════════════════════════════════ -->
+<div id="exsel-overlay">
+  <div id="exsel-header">
+    <div id="exsel-title">// SELECT EXERCISE</div>
+    <div id="exsel-filters"></div>
+    <button id="exsel-close">✕ CLOSE</button>
+  </div>
+  <div id="exsel-search-wrap">
+    <input id="exsel-search" type="text" placeholder="FILTER..." autocomplete="off" spellcheck="false"/>
+  </div>
+  <div id="exsel-list"></div>
+</div>
+
 <!-- ══════════════════════════════════════
      BULK IMPORT OVERLAY
 ══════════════════════════════════════ -->
@@ -1194,25 +1543,112 @@
 </div>
 
 <!-- ══════════════════════════════════════
+     HELP OVERLAY
+══════════════════════════════════════ -->
+<div id="help-overlay">
+  <div id="help-header">
+    <div id="help-title">// VOICE COMMAND REFERENCE</div>
+    <button id="help-close">✕ CLOSE</button>
+  </div>
+  <div id="help-body">
+
+    <div class="help-section">
+      <div class="help-section-title">// LOGGING EXERCISES</div>
+      <div class="help-format">
+        <span>"</span> Exercise Name &nbsp; weight &nbsp; x &nbsp; reps &nbsp; x &nbsp; sets <span>"</span>
+      </div>
+      <div class="help-grid">
+        <div class="help-row">
+          <div class="help-cmd">"Deadlift 315 x 5 x 3"</div>
+          <div class="help-desc">Deadlift — 315 lbs, 5 reps, 3 sets</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Squat 225 x 8"</div>
+          <div class="help-desc">Squat — 225 lbs, 8 reps, 1 set</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Bench Press 185 x 6 x 4"</div>
+          <div class="help-desc">Bench Press — 185 lbs, 6 reps, 4 sets</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Plank 60 x 3"</div>
+          <div class="help-desc">Isometric — held 60s, 3 sets</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">// NAVIGATION</div>
+      <div class="help-grid">
+        <div class="help-row">
+          <div class="help-cmd">"Open recovery" &nbsp;/&nbsp; "Show recovery"</div>
+          <div class="help-desc">Opens the Recovery Status page</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Open history" &nbsp;/&nbsp; "Show history"</div>
+          <div class="help-desc">Opens the workout calendar</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Open import" &nbsp;/&nbsp; "Bulk import"</div>
+          <div class="help-desc">Opens the bulk import page</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Close" &nbsp;/&nbsp; "Go back" &nbsp;/&nbsp; "Go home"</div>
+          <div class="help-desc">Closes any open page, returns to main</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Open help" &nbsp;/&nbsp; "Show help"</div>
+          <div class="help-desc">Opens this page</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">// OTHER COMMANDS</div>
+      <div class="help-grid">
+        <div class="help-row">
+          <div class="help-cmd">"List exercises"</div>
+          <div class="help-desc">Shows all exercises grouped by muscle</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"List categories"</div>
+          <div class="help-desc">Shows all muscle group categories</div>
+        </div>
+        <div class="help-row">
+          <div class="help-cmd">"Create exercise"</div>
+          <div class="help-desc">Starts the create exercise dialogue</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">// TIPS</div>
+      <div class="help-tip">
+        <strong>Wake word required</strong> — say <em>"Hey Arnold"</em> to activate the 8-second command window. The mic bar will turn cyan and count down. Nothing is processed until the wake word is heard.<br><br>
+        <strong>Always say the full exercise name</strong> — voice logging requires the exercise name to be spoken. Shorthand like "315 x 5" alone will be rejected.<br><br>
+        <strong>Confidence filtering</strong> — commands containing numbers require 90%+ speech recognition confidence. Low-clarity audio is dropped and shown as LOW CONF.<br><br>
+        <strong>Cancel</strong> — say "cancel" or "never mind" to exit the command window early and return to wake word mode.<br><br>
+        <strong>10-second cooldown</strong> — after any numeric voice command is accepted, the mic ignores further numeric input for 10 seconds to prevent duplicate logs.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
      RECOVERY OVERLAY
 ══════════════════════════════════════ -->
 <div id="recovery-overlay">
   <div id="recovery-header">
-    <div id="recovery-title">// RECOVERY STATUS</div>
+    <div id="recovery-title">// VOLUME</div>
     <button id="recovery-close">✕ CLOSE</button>
   </div>
-  <div id="rec-body">
-    <div id="recovery-banner">
-      <div class="rec-banner-block">
-        <div class="rec-banner-eyebrow">BODY READINESS SCORE</div>
-        <div class="rec-banner-score" id="rec-banner-score">—</div>
-        <div class="rec-banner-status" id="rec-banner-status" style="color:var(--green-dim);"></div>
-      </div>
-      <div class="rec-banner-divider"></div>
-      <div class="rec-banner-block">
-        <div class="rec-banner-meta" id="rec-banner-meta"></div>
-      </div>
+  <div id="recovery-banner">
+    <div class="rec-banner-block">
+      <div id="rec-banner-meta" class="rec-banner-meta"></div>
     </div>
+  </div>
+  <div id="rec-body">
     <div id="recovery-grid"></div>
     <div id="rec-vol-section">
       <div id="rec-vol-top">
@@ -1226,6 +1662,13 @@
       </div>
       <div id="rec-vol-chart"><div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">LOADING...</div></div>
       <div id="rec-vol-legend"></div>
+    </div>
+    <div id="rec-ex-section" style="display:none;">
+      <div id="rec-ex-top">
+        <div id="rec-ex-title">// EXERCISES — <span id="rec-ex-muscle-name"></span></div>
+      </div>
+      <div id="rec-ex-chart"></div>
+      <div id="rec-ex-legend"></div>
     </div>
   </div>
 </div>
@@ -1300,7 +1743,10 @@ function showMainApp() {
   document.getElementById('user-name-display').textContent = currentUser.name;
   document.getElementById('priority-bar').classList.add('visible');
   _lastPriorityHash = '';
+  document.body.classList.toggle('is-admin', !!currentUser.is_admin);
   document.getElementById('cmd-input').focus();
+  // Pre-load exercise list so "select [name]" works immediately without a fetch delay
+  authFetch('/api/exercises/with-last-performed').then(r => r.json()).then(d => { _exselData = d; }).catch(() => {});
 }
 
 async function loadUserList() {
@@ -1330,7 +1776,7 @@ async function selectUser(username) {
   if (res.error) { alert(res.error); return; }
   sessionToken = res.token;
   localStorage.setItem('arnold_token', sessionToken);
-  currentUser = {id: res.id, name: res.name};
+  currentUser = {id: res.id, name: res.name, is_admin: res.is_admin};
   showMainApp();
 }
 
@@ -1387,28 +1833,36 @@ let lastChatCount = 0;
 let currentExercise = null;
 let _lastPriorityHash = '';
 
+function setActiveExercise(name) {
+  currentExercise = name;
+  const lbl = document.getElementById('active-ex-label');
+  const badge = document.getElementById('active-ex-badge');
+  const histTitle = document.getElementById('history-title');
+  const todayTitle = document.getElementById('today-title');
+  const todayVol = document.getElementById('today-vol');
+  const histVol = document.getElementById('history-vol');
+  if (name) {
+    lbl.textContent = `⊳ ${name.toUpperCase()}`;
+    badge.setAttribute('data-set', '1');
+    if (histTitle) histTitle.textContent = `Last Session — ${name}`;
+    if (todayTitle) todayTitle.textContent = `Today's Session — Current Set: ${name}`;
+  } else {
+    lbl.textContent = 'NO EXERCISE SELECTED';
+    badge.removeAttribute('data-set');
+    if (histTitle) histTitle.textContent = 'Last Session';
+    if (todayTitle) todayTitle.textContent = "Today's Session";
+    if (todayVol) todayVol.style.display = 'none';
+    if (histVol) histVol.style.display = 'none';
+  }
+}
+
 async function refreshChat() {
   try {
     const msgs = await fetch('/api/chat').then(r => r.json());
     if (msgs.length === lastChatCount) return;
     lastChatCount = msgs.length;
-    const panel = document.getElementById('chat-scroll');
-    panel.innerHTML = '';
-    msgs.forEach(m => {
-      const div = document.createElement('div');
-      div.className = `msg ${m.role}`;
-      div.innerHTML = `<div class="msg-meta">${m.role.toUpperCase()} // ${m.time}</div>
-                       <div class="msg-text">${m.message}</div>`;
-      panel.appendChild(div);
-    });
-    panel.scrollTop = panel.scrollHeight;
-    // Speak new Arnold messages — skip history on first load
-    if (_ttsSpokenCount < 0) {
-      _ttsSpokenCount = msgs.length;
-    } else {
-      msgs.slice(_ttsSpokenCount).filter(m => m.role === 'arnold').forEach(m => arnoldSpeak(m.message));
-      _ttsSpokenCount = msgs.length;
-    }
+    const lastArnold = [...msgs].reverse().find(m => m.role === 'arnold');
+    if (lastArnold) document.getElementById('cb-last-reply').textContent = lastArnold.message;
   } catch(e) {}
 }
 
@@ -1425,22 +1879,64 @@ async function getExerciseNames() {
   return _exerciseNames;
 }
 
+let _lastWorkoutTopId = null;
+let _workoutInactivityTimer = null;
+
+function _resetWorkoutInactivityTimer() {
+  clearTimeout(_workoutInactivityTimer);
+  _workoutInactivityTimer = setTimeout(() => {
+    const panel = document.getElementById('workout-scroll');
+    if (panel) panel.scrollTo({top: 0, behavior: 'smooth'});
+  }, 30000);
+}
+['scroll', 'wheel', 'touchstart', 'mousedown'].forEach(evt =>
+  document.getElementById('workout-scroll').addEventListener(evt, _resetWorkoutInactivityTimer, {passive: true})
+);
+_resetWorkoutInactivityTimer();
+
 async function refreshWorkouts() {
   if (document.querySelector('.entry-edit-form.open')) return; // don't clobber an open edit form
   if (document.getElementById('manual-entry-form')?.style.display !== 'none') return; // don't clobber open manual form
   try {
     const sets = await authFetch('/api/workouts/today').then(r => r.json());
     const panel = document.getElementById('workout-scroll');
-    if (!sets.length) { panel.innerHTML = '<div class="empty-state">[ NO SETS LOGGED YET ]</div>'; return; }
+    if (!sets.length) { panel.innerHTML = '<div class="empty-state">[ NO SETS LOGGED YET ]</div>'; _lastWorkoutTopId = null; return; }
+    const newTopId = sets[0].id;
+    const isNewEntry = _lastWorkoutTopId !== null && newTopId !== _lastWorkoutTopId;
+    _lastWorkoutTopId = newTopId;
     const exNames = await getExerciseNames();
+
+    // Today's volume for current exercise
+    const todayVolEl = document.getElementById('today-vol');
+    if (todayVolEl && currentExercise) {
+      const exSets = sets.filter(s => s.exercise === currentExercise);
+      if (!exSets.length) {
+        todayVolEl.style.display = 'none';
+      } else {
+        const isIso = !!exSets[0].is_isometric;
+        if (isIso) {
+          const totalSecs = exSets.reduce((acc, s) => acc + s.reps * s.sets, 0);
+          todayVolEl.textContent = `${totalSecs}s total`;
+          todayVolEl.style.display = '';
+        } else {
+          const vol = exSets.reduce((acc, s) => acc + (s.weight || 0) * s.reps * s.sets, 0);
+          if (vol > 0) {
+            todayVolEl.textContent = `${vol >= 1000 ? (vol/1000).toFixed(1)+'k' : vol} lbs`;
+            todayVolEl.style.display = '';
+          } else {
+            todayVolEl.style.display = 'none';
+          }
+        }
+      }
+    }
+
     panel.innerHTML = '';
     sets.forEach(s => {
       const div = document.createElement('div');
       div.className = 'workout-entry';
-      div.style.flexWrap = 'wrap';
       const time = s.timestamp?.split(' ')[1]?.slice(0,5) || '';
       const isIso = !!s.is_isometric;
-      const wt = s.weight ? `${s.weight}lbs` : 'BW';
+      const wt = s.weight ? `${s.weight}<span style="font-size:.55em;opacity:.7;">lbs</span>` : 'BW';
       const repsDisp = isIso ? `${s.reps}s` : s.reps;
       const statHtml = (isIso && !s.weight)
         ? `<strong>${repsDisp}</strong>`
@@ -1449,14 +1945,12 @@ async function refreshWorkouts() {
       const exOpts = exNames.map(n => `<option value="${n}"${n===s.exercise?' selected':''}>${n}</option>`).join('');
 
       div.innerHTML = `
-        <div class="ex-name">${s.exercise}</div>
+        <div class="ex-name ex-name-link">${s.exercise}</div>
         <div class="ex-stat"><strong>${s.sets}</strong> sets</div>
         <div class="ex-stat">${statHtml}</div>
         <div class="ex-time">${time}</div>
-        <div class="entry-actions">
-          <button class="btn-entry btn-edit" data-id="${s.id}">✎ EDIT</button>
-          <button class="btn-entry btn-del" data-id="${s.id}">✕ DELETE</button>
-        </div>
+        ${s.is_pr ? '<span class="pr-star" title="New PR!">★</span>' : '<span></span>'}
+        <button class="btn-entry btn-edit" data-id="${s.id}">✎</button>
         <div class="entry-edit-form" data-id="${s.id}">
           <select class="ex-input">${exOpts}</select>
           <input type="number" class="f-weight" placeholder="weight" value="${s.weight || ''}" min="0" step="2.5" />
@@ -1464,8 +1958,14 @@ async function refreshWorkouts() {
           <input type="number" class="f-sets"   placeholder="sets"   value="${s.sets   || 1}"  min="1" />
           <button class="btn-entry btn-save">SAVE</button>
           <button class="btn-entry btn-cancel">CANCEL</button>
+          <button class="btn-entry btn-del" data-id="${s.id}">✕ DELETE</button>
         </div>`;
 
+      div.querySelector('.ex-name-link').addEventListener('click', () => {
+        setActiveExercise(s.exercise);
+        authFetch('/api/exercise/set-current', {method: 'POST', body: JSON.stringify({exercise: s.exercise})});
+        openDetails();
+      });
       div.querySelector('.btn-edit').addEventListener('click', () => {
         div.querySelector('.entry-edit-form').classList.toggle('open');
       });
@@ -1473,9 +1973,8 @@ async function refreshWorkouts() {
         div.querySelector('.entry-edit-form').classList.remove('open');
       });
       div.querySelector('.btn-del').addEventListener('click', async () => {
-        const delDesc = isIso ? `${s.reps}s hold` : `${wt} × ${s.reps}`;
-        if (!confirm(`Delete this set (${s.exercise} — ${delDesc})?`)) return;
         await authFetch(`/api/workout/${s.id}`, {method: 'DELETE'});
+        div.querySelector('.entry-edit-form').classList.remove('open');
         _exerciseNames = [];
         _exerciseIsIsoMap = {};
         refreshWorkouts();
@@ -1497,27 +1996,47 @@ async function refreshWorkouts() {
 
       panel.appendChild(div);
     });
+    if (isNewEntry) {
+      panel.scrollTo({top: 0, behavior: 'smooth'});
+      _resetWorkoutInactivityTimer();
+    }
   } catch(e) {}
 }
 
-async function refreshHistory() {
+async function refreshHistory(exerciseName) {
   try {
-    const data = await authFetch('/api/exercise/current').then(r => r.json());
-    const name = data.exercise;
+    // Use explicit arg → then frontend currentExercise → finally ask backend
+    let name = exerciseName || currentExercise || null;
+    if (!name) {
+      const data = await authFetch('/api/exercise/current').then(r => r.json());
+      name = data.exercise;
+    }
     if (!name) return;
 
-    if (name !== currentExercise) {
-      currentExercise = name;
-      document.getElementById('history-title').textContent = `Last Session — ${name}`;
+    if (!currentExercise) {
+      setActiveExercise(name);
     }
 
     const last = await authFetch(`/api/exercise/${encodeURIComponent(name)}/last-session`).then(r => r.json());
     const panel = document.getElementById('history-scroll');
-    if (!last) { panel.innerHTML = '<div class="empty-state">[ NO PRIOR SESSIONS ]</div>'; return; }
+    if (!last) {
+      panel.innerHTML = '<div class="empty-state">[ NO PRIOR SESSIONS ]</div>';
+      const hv = document.getElementById('history-vol');
+      if (hv) hv.style.display = 'none';
+      return;
+    }
+
+    // Show last session volume in panel header
+    const hv = document.getElementById('history-vol');
+    if (hv && last.volume) {
+      const vol = last.volume;
+      hv.textContent = `${vol >= 1000 ? (vol/1000).toFixed(1)+'k' : vol} lbs`;
+      hv.style.display = '';
+    }
 
     panel.innerHTML = '';
 
-    // Header: date + volume
+    // Header: date + 1RM only (volume now in panel header)
     const hdr = document.createElement('div');
     hdr.style.cssText = 'font-size:.62rem;color:#005520;letter-spacing:.15em;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(0,255,65,.08);display:flex;gap:10px;align-items:center;';
     const ormTag = (!last.is_isometric && last.one_rm)
@@ -1565,13 +2084,85 @@ async function submitInput() {
   _submitLastText = text.toLowerCase();
   _submitLastMs   = now;
   input.value = '';
+  // Overlay-opening navs keep the voice session alive and refresh popup context
+  const _STAY_NAVS = new Set(['recovery','history','import','details','ex_select','ex_list','stats']);
   try {
-    await authFetch('/api/input', {method: 'POST', body: JSON.stringify({text})});
+    const res = await authFetch('/api/input', {method: 'POST', body: JSON.stringify({text})}).then(r => r.json());
     pollAll();
-    if (document.getElementById('details-overlay').classList.contains('open')) openDetails();
+    if (res.nav) {
+      _handleNav(res.nav);
+      if (_STAY_NAVS.has(res.nav)) {
+        // Let overlay open first, then refresh command mode with new context
+        setTimeout(() => window._voiceRefreshCtx && window._voiceRefreshCtx(), 120);
+        return;
+      }
+    } else if (document.getElementById('details-overlay').classList.contains('open')) {
+      openDetails();
+    }
+  } catch(e) {}
+  // Terminal command (log, unrecognised, close-like nav) → end session
+  setTimeout(() => window._voiceEndCmd && window._voiceEndCmd(), 800);
+}
+
+function _handleNav(nav) {
+  // Quick help never closes overlays — it reads the current context
+  if (nav === 'quick_help') { showQuickHelp(); return; }
+
+  // Close all overlays first
+  closeHistory();
+  closeRecovery();
+  closeHelp();
+  closeDetails();
+  closeExSel();
+  closeStats();
+  _closeExlist();
+  if (window._navCloseImport) window._navCloseImport();
+  if (nav === 'recovery') openRecovery();
+  else if (nav === 'history') openHistory();
+  else if (nav === 'import' && window._navOpenImport) window._navOpenImport();
+  else if (nav === 'help') openHelp();
+  else if (nav === 'details') { if (currentExercise) openDetails(); }
+  else if (nav === 'ex_select') openExerciseList();
+  else if (nav === 'ex_list') openExerciseList();
+  else if (nav === 'stats') openStats();
+  else if (nav === 'scroll_up')   _voiceScroll(-1);
+  else if (nav === 'scroll_down') _voiceScroll(1);
+  // 'close' just closes all, already done above
+}
+
+function _voiceScroll(dir) {
+  const amount = dir * 320;
+  // Find the visible scrollable area
+  const candidates = [
+    document.getElementById('rec-body'),
+    document.getElementById('hist-scroll-area'),
+    document.getElementById('details-body'),
+    document.getElementById('help-body'),
+    document.getElementById('workout-scroll'),
+  ];
+  for (const el of candidates) {
+    if (!el) continue;
+    const overlay = el.closest('[id$="-overlay"], #recovery-overlay');
+    const overlayVisible = overlay ? overlay.classList.contains('open') : true;
+    if (overlayVisible && el.scrollHeight > el.clientHeight) {
+      el.scrollBy({top: amount, behavior: 'smooth'});
+      return;
+    }
+  }
+}
+async function submitVoiceInput(text) {
+  if (!text) return;
+  const now = Date.now();
+  if (text.toLowerCase() === _submitLastText && now - _submitLastMs < 15000) return;
+  _submitLastText = text.toLowerCase();
+  _submitLastMs   = now;
+  try {
+    const res = await authFetch('/api/input', {method: 'POST', body: JSON.stringify({text, source: 'voice'})}).then(r => r.json());
+    pollAll();
+    if (res.nav) _handleNav(res.nav);
   } catch(e) {}
 }
-document.getElementById('cmd-submit').addEventListener('click', submitInput);
+
 document.getElementById('cmd-input').addEventListener('keydown', e => { if (e.key === 'Enter') submitInput(); });
 
 async function refreshPriorityBar() {
@@ -1603,9 +2194,18 @@ async function refreshPriorityBar() {
         const t = Math.max(0, Math.min(1, pct / 100));
         daysColor = `rgb(${Math.round(255*(1-t))},${Math.round(255*t)},0)`;
       }
+      let prStr = '';
+      if (ex.is_isometric && ex.pr_reps) {
+        prStr = `<span class="priority-chip-pr">// ${ex.pr_reps}s</span>`;
+      } else if (ex.pr_weight && ex.pr_reps) {
+        prStr = `<span class="priority-chip-pr">// ${ex.pr_weight}lbs × ${ex.pr_reps}</span>`;
+      } else if (ex.is_bodyweight && ex.pr_reps) {
+        prStr = `<span class="priority-chip-pr">// BW × ${ex.pr_reps}</span>`;
+      }
       return `<span class="priority-chip" data-name="${safeName}">` +
         `<span class="priority-chip-name">${safeName}</span>` +
         `<span class="priority-chip-days" style="color:${daysColor}">${daysText}</span>` +
+        prStr +
         `</span>`;
     }).join('');
 
@@ -1622,8 +2222,7 @@ async function refreshPriorityBar() {
       inner.querySelectorAll('.priority-chip').forEach(chip => {
         chip.addEventListener('click', () => {
           const name = chip.getAttribute('data-name');
-          currentExercise = name;
-          document.getElementById('history-title').textContent = `Last Session — ${name}`;
+          setActiveExercise(name);
           openDetails();
         });
       });
@@ -1640,25 +2239,6 @@ setInterval(pollAll, 1500);
 // ══════════════════════════════════════
 // MANUAL ENTRY FORM (right panel)
 // ══════════════════════════════════════
-document.getElementById('manual-log-btn').addEventListener('click', async () => {
-  const form = document.getElementById('manual-entry-form');
-  const isOpen = form.style.display !== 'none';
-  if (isOpen) { form.style.display = 'none'; return; }
-  // Populate exercise dropdown
-  const sel = document.getElementById('me-exercise');
-  sel.innerHTML = '';
-  const names = await getExerciseNames();
-  names.forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o); });
-  // Pre-select current exercise if one is active
-  if (currentExercise) sel.value = currentExercise;
-  const updateRepsHint = () => {
-    document.getElementById('me-reps').placeholder = _exerciseIsIsoMap[sel.value] ? 'seconds' : 'reps';
-  };
-  sel.onchange = updateRepsHint;
-  updateRepsHint();
-  form.style.display = 'flex';
-  document.getElementById('me-reps').focus();
-});
 
 document.getElementById('me-cancel').addEventListener('click', () => {
   document.getElementById('manual-entry-form').style.display = 'none';
@@ -1687,7 +2267,7 @@ document.getElementById('me-save').addEventListener('click', async () => {
 // ══════════════════════════════════════
 document.getElementById('details-btn').addEventListener('click', openDetails);
 document.getElementById('details-close').addEventListener('click', closeDetails);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetails(); closeRecovery(); closeHistory(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetails(); closeRecovery(); closeHistory(); closeHelp(); closeExSel(); } });
 
 function closeDetails() {
   document.getElementById('details-overlay').classList.remove('open');
@@ -1700,10 +2280,20 @@ async function openDetails() {
   overlay.classList.add('open');
 
   // Reset
-  ['stat-sessions','stat-pr','stat-best-vol','stat-total'].forEach(id => document.getElementById(id).textContent = '…');
-  ['stat-sessions-sub','stat-pr-sub','stat-best-vol-sub','stat-total-sub'].forEach(id => document.getElementById(id).textContent = '');
+  ['stat-sessions','stat-pr','stat-best-vol','stat-total','stat-days-pr'].forEach(id => document.getElementById(id).textContent = '…');
+  ['stat-sessions-sub','stat-pr-sub','stat-best-vol-sub','stat-total-sub','stat-days-pr-sub'].forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('details-rep-prs').style.display = 'none';
   document.getElementById('details-chart').innerHTML = '';
   document.getElementById('details-body').innerHTML = '';
+
+  // Fetch last PR (global, across all exercises) — non-blocking
+  authFetch('/api/user/last-pr').then(r => r.json()).then(pr => {
+    const el = document.getElementById('stat-days-pr');
+    const sub = document.getElementById('stat-days-pr-sub');
+    if (pr.days_since === null) { el.textContent = '—'; sub.textContent = 'no PRs yet'; return; }
+    el.textContent = pr.days_since === 0 ? 'TODAY' : `${pr.days_since}d`;
+    sub.textContent = pr.exercise ? `${pr.exercise} · ${pr.weight} lbs` : '';
+  }).catch(() => { document.getElementById('stat-days-pr').textContent = '—'; });
 
   try {
     const [isIso, history] = await Promise.all([
@@ -1718,6 +2308,7 @@ async function openDetails() {
     }
 
     renderStats(history, isIso);
+    renderRepPRs(history, isIso);
     renderChart(history, isIso);
     renderTable(history, isIso);
   } catch(e) {
@@ -1744,7 +2335,6 @@ async function loadDescription(name) {
     }
     inputEl.value = desc;
     document.getElementById('details-priority-cb').checked = !!info.is_priority;
-    document.getElementById('details-isometric-cb').checked = !!info.is_isometric;
     return !!info.is_isometric;
   } catch(e) { return false; }
 }
@@ -1768,16 +2358,6 @@ document.getElementById('details-desc-save').addEventListener('click', async () 
   document.getElementById('details-desc-form').style.display = 'none';
   document.getElementById('details-desc-view').style.display = 'flex';
   loadDescription(currentExercise);
-});
-
-document.getElementById('details-isometric-cb').addEventListener('change', async function() {
-  if (!currentExercise) return;
-  await authFetch(`/api/exercise/${encodeURIComponent(currentExercise)}/isometric`, {
-    method: 'PUT',
-    body: JSON.stringify({isometric: this.checked})
-  });
-  _exerciseNames = [];
-  _exerciseIsIsoMap = {};
 });
 
 document.getElementById('details-priority-cb').addEventListener('change', async function() {
@@ -1857,120 +2437,128 @@ function renderStats(history, isIso = false) {
   }
 }
 
+function renderRepPRs(history, isIso) {
+  const section = document.getElementById('details-rep-prs');
+  if (isIso) { section.style.display = 'none'; return; }
+  const repTargets = [1, 3, 5, 8, 12];
+  const bests = {};
+  repTargets.forEach(r => bests[r] = {weight: 0, date: null});
+  history.forEach(s => {
+    (s.entries || []).forEach(e => {
+      if (repTargets.includes(e.reps) && e.weight > bests[e.reps].weight) {
+        bests[e.reps] = {weight: e.weight, date: s.date};
+      }
+    });
+  });
+  const hasAny = repTargets.some(r => bests[r].weight > 0);
+  if (!hasAny) { section.style.display = 'none'; return; }
+  section.style.display = 'flex';
+  section.innerHTML = repTargets.map(r => {
+    const b = bests[r];
+    return `<div class="rep-pr-card">
+      <div class="rep-pr-label">${r} REP MAX</div>
+      <div class="rep-pr-val">${b.weight > 0 ? b.weight + ' lbs' : '—'}</div>
+      ${b.date ? `<div class="rep-pr-sub">${b.date}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
 function renderChart(history, isIso = false) {
   const el = document.getElementById('details-chart');
   const tooltip = document.getElementById('chart-tooltip');
   const fmtSecs = s => s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`;
 
-  // Oldest-first for chart
-  const data = [...history].reverse();
-  if (data.length === 0) return;
+  const data = [...history].reverse(); // oldest-first
+  if (!data.length) return;
 
-  const W = el.clientWidth || 900;
-  const H = 180;
-  const P = {top: 22, right: 24, bottom: 34, left: 70};
-  const CW = W - P.left - P.right;
-  const CH = H - P.top - P.bottom;
+  const W = 1000, H = 190;
+  const PAD = {top:14, right:16, bottom:30, left:54};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+
+  // Build calendar date range spanning the data
+  const firstDate = data[0].date, lastDate = data[data.length-1].date;
+  const start = new Date(firstDate + 'T12:00:00'), end = new Date(lastDate + 'T12:00:00');
+  const totalDays = Math.max(1, Math.round((end - start) / 86400000));
+  const dates = [];
+  for (let i = 0; i <= totalDays; i++) {
+    const d = new Date(start); d.setDate(d.getDate() + i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+
+  const sessionMap = {};
+  data.forEach(s => { sessionMap[s.date] = s; });
 
   const vols = isIso
     ? data.map(s => (s.entries||[]).reduce((a,e) => a+e.reps, 0))
     : data.map(s => s.volume);
-  const maxV = Math.max(...vols);
-  const minV = Math.max(0, Math.min(...vols) * 0.8);
+  const maxV = Math.max(...vols, 1);
 
-  const x = i => P.left + (data.length > 1 ? (i / (data.length - 1)) * CW : CW / 2);
-  const y = v => P.top + CH - ((v - minV) / ((maxV - minV) || 1)) * CH;
+  const xp = i => PAD.left + (dates.length > 1 ? (i / (dates.length-1)) * cW : cW/2);
+  const yp = v => PAD.top + cH - Math.min(1, v / maxV) * cH;
 
-  const pts = data.map((s, i) => [x(i), y(vols[i])]);
-
-  // Smooth catmull-rom-ish curve via bezier
-  let linePath = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-  for (let i = 1; i < pts.length; i++) {
-    const [px, py] = pts[i-1];
-    const [cx, cy] = pts[i];
-    const mx = (px + cx) / 2;
-    linePath += ` C ${mx.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${cy.toFixed(1)} ${cx.toFixed(1)},${cy.toFixed(1)}`;
+  let svg = '';
+  // Y grid
+  for (let t = 0; t <= 4; t++) {
+    const v = (maxV / 4) * t;
+    const yy = yp(v);
+    const lbl = isIso ? fmtSecs(Math.round(v)) : (v >= 1000 ? `${(v/1000).toFixed(1)}k` : Math.round(v));
+    svg += `<line x1="${PAD.left}" y1="${yy}" x2="${W-PAD.right}" y2="${yy}" stroke="rgba(0,255,65,.05)"/>`;
+    svg += `<text x="${PAD.left-5}" y="${yy+4}" text-anchor="end" font-size="8" fill="#004a18">${lbl}</text>`;
   }
-
-  const fillPath = `M ${P.left},${P.top+CH} L ${pts.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L ')} L ${pts[pts.length-1][0].toFixed(1)},${P.top+CH} Z`;
-
-  // Y ticks
-  const yTickCount = 4;
-  let yTicksHtml = '';
-  for (let i = 0; i <= yTickCount; i++) {
-    const v = minV + (maxV - minV) * (i / yTickCount);
-    const yy = y(v).toFixed(1);
-    const label = isIso ? fmtSecs(Math.round(v)) : (v >= 1000 ? `${(v/1000).toFixed(1)}k` : Math.round(v));
-    yTicksHtml += `<line x1="${P.left}" y1="${yy}" x2="${(P.left+CW).toFixed(1)}" y2="${yy}" stroke="rgba(0,255,65,0.07)" stroke-width="1"/>
-      <text x="${(P.left-8).toFixed(1)}" y="${(parseFloat(yy)+4).toFixed(1)}" text-anchor="end" fill="#005520" font-size="10" font-family="Share Tech Mono,monospace">${label}</text>`;
-  }
-
-  // X labels
-  const xStep = Math.max(1, Math.ceil(data.length / 7));
-  let xLabelsHtml = '';
-  data.forEach((s, i) => {
-    if (i % xStep !== 0 && i !== data.length - 1) return;
-    xLabelsHtml += `<text x="${x(i).toFixed(1)}" y="${(P.top+CH+22).toFixed(1)}" text-anchor="middle" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace">${s.date.slice(5)}</text>`;
+  // X labels (sparse)
+  const step = Math.ceil(dates.length / 10);
+  dates.forEach((d, i) => {
+    if (i % step === 0 || i === dates.length-1) {
+      const dt = new Date(d + 'T12:00:00');
+      const lbl = dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      svg += `<text x="${xp(i)}" y="${H-5}" text-anchor="middle" font-size="7" fill="#004a18">${lbl}</text>`;
+    }
   });
 
-  // Points
-  let pointsHtml = data.map((s, i) => {
-    const isPR = s.is_pr;
-    const r = isPR ? 6 : 4;
-    const fill = isPR ? '#ffffff' : '#00ff41';
-    const filter = isPR ? 'drop-shadow(0 0 5px #fff)' : 'drop-shadow(0 0 4px #00ff41)';
-    return `<circle cx="${x(i).toFixed(1)}" cy="${y(vols[i]).toFixed(1)}" r="${r}" fill="${fill}" stroke="#000" stroke-width="1.5" class="chart-pt" data-idx="${i}" style="cursor:pointer;filter:${filter};"/>`;
-  }).join('');
+  // Build active points (only session dates)
+  const activePts = dates.map((d, i) => {
+    const s = sessionMap[d];
+    if (!s) return null;
+    const v = isIso ? (s.entries||[]).reduce((a,e) => a+e.reps, 0) : s.volume;
+    return {x: xp(i), y: yp(v), v, s, d};
+  }).filter(Boolean);
 
-  el.innerHTML = `
-  <svg id="chart-svg" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;display:block;">
-    <defs>
-      <linearGradient id="vol-fill" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#00ff41" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="#00ff41" stop-opacity="0.01"/>
-      </linearGradient>
-    </defs>
-    ${yTicksHtml}
-    <line x1="${P.left}" y1="${P.top}" x2="${P.left}" y2="${P.top+CH}" stroke="rgba(0,255,65,0.2)" stroke-width="1"/>
-    <line x1="${P.left}" y1="${P.top+CH}" x2="${P.left+CW}" y2="${P.top+CH}" stroke="rgba(0,255,65,0.2)" stroke-width="1"/>
-    <path d="${fillPath}" fill="url(#vol-fill)"/>
-    <path id="chart-line" d="${linePath}" fill="none" stroke="#00ff41" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    ${pointsHtml}
-    ${xLabelsHtml}
-    <text x="${P.left}" y="${P.top-7}" fill="#004010" font-size="9" font-family="Share Tech Mono,monospace" letter-spacing="0.15em">${isIso ? 'HOLD TIME (S)' : 'VOLUME (LBS)'}</text>
-  </svg>`;
+  if (activePts.length) {
+    svg += `<path d="${_smoothPath(activePts)}" fill="none" stroke="#00ff41" stroke-width="1.8" opacity="0.6"/>`;
+    activePts.forEach((p, idx) => {
+      const isPR = p.s.is_pr && !isIso;
+      if (isPR) {
+        const ms = p.s.max_set;
+        const lbl = ms ? `PR: ${ms.weight}×${ms.reps}` : 'PR';
+        const above = p.y > PAD.top + cH * 0.55;
+        const ly = above ? p.y - 16 : p.y + 20;
+        svg += `<text x="${p.x}" y="${p.y + 5}" text-anchor="middle" font-size="13" fill="#ffffff" style="pointer-events:none;filter:drop-shadow(0 0 4px rgba(255,255,255,0.6));">★</text>`;
+        svg += `<text x="${p.x}" y="${ly}" text-anchor="middle" font-size="7.5" fill="rgba(255,255,255,0.85)" letter-spacing="0.04em" style="pointer-events:none;">${lbl}</text>`;
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="9" fill="transparent" class="chart-pt" data-idx="${idx}" style="cursor:pointer;"/>`;
+      } else {
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#00ff41" opacity="0.95" class="chart-pt" data-idx="${idx}" style="cursor:pointer;"/>`;
+      }
+    });
+  }
 
-  // Animate line draw using getTotalLength
-  requestAnimationFrame(() => {
-    const path = el.querySelector('#chart-line');
-    if (!path) return;
-    const len = path.getTotalLength();
-    path.style.strokeDasharray = len;
-    path.style.strokeDashoffset = len;
-    path.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
-    requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
-  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" style="display:block;">${svg}</svg>`;
 
   // Tooltip
   el.querySelectorAll('.chart-pt').forEach(pt => {
     pt.addEventListener('mouseenter', () => {
-      const i = parseInt(pt.getAttribute('data-idx'));
-      const s = data[i];
+      const idx = parseInt(pt.getAttribute('data-idx'));
+      const {s, v} = activePts[idx];
       tooltip.style.display = 'block';
-      const sessionVol = vols[i];
-      let ttRow1, ttRow2;
+      let rows = '';
       if (isIso) {
-        const bestHold = Math.max(...(s.entries||[]).map(e => e.reps), 0);
-        ttRow1 = `<div class="tt-row"><span class="tt-key">HOLD TIME</span><span class="tt-val">${fmtSecs(sessionVol)}</span></div>`;
-        ttRow2 = `<div class="tt-row"><span class="tt-key">BEST HOLD</span><span class="tt-val">${fmtSecs(bestHold)}</span></div>`;
+        rows = `<div class="tt-row"><span class="tt-key">HOLD TIME</span><span class="tt-val">${fmtSecs(v)}</span></div>`;
       } else {
         const ms = s.max_set;
-        ttRow1 = `<div class="tt-row"><span class="tt-key">VOLUME</span><span class="tt-val">${s.volume.toLocaleString()} lbs</span></div>`;
-        ttRow2 = `<div class="tt-row"><span class="tt-key">MAX SET</span><span class="tt-val">${ms ? `${ms.weight} × ${ms.reps}` : '—'}</span></div>`;
+        rows = `<div class="tt-row"><span class="tt-key">VOLUME</span><span class="tt-val">${s.volume.toLocaleString()} lbs</span></div>` +
+               `<div class="tt-row"><span class="tt-key">MAX SET</span><span class="tt-val">${ms ? `${ms.weight} × ${ms.reps}` : '—'}</span></div>`;
       }
-      tooltip.innerHTML = `<div class="tt-date">${s.date}${s.is_pr && !isIso ? ' ★ PR' : ''}</div>
-        ${ttRow1}${ttRow2}
-        <div class="tt-row"><span class="tt-key">SETS</span><span class="tt-val">${s.entries.length}</span></div>`;
+      tooltip.innerHTML = `<div class="tt-date">${s.date}${s.is_pr && !isIso ? ' ★ PR' : ''}</div>${rows}<div class="tt-row"><span class="tt-key">SETS</span><span class="tt-val">${s.max_set_count ?? s.entries.length}</span></div>`;
     });
     pt.addEventListener('mousemove', e => {
       const rect = el.getBoundingClientRect();
@@ -2004,7 +2592,7 @@ function renderTable(history, isIso = false) {
       <td class="td-date">${s.date}</td>
       <td class="td-weight">${mainStat}</td>
       <td class="td-vol">${sessionStat}</td>
-      <td class="td-sets">${s.entries.length} sets</td>
+      <td class="td-sets">${s.max_set_count ?? s.entries.length} sets</td>
       <td style="text-align:center;">${badge}</td>
     </tr>`;
   }).join('');
@@ -2025,10 +2613,173 @@ function renderTable(history, isIso = false) {
 }
 
 // ══════════════════════════════════════
+// STATS OVERLAY
+// ══════════════════════════════════════
+document.getElementById('stats-close').addEventListener('click', closeStats);
+
+function closeStats() {
+  document.getElementById('stats-overlay').classList.remove('open');
+}
+
+async function openStats() {
+  document.getElementById('stats-overlay').classList.add('open');
+  await Promise.all([loadBwChart(), loadPRs()]);
+}
+
+async function loadBwChart() {
+  try {
+    const data = await authFetch('/api/stats/bodyweight').then(r => r.json());
+    renderBwChart(data);
+  } catch(e) {}
+}
+
+function renderBwChart(data) {
+  const svg = document.getElementById('bw-chart');
+  const last = document.getElementById('bw-last');
+  svg.innerHTML = '';
+
+  if (!data.length) {
+    svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#003010" font-family="Share Tech Mono,monospace" font-size="11" letter-spacing="2">NO DATA YET</text>';
+    last.textContent = '';
+    return;
+  }
+
+  // Update "last recorded" blurb
+  const latest = data[data.length - 1];
+  last.textContent = `LAST: ${latest.weight} LBS — ${latest.date}`;
+
+  const W = 600, H = 160, PAD = { t: 12, r: 16, b: 28, l: 44 };
+  const weights = data.map(d => d.weight);
+  const minW = Math.min(...weights), maxW = Math.max(...weights);
+  const range = maxW - minW || 1;
+
+  const xScale = i => PAD.l + (i / Math.max(data.length - 1, 1)) * (W - PAD.l - PAD.r);
+  const yScale = w => PAD.t + (1 - (w - minW) / range) * (H - PAD.t - PAD.b);
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  // Grid lines (3)
+  [0, 0.5, 1].forEach(t => {
+    const y = PAD.t + t * (H - PAD.t - PAD.b);
+    const val = (maxW - t * range).toFixed(1);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', PAD.l); line.setAttribute('x2', W - PAD.r);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'rgba(0,255,65,.08)'); line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lbl.setAttribute('x', PAD.l - 6); lbl.setAttribute('y', y + 4);
+    lbl.setAttribute('text-anchor', 'end'); lbl.setAttribute('fill', '#004010');
+    lbl.setAttribute('font-family', 'Share Tech Mono,monospace'); lbl.setAttribute('font-size', '9');
+    lbl.textContent = val;
+    svg.appendChild(lbl);
+  });
+
+  // Smooth path (Catmull-Rom)
+  const pts = data.map((d, i) => ({ x: xScale(i), y: yScale(d.weight) }));
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const cp1x = p1.x + (p2.x - p0.x) / 6, cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6, cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x},${p2.y}`;
+  }
+  // Fill area under line
+  const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  const bottom = H - PAD.b;
+  area.setAttribute('d', `${d} L${pts[pts.length-1].x},${bottom} L${pts[0].x},${bottom} Z`);
+  area.setAttribute('fill', 'rgba(0,255,65,.04)'); area.setAttribute('stroke', 'none');
+  svg.appendChild(area);
+
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  line.setAttribute('d', d); line.setAttribute('fill', 'none');
+  line.setAttribute('stroke', '#00ff41'); line.setAttribute('stroke-width', '1.5');
+  svg.appendChild(line);
+
+  // Dots + tooltips
+  data.forEach((entry, i) => {
+    const cx = xScale(i), cy = yScale(entry.weight);
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', '3');
+    dot.setAttribute('fill', '#00ff41'); dot.setAttribute('stroke', '#000'); dot.setAttribute('stroke-width', '1');
+    const tip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    tip.textContent = `${entry.weight} lbs — ${entry.date}`;
+    dot.appendChild(tip);
+    svg.appendChild(dot);
+  });
+
+  // X-axis dates (first + last, and some in between)
+  const showIdx = new Set([0, data.length - 1]);
+  if (data.length > 4) showIdx.add(Math.floor(data.length / 2));
+  showIdx.forEach(i => {
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lbl.setAttribute('x', xScale(i)); lbl.setAttribute('y', H - 4);
+    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('fill', '#004010');
+    lbl.setAttribute('font-family', 'Share Tech Mono,monospace'); lbl.setAttribute('font-size', '8');
+    lbl.textContent = data[i].date.slice(5); // MM-DD
+    svg.appendChild(lbl);
+  });
+}
+
+async function loadPRs() {
+  const list = document.getElementById('pr-list');
+  try {
+    const data = await authFetch('/api/stats/prs').then(r => r.json());
+    if (!data.length) { list.innerHTML = '<div class="pr-none">NO PRIORITY EXERCISES SET — MARK EXERCISES AS ★ IN EXERCISE LIST</div>'; return; }
+    list.innerHTML = data.map(pr => {
+      if (!pr.weight && !pr.reps) {
+        return `<div class="pr-row"><span class="pr-name">${pr.exercise}</span><span class="pr-none" style="grid-column:2/4">NO DATA</span></div>`;
+      }
+      if (pr.is_isometric) {
+        return `<div class="pr-row">
+          <span class="pr-name">${pr.exercise}</span>
+          <span class="pr-val">${pr.reps}s HOLD</span>
+          <span class="pr-date">${pr.date || ''}</span>
+        </div>`;
+      }
+      const oneRm = pr.estimated_1rm ? `<span class="pr-1rm">~${pr.estimated_1rm} LBS 1RM</span>` : '';
+      return `<div class="pr-row">
+        <span class="pr-name">${pr.exercise}</span>
+        <span class="pr-val">${pr.weight} × ${pr.reps}</span>
+        <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">${oneRm}<span class="pr-date">${pr.date || ''}</span></span>
+      </div>`;
+    }).join('');
+  } catch(e) { list.innerHTML = '<div class="pr-none">ERROR</div>'; }
+}
+
+document.getElementById('bw-log-btn').addEventListener('click', async () => {
+  const val = parseFloat(document.getElementById('bw-input').value);
+  if (!val || val < 50 || val > 500) return;
+  await authFetch('/api/stats/bodyweight', {method: 'POST', body: JSON.stringify({weight: val})});
+  document.getElementById('bw-input').value = '';
+  await loadBwChart();
+});
+document.getElementById('bw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('bw-log-btn').click();
+});
+
+// ══════════════════════════════════════
 // EXERCISE LIST OVERLAY
 // ══════════════════════════════════════
+function _closeExlist() {
+  const ov = document.getElementById('exlist-overlay');
+  ov.classList.remove('open', 'edit-mode');
+  document.getElementById('exlist-edit-toggle').textContent = '✎ EDIT';
+  _exlistFilter = null;
+}
+
+document.getElementById('exlist-filter-label').addEventListener('click', () => {
+  _exlistFilter = null;
+  renderExlist();
+});
+
 document.getElementById('exercise-list-btn').addEventListener('click', openExerciseList);
-document.getElementById('exlist-close').addEventListener('click', () => document.getElementById('exlist-overlay').classList.remove('open'));
+document.getElementById('exlist-close').addEventListener('click', _closeExlist);
+document.getElementById('exlist-edit-toggle').addEventListener('click', () => {
+  const ov = document.getElementById('exlist-overlay');
+  const isEdit = ov.classList.toggle('edit-mode');
+  document.getElementById('exlist-edit-toggle').textContent = isEdit ? '✓ DONE' : '✎ EDIT';
+});
 
 async function openExerciseList() {
   document.getElementById('exlist-overlay').classList.add('open');
@@ -2038,6 +2789,7 @@ async function openExerciseList() {
 
 let _exlistData = [];   // [{name, muscle_category}]
 let _exlistCats = [];   // ['Arms', 'Back', ...]
+let _exlistFilter = null; // null = all, or muscle category string
 
 async function loadExlistCategories() {
   try {
@@ -2058,9 +2810,21 @@ async function renderExlist() {
     _exlistData.forEach(e => { _exerciseIsIsoMap[e.name] = !!e.is_isometric; });
   } catch(e) { body.innerHTML = '<div class="no-data">[ ERROR ]</div>'; return; }
 
+  // Apply muscle filter
+  const filterLbl = document.getElementById('exlist-filter-label');
+  const filtered = _exlistFilter
+    ? _exlistData.filter(ex => (ex.muscle_category || '').toLowerCase() === _exlistFilter.toLowerCase())
+    : _exlistData;
+  if (_exlistFilter) {
+    filterLbl.textContent = `✕ ${_exlistFilter.toUpperCase()}`;
+    filterLbl.style.display = '';
+  } else {
+    filterLbl.style.display = 'none';
+  }
+
   // Group by category
   const groups = {};
-  _exlistData.forEach(ex => {
+  filtered.forEach(ex => {
     const cat = ex.muscle_category || 'Uncategorized';
     (groups[cat] = groups[cat] || []).push(ex);
   });
@@ -2094,17 +2858,33 @@ async function renderExlist() {
           <input type="checkbox" class="el-isometric-cb"${ex.is_isometric ? ' checked' : ''} style="accent-color:var(--cyan);cursor:pointer;" />
           ⏱
         </label>
+        <label class="exlist-bodyweight-label" title="Bodyweight — bare number logs reps only (weight still accepted)">
+          <input type="checkbox" class="el-bodyweight-cb"${ex.is_bodyweight ? ' checked' : ''} style="accent-color:#ffdd00;cursor:pointer;" />
+          BW
+        </label>
         <label class="exlist-priority-label" title="Toggle priority">
           <input type="checkbox" class="el-priority-cb"${ex.is_priority ? ' checked' : ''} style="accent-color:var(--green);cursor:pointer;" />
           ★
         </label>
-        <button class="btn-entry el-edit-btn">✎ EDIT</button>
-        <button class="btn-entry btn-del el-del-btn">✕ DELETE</button>`;
+        <button class="btn-entry el-edit-btn admin-only">✎ EDIT</button>
+        <button class="btn-entry btn-del el-del-btn admin-only">✕ DELETE</button>`;
 
       const viewEls  = row.querySelectorAll('[data-view]');
       const editEl   = row.querySelector('[data-edit]');
       const editBtn  = row.querySelector('.el-edit-btn');
       const delBtn   = row.querySelector('.el-del-btn');
+
+      // Click name to set as current exercise, close all overlays, return to main page
+      row.querySelector('.exlist-name').addEventListener('click', () => {
+        if (editEl.classList.contains('open')) return; // ignore click while editing
+        setActiveExercise(ex.name);
+        authFetch('/api/exercise/set-current', {method: 'POST', body: JSON.stringify({exercise: ex.name})});
+        refreshHistory(ex.name);
+        closeHistory(); closeRecovery(); closeHelp(); closeDetails(); closeExSel(); closeStats();
+        if (window._navCloseImport) window._navCloseImport();
+        _closeExlist();
+        setInterim(`✓ ${ex.name.toUpperCase()}`);
+      });
 
       editBtn.addEventListener('click', () => {
         viewEls.forEach(el => el.style.display = 'none');
@@ -2147,6 +2927,15 @@ async function renderExlist() {
         });
         _exerciseNames = [];
         _exerciseIsIsoMap = {};
+      });
+
+      row.querySelector('.el-bodyweight-cb').addEventListener('change', async function() {
+        await authFetch(`/api/exercise/${encodeURIComponent(ex.name)}/bodyweight`, {
+          method: 'PUT',
+          body: JSON.stringify({bodyweight: this.checked})
+        });
+        _lastPriorityHash = '';
+        refreshPriorityBar();
       });
 
       row.querySelector('.el-priority-cb').addEventListener('change', async function() {
@@ -2220,14 +3009,19 @@ function initHistMuscleFilter() {
 const _MONTH_NAMES = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
 
 document.getElementById('history-btn').addEventListener('click', openHistory);
+document.getElementById('stats-btn').addEventListener('click', openStats);
 document.getElementById('history-close').addEventListener('click', closeHistory);
 document.getElementById('hist-prev-btn').addEventListener('click', () => {
+  const prevYear = _histYear;
   _histMonth--; if (_histMonth < 1) { _histMonth = 12; _histYear--; }
   loadHistMonth();
+  if (_histYear !== prevYear) loadYearChart(_histYear);
 });
 document.getElementById('hist-next-btn').addEventListener('click', () => {
+  const prevYear = _histYear;
   _histMonth++; if (_histMonth > 12) { _histMonth = 1; _histYear++; }
   loadHistMonth();
+  if (_histYear !== prevYear) loadYearChart(_histYear);
 });
 
 function openHistory() {
@@ -2240,6 +3034,7 @@ function openHistory() {
   document.getElementById('history-overlay').classList.add('open');
   initHistMuscleFilter();
   loadHistMonth();
+  loadYearChart(_histYear);
 }
 function closeHistory() {
   document.getElementById('history-overlay').classList.remove('open');
@@ -2302,6 +3097,7 @@ let _histCalCache = null; // {days, muscle_maxes} for current month
 
 async function loadHistMonth() {
   document.getElementById('hist-month-label').textContent = `${_MONTH_NAMES[_histMonth-1]} ${_histYear}`;
+  document.getElementById('hist-month-vol').textContent = '';
   const grid = document.getElementById('hist-cal-grid');
   grid.innerHTML = '<div style="color:#004010;font-size:.6rem;letter-spacing:.15em;padding:18px;grid-column:1/-1;">LOADING...</div>';
   try {
@@ -2309,10 +3105,60 @@ async function loadHistMonth() {
     const days = Array.isArray(data) ? data : (data.days || []);
     _calMuscleMaxes = data.muscle_maxes || {};
     _histCalCache = { days, muscle_maxes: _calMuscleMaxes };
+    // Monthly volume total
+    const monthVol = days.reduce((a, d) => a + (d.volume || 0), 0);
+    if (monthVol > 0) {
+      const fmt = monthVol >= 1000000 ? `${(monthVol/1000000).toFixed(2)}M` : monthVol >= 1000 ? `${(monthVol/1000).toFixed(1)}k` : monthVol;
+      document.getElementById('hist-month-vol').textContent = `// ${fmt} LBS`;
+    }
     renderHistCalendar(days);
   } catch(e) {
     grid.innerHTML = '<div style="color:#ff4040;font-size:.6rem;padding:18px;grid-column:1/-1;">ERROR</div>';
   }
+}
+
+let _histYearCache = {};
+
+async function loadYearChart(year) {
+  document.getElementById('hist-year-num').textContent = year;
+  const chartEl = document.getElementById('hist-year-chart');
+  if (_histYearCache[year]) { renderYearChart(_histYearCache[year], year); return; }
+  try {
+    const data = await authFetch(`/api/calendar/year?year=${year}`).then(r => r.json());
+    _histYearCache[year] = data;
+    renderYearChart(data, year);
+  } catch(e) { chartEl.innerHTML = ''; }
+}
+
+function renderYearChart(data, year) {
+  const el = document.getElementById('hist-year-chart');
+  const curMonth = new Date().getMonth() + 1;
+  const curYear  = new Date().getFullYear();
+  const W = 1000, H = 56;
+  const PAD = {top: 4, right: 4, bottom: 18, left: 4};
+  const maxVol = Math.max(...data.map(d => d.volume), 1);
+  const barW = (W - PAD.left - PAD.right) / 12;
+  const cH = H - PAD.top - PAD.bottom;
+  const ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  let svg = '';
+  data.forEach((d, i) => {
+    const x = PAD.left + i * barW;
+    const bh = d.volume > 0 ? Math.max(3, Math.round((d.volume / maxVol) * cH)) : 0;
+    const by = PAD.top + cH - bh;
+    const isCur = (year === curYear && d.month === curMonth);
+    const barColor = isCur ? 'var(--green)' : d.volume > 0 ? 'rgba(0,255,65,.38)' : 'rgba(0,255,65,.07)';
+    const gap = 3;
+    if (bh > 0) svg += `<rect x="${x + gap}" y="${by}" width="${barW - gap*2}" height="${bh}" fill="${barColor}" rx="1"/>`;
+    else svg += `<rect x="${x + gap}" y="${PAD.top + cH - 2}" width="${barW - gap*2}" height="2" fill="rgba(0,255,65,.07)" rx="1"/>`;
+    // Volume label on hover-ish — tooltip via title
+    const volFmt = d.volume >= 1000 ? `${(d.volume/1000).toFixed(1)}k` : d.volume;
+    svg += `<rect x="${x}" y="${PAD.top}" width="${barW}" height="${cH + PAD.bottom}" fill="transparent">
+      <title>${ABBR[i]}: ${volFmt > 0 ? volFmt + ' lbs' : 'no data'} (${d.session_days} day${d.session_days !== 1 ? 's' : ''})</title></rect>`;
+    // Month label
+    const labelColor = isCur ? 'var(--green)' : d.volume > 0 ? '#004a18' : '#002808';
+    svg += `<text x="${x + barW/2}" y="${H - 3}" text-anchor="middle" font-size="7" fill="${labelColor}">${ABBR[i]}</text>`;
+  });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="display:block;">${svg}</svg>`;
 }
 
 function renderHistCalendar(dayData) {
@@ -2333,7 +3179,8 @@ function renderHistCalendar(dayData) {
     cell.className = classes;
     if (dateStr) cell.dataset.date = dateStr;
 
-    let html = `<span class="cal-day-num">${dayNum}</span>`;
+    const setCntHtml = info && info.set_count ? `<span class="cal-set-cnt">${info.set_count}S</span>` : '';
+    let html = `<div class="cal-day-hdr"><span class="cal-day-num">${dayNum}</span>${setCntHtml}</div>`;
 
     const visibleMuscles = info ? info.muscles.filter(m => _histMuscleFilter.has(m.name)) : [];
     if (visibleMuscles.length) {
@@ -2501,14 +3348,11 @@ document.getElementById('hist-add-save').addEventListener('click', async () => {
 // ══════════════════════════════════════
 
 // ══════════════════════════════════════
-// TEXT-TO-SPEECH (Arnold speaks back)
+// TEXT-TO-SPEECH — DISABLED (text-only)
 // ══════════════════════════════════════
-let _ttsSpokenCount = -1;  // -1 = not yet initialised; skip history on first load
-let _ttsMuted = false;
-let _ttsVoice = null;
-
 function _loadVoice() {
-  const voices = window.speechSynthesis.getVoices();
+  // TTS removed; keeping stub so nothing breaks
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
   if (!voices.length) return;
   // Prefer a low male English voice to suit the character
   const preferred = ['Microsoft David', 'Google UK English Male', 'Daniel', 'Fred', 'Alex', 'Thomas'];
@@ -2525,28 +3369,96 @@ if (window.speechSynthesis) {
   _loadVoice();
 }
 
-function arnoldSpeak(text) {
-  if (_ttsMuted || !text || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if (_ttsVoice) u.voice = _ttsVoice;
-  u.rate  = 1.05;
-  u.pitch = 0.88;
-  window.speechSynthesis.speak(u);
+function arnoldSpeak(text) { /* TTS removed */ }
+
+const _MONTH_NAMES_SHORT = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+const _MONTH_NAMES_FULL  = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+function _voiceHistoryCmd(lower, rawTxt) {
+  // "next month" / "previous month" / "last month" / "go back"
+  if (/\b(next month|forward|next)\b/.test(lower)) {
+    const prevYear = _histYear;
+    _histMonth++; if (_histMonth > 12) { _histMonth = 1; _histYear++; }
+    loadHistMonth();
+    if (_histYear !== prevYear) loadYearChart(_histYear);
+    return `${_MONTH_NAMES[_histMonth-1]} ${_histYear}`;
+  }
+  if (/\b(prev(ious)?|last month|back month|go back)\b/.test(lower)) {
+    const prevYear = _histYear;
+    _histMonth--; if (_histMonth < 1) { _histMonth = 12; _histYear--; }
+    loadHistMonth();
+    if (_histYear !== prevYear) loadYearChart(_histYear);
+    return `${_MONTH_NAMES[_histMonth-1]} ${_histYear}`;
+  }
+  // "go to [month name]" / "open [month]"
+  for (let i = 0; i < 12; i++) {
+    if (lower.includes(_MONTH_NAMES_SHORT[i]) || lower.includes(_MONTH_NAMES_FULL[i])) {
+      _histMonth = i + 1;
+      loadHistMonth();
+      return `${_MONTH_NAMES[i]} ${_histYear}`;
+    }
+  }
+  // "select [day number]" — digit command handled here too
+  const dayMatch = lower.match(/\b(?:select|open|day|go to)?\s*(\d{1,2})\b/);
+  if (dayMatch) {
+    const day = parseInt(dayMatch[1]);
+    const daysInMonth = new Date(_histYear, _histMonth, 0).getDate();
+    if (day >= 1 && day <= daysInMonth) {
+      const ds = `${_histYear}-${String(_histMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      selectHistDay(ds);
+      return `SELECTED ${day}`;
+    }
+  }
+  return null;
 }
 
-document.getElementById('tts-btn').addEventListener('click', () => {
-  _ttsMuted = !_ttsMuted;
-  const btn = document.getElementById('tts-btn');
-  btn.textContent = _ttsMuted ? '— VOICE' : '♪ VOICE';
-  btn.style.opacity = _ttsMuted ? '0.4' : '';
-  if (_ttsMuted) window.speechSynthesis.cancel();
-});
+const _MUSCLES = ['Back','Biceps','Chest','Core','Grip','Legs','Shoulders','Triceps'];
+
+function _voiceMatchMuscle(lower) {
+  if (/\b(all|everything|reset)\b/.test(lower)) return 'ALL';
+  for (const m of _MUSCLES) {
+    const ml = m.toLowerCase();
+    if (lower === ml || lower === `show ${ml}` || lower === `${ml} only` ||
+        lower === `filter ${ml}` || lower === `only ${ml}`) return m;
+  }
+  return null;
+}
+
+function _voiceMatchExercise(lower) {
+  if (!_exselData.length) return null;
+  // 1. Exact match
+  let hit = _exselData.find(e => e.name.toLowerCase() === lower);
+  if (hit) return hit;
+  // 2. Starts-with match
+  hit = _exselData.find(e => e.name.toLowerCase().startsWith(lower));
+  if (hit) return hit;
+  // 3. All words in spoken text appear in exercise name
+  const words = lower.split(/\s+/).filter(w => w.length > 2);
+  if (words.length) {
+    hit = _exselData.find(e => {
+      const en = e.name.toLowerCase();
+      return words.every(w => en.includes(w));
+    });
+    if (hit) return hit;
+  }
+  // 4. Exercise name starts-with first word (single keyword like "deadlift", "bench")
+  if (words.length === 1) {
+    hit = _exselData.find(e => e.name.toLowerCase().startsWith(words[0]));
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function _findExlistRow(query) {
+  const q = query.toLowerCase();
+  const nodes = [...document.querySelectorAll('#exlist-body .exlist-name')];
+  const exact   = nodes.find(el => el.textContent.trim().toLowerCase() === q);
+  const partial = nodes.find(el => el.textContent.trim().toLowerCase().includes(q));
+  return (exact || partial)?.closest('.exlist-row') ?? null;
+}
 
 // ══════════════════════════════════════
-// VOICE INPUT (Web Speech API)
-// ══════════════════════════════════════
-// VOICE INPUT — toggle-controlled continuous
+// VOICE INPUT — wake word "Hey Arnold"
 // ══════════════════════════════════════
 (function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2558,29 +3470,283 @@ document.getElementById('tts-btn').addEventListener('click', () => {
   let rec        = null;
   let micOn      = false;
   let restarting = false;
+  let phase      = 'wake'; // 'wake' | 'command'
+  let cmdTimer   = null;
+  let cntInterval= null;
+  const CMD_WINDOW = 10; // seconds to listen after wake word
 
-  // Dedup state lives outside buildRec so it survives mic restarts
-  let _recLastFinal  = '';
-  let _recLastMs     = 0;
-  let _voiceCooldownUntil = 0; // ms timestamp — no submissions before this
+  let _recLastFinal       = '';
+  let _recLastMs          = 0;
+  let _voiceCooldownUntil = 0;
 
   function updateBtn() {
-    toggleBtn.textContent = micOn ? '◉ MIC ON' : '◉ MIC OFF';
-    toggleBtn.style.opacity = micOn ? '1' : '0.45';
-    toggleBtn.style.borderColor = micOn ? 'var(--green)' : '';
-    toggleBtn.style.color = micOn ? 'var(--green)' : '';
+    if (!micOn) {
+      toggleBtn.textContent   = '◉ MIC OFF';
+      toggleBtn.style.opacity = '0.45';
+      toggleBtn.style.borderColor = '';
+      toggleBtn.style.color = '';
+    } else if (phase === 'command') {
+      toggleBtn.textContent   = '◉ ACTIVE';
+      toggleBtn.style.opacity = '1';
+      toggleBtn.style.borderColor = 'var(--cyan)';
+      toggleBtn.style.color       = 'var(--cyan)';
+    } else {
+      toggleBtn.textContent   = '◉ HEY ARNOLD';
+      toggleBtn.style.opacity = '1';
+      toggleBtn.style.borderColor = 'var(--green)';
+      toggleBtn.style.color       = 'var(--green)';
+    }
+  }
+
+  function setInterim(text) {
+    interim.textContent = text;
+    const live = document.getElementById('qh-live-text');
+    if (live) live.textContent = text;
+  }
+
+  function enterCommandMode() {
+    phase = 'command';
+    updateBtn();
+    voiceBar.style.boxShadow = '0 0 18px rgba(0,229,255,.25)';
+    clearTimeout(cmdTimer); clearInterval(cntInterval);
+    let rem = CMD_WINDOW;
+    setInterim(`LISTENING — ${rem}s`);
+    cntInterval = setInterval(() => {
+      rem--;
+      if (rem > 0) setInterim(`LISTENING — ${rem}s`);
+    }, 1000);
+    cmdTimer = setTimeout(() => enterWakeMode(), CMD_WINDOW * 1000);
+    showQuickHelp(true); // show popup, no auto-close — closes when command finishes
+  }
+
+  function enterWakeMode() {
+    phase = 'wake';
+    clearTimeout(cmdTimer); clearInterval(cntInterval);
+    cmdTimer = null;
+    updateBtn();
+    voiceBar.style.boxShadow = '';
+    if (micOn) setInterim('SAY: HEY ARNOLD');
+    hideQuickHelp();
+  }
+
+  // Exposed so submitInput (outside IIFE) can manage voice lifecycle
+  window._voiceRefreshCtx = function() {
+    if (phase !== 'command') return;
+    clearTimeout(cmdTimer); clearInterval(cntInterval);
+    let rem = CMD_WINDOW;
+    setInterim(`LISTENING — ${rem}s`);
+    cntInterval = setInterval(() => { rem--; if (rem > 0) setInterim(`LISTENING — ${rem}s`); }, 1000);
+    cmdTimer = setTimeout(enterWakeMode, CMD_WINDOW * 1000);
+    showQuickHelp(true); // update popup to new context, no auto-close
+  };
+  window._voiceEndCmd = function() { if (phase === 'command') enterWakeMode(); };
+
+  function isWakeWord(txt) {
+    const s = txt.toLowerCase();
+    return /hey\s+arnold/.test(s) || /hey\s+art\b/.test(s) || s === 'arnold';
+  }
+
+  // Normalize spoken shorthand: "95 by 10", "95 times 10", "95 for 10" → "95 x 10"
+  function normalizeVoice(txt) {
+    return txt
+      .replace(/\b(by|times|cross|into|and)\b/gi, 'x')
+      .replace(/\bfor\s+(\d)/gi, 'x $1');
+  }
+
+  function processCommand(rawTxt, confidence, now) {
+    if (!rawTxt) return;
+    const txt   = normalizeVoice(rawTxt);
+    const lower = txt.toLowerCase().trim().replace(/[.,!?;:]+$/, '');
+    const hasDigit = /\d/.test(txt);
+    const minConf  = hasDigit ? 0.75 : 0.75; // single threshold — SpeechRecognition confidence is unreliable
+
+    if (confidence > 0 && confidence < minConf) {
+      setInterim(`LOW CONF (${Math.round(confidence*100)}%)`);
+      setTimeout(() => enterWakeMode(), 1500);
+      return;
+    }
+    // Duplicate guard: 3s for digit commands (allow quick successive sets), 8s for text
+    const dupWindow = hasDigit ? 3000 : 8000;
+    if (lower === _recLastFinal && now - _recLastMs < dupWindow) { enterWakeMode(); return; }
+    // Post-log cooldown: 1.5s just to prevent double-fire from one utterance
+    if (hasDigit && now < _voiceCooldownUntil) { enterWakeMode(); return; }
+
+    setInterim(txt.toUpperCase());
+
+    // ── Context-specific voice commands ──
+    if (document.getElementById('history-overlay').classList.contains('open')) {
+      // HISTORY: "select [day]", "next month", "previous month", "go to [month]"
+      const histNav = _voiceHistoryCmd(lower, hasDigit ? txt : null);
+      if (histNav) {
+        setInterim(histNav);
+        window._voiceRefreshCtx && window._voiceRefreshCtx();
+        return;
+      }
+    }
+
+    if (!hasDigit) {
+      // GLOBAL: "select [exercise name]" — directly set active exercise from any page
+      const selMatch = lower.match(/^select\s+(.+)$/);
+      if (selMatch) {
+        const query = selMatch[1].trim();
+        (async () => {
+          if (!_exselData.length) {
+            try { _exselData = await authFetch('/api/exercises/with-last-performed').then(r => r.json()); } catch(e) {}
+          }
+          const hit = _voiceMatchExercise(query);
+          if (hit) {
+            setActiveExercise(hit.name);
+            authFetch('/api/exercise/set-current', {method: 'POST', body: JSON.stringify({exercise: hit.name})});
+            refreshHistory(hit.name);
+            setInterim(`✓ ${hit.name.toUpperCase()}`);
+            _closeExlist();
+          } else {
+            setInterim(`NO MATCH: ${query.toUpperCase()}`);
+          }
+        })();
+        setTimeout(() => enterWakeMode(), 1200);
+        return;
+      }
+
+      // VOLUME PAGE: muscle filter + date range
+      if (document.getElementById('recovery-overlay').classList.contains('open')) {
+        // Date range: "14 days", "30 days", "sixty days", "change to 60", etc.
+        const rangeMatch = lower.match(/\b(14|fourteen|30|thirty|60|sixty)\b/);
+        const rangeMap = {'14':14,'fourteen':14,'30':30,'thirty':30,'60':60,'sixty':60};
+        if (rangeMatch) {
+          const days = rangeMap[rangeMatch[1]];
+          const btn = document.querySelector(`.rec-range-btn[data-days="${days}"]`);
+          if (btn) { btn.click(); setInterim(`${days}D RANGE`); setTimeout(() => enterWakeMode(), 900); return; }
+        }
+        const muscle = _voiceMatchMuscle(lower);
+        if (muscle !== null && muscle !== 'ALL') {
+          setInterim(`SHOWING ${muscle.toUpperCase()}`);
+          const btn = document.querySelector(`.rec-vol-fbtn[title="${muscle}"]`);
+          if (btn) {
+            btn.click(); // data already loaded — just filter
+          } else {
+            _recVolActive.clear();
+            _recVolActive.add(muscle);
+            loadRecoveryVolume();
+          }
+          setTimeout(() => enterWakeMode(), 900);
+          return;
+        }
+      }
+
+      // EXERCISE LIST: edit mode voice commands
+      if (document.getElementById('exlist-overlay').classList.contains('open')) {
+        const ov = document.getElementById('exlist-overlay');
+        const inEditMode = ov.classList.contains('edit-mode');
+        if (/^scroll down$/i.test(lower)) {
+          document.getElementById('exlist-body').scrollBy({top: 320, behavior: 'smooth'});
+          window._voiceRefreshCtx && window._voiceRefreshCtx();
+          return;
+        }
+        if (/^scroll up$/i.test(lower)) {
+          document.getElementById('exlist-body').scrollBy({top: -320, behavior: 'smooth'});
+          window._voiceRefreshCtx && window._voiceRefreshCtx();
+          return;
+        }
+        if (lower === 'edit' && !inEditMode) {
+          ov.classList.add('edit-mode');
+          document.getElementById('exlist-edit-toggle').textContent = '✓ DONE';
+          setInterim('EDIT MODE ON');
+          window._voiceRefreshCtx && window._voiceRefreshCtx();
+          return;
+        }
+        if (/^(done|cancel)$/.test(lower) && inEditMode) {
+          ov.classList.remove('edit-mode');
+          document.getElementById('exlist-edit-toggle').textContent = '✎ EDIT';
+          setInterim('EDIT MODE OFF');
+          window._voiceRefreshCtx && window._voiceRefreshCtx();
+          return;
+        }
+        // Muscle filter: "show back", "show all", "all"
+        if (/^(show all|all|reset|everything)$/.test(lower)) {
+          _exlistFilter = null;
+          renderExlist();
+          setInterim('SHOWING ALL');
+          window._voiceRefreshCtx && window._voiceRefreshCtx();
+          return;
+        }
+        const showMuscleM = lower.match(/^show\s+(.+)$/);
+        if (showMuscleM) {
+          const muscle = _voiceMatchMuscle(showMuscleM[1].trim());
+          if (muscle && muscle !== 'ALL') {
+            _exlistFilter = muscle;
+            renderExlist();
+            setInterim(`SHOWING ${muscle.toUpperCase()}`);
+            window._voiceRefreshCtx && window._voiceRefreshCtx();
+            return;
+          }
+        }
+        if (inEditMode) {
+          const editMatch = lower.match(/^edit\s+(\S.+)$/);
+          if (editMatch) {
+            const row = _findExlistRow(editMatch[1].trim());
+            if (row) {
+              row.querySelector('.el-edit-btn')?.click();
+              setInterim('EDITING: ' + row.querySelector('.exlist-name').textContent.trim().toUpperCase());
+            } else {
+              setInterim('NOT FOUND: ' + editMatch[1].toUpperCase());
+            }
+            window._voiceRefreshCtx && window._voiceRefreshCtx();
+            return;
+          }
+          const delMatch = lower.match(/^delete\s+(\S.+)$/);
+          if (delMatch) {
+            const row = _findExlistRow(delMatch[1].trim());
+            if (row) {
+              row.querySelector('.el-del-btn')?.click();
+              setInterim('DELETED: ' + row.querySelector('.exlist-name').textContent.trim().toUpperCase());
+            } else {
+              setInterim('NOT FOUND: ' + delMatch[1].toUpperCase());
+            }
+            setTimeout(() => enterWakeMode(), 900);
+            return;
+          }
+        } else {
+          // View mode: speaking a name selects the exercise and closes the list
+          const row = _findExlistRow(lower);
+          if (row) {
+            row.querySelector('.exlist-name')?.click();
+            setInterim('✓ ' + row.querySelector('.exlist-name').textContent.trim().toUpperCase());
+            setTimeout(() => enterWakeMode(), 900);
+            return;
+          }
+        }
+      }
+
+    }
+
+    if (hasDigit) {
+      _recLastFinal = lower;
+      _recLastMs    = now;
+      _voiceCooldownUntil = now + 1500; // 1.5s — just blocks double-fire from one utterance
+      submitVoiceInput(txt);
+      setTimeout(() => enterWakeMode(), 1000); // log = terminal, end session
+    } else {
+      if (/^(close|closed|clothes|cloths|exit|main|home|go home)$/.test(lower)) {
+        _handleNav('close');
+        setTimeout(() => enterWakeMode(), 600); // close = terminal, end session
+      } else {
+        document.getElementById('cmd-input').value = txt;
+        submitInput(); // submitInput decides: refresh context or end session
+      }
+    }
   }
 
   function buildRec() {
     const r = new SpeechRecognition();
-    r.continuous      = true;
-    r.interimResults  = true;
-    r.lang            = 'en-US';
+    r.continuous     = true;
+    r.interimResults = true;
+    r.lang           = 'en-US';
     r.maxAlternatives = 1;
 
     r.onstart = () => {
       voiceBar.classList.add('active');
-      interim.textContent = 'LISTENING...';
+      if (phase !== 'command') setInterim('SAY: HEY ARNOLD');
     };
 
     r.onresult = (e) => {
@@ -2588,56 +3754,46 @@ document.getElementById('tts-btn').addEventListener('click', () => {
       if (!result) return;
       const alt = result[0];
       const t   = alt.transcript;
+
       if (!result.isFinal) {
-        interim.textContent = t.toUpperCase();
+        setInterim(t.toUpperCase());
         return;
       }
-      const txt = t.trim();
+
+      const txt   = t.trim();
       if (!txt) return;
-      const now = Date.now();
+      const lower = txt.toLowerCase().trim();
+      const now   = Date.now();
 
-      // 1. Reject low-confidence audio (ambient noise, unclear speech)
-      if (alt.confidence > 0 && alt.confidence < 0.82) {
-        interim.textContent = `LOW CONF (${Math.round(alt.confidence*100)}%)`;
-        setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 1200);
+      // ── WAKE MODE: only look for the wake word ──
+      if (phase === 'wake') {
+        if (isWakeWord(txt)) {
+          // Strip wake word — process any trailing command immediately
+          const remainder = txt.replace(/hey\s+arnold\w*/i, '').replace(/hey\s+art\b/i, '').trim();
+          enterCommandMode();
+          if (remainder) processCommand(remainder, alt.confidence, now);
+        } else {
+          setTimeout(() => { if (micOn && phase === 'wake') setInterim('SAY: HEY ARNOLD'); }, 800);
+        }
         return;
       }
 
-      // 2. Dedup — ignore same phrase within 15s (survives mic restarts)
-      if (txt.toLowerCase() === _recLastFinal && now - _recLastMs < 15000) return;
-
-      // 3. Post-log cooldown — prevent re-triggering right after a submission
-      if (now < _voiceCooldownUntil) return;
-
-      // 4. Require at least one digit — exercise logs always contain numbers (weight/reps)
-      if (!/\d/.test(txt)) {
-        document.getElementById('cmd-input').value = txt;
-        submitInput();
-        setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 900);
-        return;
-      }
-
-      _recLastFinal = txt.toLowerCase();
-      _recLastMs    = now;
-      _voiceCooldownUntil = now + 5000; // 5s cooldown after any numeric command
-      interim.textContent = txt.toUpperCase();
-      document.getElementById('cmd-input').value = txt;
-      submitInput();
-      setTimeout(() => { if (voiceBar.classList.contains('active')) interim.textContent = 'LISTENING...'; }, 900);
+      // ── COMMAND MODE ──
+      if (/^(cancel|never ?mind|stop listening)$/.test(lower)) { enterWakeMode(); return; }
+      clearTimeout(cmdTimer); clearInterval(cntInterval);
+      processCommand(txt, alt.confidence, now);
     };
 
     r.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
         micOn = false; updateBtn();
         voiceBar.classList.remove('active');
-        interim.textContent = 'MIC BLOCKED';
+        setInterim('MIC BLOCKED');
       } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
-        // network / audio-capture / other — show briefly then let onend restart
-        interim.textContent = e.error.toUpperCase();
+        setInterim(e.error.toUpperCase());
       }
     };
 
-    // Browser ends continuous sessions after ~60s silence — auto-restart if still on
     r.onend = () => {
       if (!micOn || restarting) return;
       restarting = true;
@@ -2649,11 +3805,14 @@ document.getElementById('tts-btn').addEventListener('click', () => {
 
   function tryStart() {
     try { rec = buildRec(); rec.start(); }
-    catch(err) { interim.textContent = 'ERR: ' + err.message; micOn = false; updateBtn(); }
+    catch(err) { setInterim('ERR: ' + err.message); micOn = false; updateBtn(); }
   }
 
   function stopRec() {
     voiceBar.classList.remove('active');
+    voiceBar.style.boxShadow = '';
+    clearTimeout(cmdTimer); clearInterval(cntInterval);
+    phase = 'wake';
     try { rec && rec.stop(); } catch(_) {}
     rec = null;
   }
@@ -2661,7 +3820,7 @@ document.getElementById('tts-btn').addEventListener('click', () => {
   toggleBtn.addEventListener('click', () => {
     micOn = !micOn;
     updateBtn();
-    if (micOn) tryStart(); else stopRec();
+    if (micOn) { phase = 'wake'; tryStart(); } else stopRec();
   });
 
   updateBtn();
@@ -2711,6 +3870,8 @@ document.getElementById('tts-btn').addEventListener('click', () => {
   }
 
   function closeImport() { overlay.classList.remove('open'); }
+  window._navOpenImport = openImport;
+  window._navCloseImport = closeImport;
 
   const LINE_RE = /^(.*?)\s+(\d+(?:\.\d+)?)\s*[xX×]\s*(\d+)(?:\s*[xX×]\s*(\d+))?\s*$/;
   function parseLine(line) {
@@ -2879,6 +4040,14 @@ document.getElementById('tts-btn').addEventListener('click', () => {
 // ══════════════════════════════════════
 // RECOVERY OVERLAY
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// HELP OVERLAY
+// ══════════════════════════════════════
+function openHelp()  { document.getElementById('help-overlay').classList.add('open'); }
+function closeHelp() { document.getElementById('help-overlay').classList.remove('open'); }
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+
 document.getElementById('recovery-btn').addEventListener('click', openRecovery);
 document.getElementById('recovery-close').addEventListener('click', closeRecovery);
 
@@ -2891,6 +4060,10 @@ const _VOL_COLORS = {
 let _recVolDays = 30;
 let _recVolActive = new Set();
 let _recVolData   = [];
+let _recSelectedMuscle = null;
+let _exVolActive  = new Set();
+let _exVolLastData = null;
+const _EX_PALETTE = ['#00ff41','#00e5ff','#ffaa00','#ff6688','#aa44ff','#44ffcc','#ff5555','#88aaff','#ffcc44','#aaffaa'];
 
 document.querySelectorAll('.rec-range-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -2907,11 +4080,23 @@ async function loadRecoveryVolume() {
   try {
     const data = await authFetch(`/api/recovery/volume-history?days=${_recVolDays}`).then(r => r.json());
     _recVolData = data;
-    // Init active set on first load
     const muscles = [...new Set(data.map(d => d.muscle))];
+    // Remove any stale muscles that have no data in this range, then fill all if nothing left
+    for (const m of [..._recVolActive]) { if (!muscles.includes(m)) _recVolActive.delete(m); }
     if (_recVolActive.size === 0) muscles.forEach(m => _recVolActive.add(m));
     renderVolFilters(muscles);
     renderVolChart();
+    // Drill-down chart: use the already-selected muscle (defaults to Chest on open), else first with data
+    if (_recSelectedMuscle) {
+      const btn = document.querySelector(`.rec-vol-fbtn[title="${_recSelectedMuscle}"]`);
+      if (btn) btn.classList.add('selected');
+      loadExerciseChart(_recSelectedMuscle);
+    } else if (muscles.length) {
+      _recSelectedMuscle = muscles[0];
+      const firstBtn = document.querySelector(`.rec-vol-fbtn[title="${muscles[0]}"]`);
+      if (firstBtn) firstBtn.classList.add('selected');
+      loadExerciseChart(muscles[0]);
+    }
   } catch(e) {
     document.getElementById('rec-vol-chart').innerHTML =
       '<div style="color:#ff4040;font-size:.62rem;padding:20px;">ERROR LOADING VOLUME DATA</div>';
@@ -2930,9 +4115,18 @@ function renderVolFilters(muscles) {
     btn.textContent = m.slice(0,4).toUpperCase();
     btn.title = m;
     btn.addEventListener('click', () => {
-      if (_recVolActive.has(m)) _recVolActive.delete(m); else _recVolActive.add(m);
-      btn.classList.toggle('on');
+      // Show only this muscle in the main chart
+      _recVolActive.clear();
+      _recVolActive.add(m);
+      container.querySelectorAll('.rec-vol-fbtn').forEach(b => {
+        b.classList.toggle('on', b.title === m);
+        b.classList.remove('selected');
+      });
+      btn.classList.add('selected');
       renderVolChart();
+      // Load exercise drill-down for this muscle
+      _recSelectedMuscle = m;
+      loadExerciseChart(m);
     });
     container.appendChild(btn);
   });
@@ -3036,72 +4230,168 @@ function renderVolChart() {
   ).join('');
 }
 
+async function loadExerciseChart(muscle) {
+  const section = document.getElementById('rec-ex-section');
+  const chartEl = document.getElementById('rec-ex-chart');
+  document.getElementById('rec-ex-muscle-name').textContent = muscle.toUpperCase();
+  section.style.display = '';
+  chartEl.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">LOADING...</div>';
+  try {
+    const res = await authFetch(`/api/recovery/exercise-volume?muscle=${encodeURIComponent(muscle)}&days=${_recVolDays}`);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('bad response');
+    renderExerciseChart(data);
+  } catch(e) {
+    chartEl.innerHTML = `<div style="color:#ff4040;font-size:.62rem;padding:20px;">ERROR LOADING DATA (${e.message}) — restart server?</div>`;
+  }
+}
+
+function renderExerciseChart(data) {
+  _exVolLastData = data;
+  const chartEl = document.getElementById('rec-ex-chart');
+  const legEl   = document.getElementById('rec-ex-legend');
+
+  if (!data.length) {
+    chartEl.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;text-align:center;">[ NO DATA FOR THIS MUSCLE GROUP ]</div>';
+    legEl.innerHTML = '';
+    _exVolActive.clear();
+    return;
+  }
+
+  const exercises = [...new Set(data.map(d => d.exercise))].sort();
+
+  // Reset active set when exercise list changes (new muscle selected)
+  const prevKey = [..._exVolActive].sort().join('|');
+  const newKey  = exercises.join('|');
+  if (prevKey !== newKey) _exVolActive = new Set(exercises);
+
+  // Build date range
+  const dates = [];
+  for (let i = _recVolDays - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+
+  const lookup = {};
+  data.forEach(d => {
+    if (!lookup[d.exercise]) lookup[d.exercise] = {};
+    lookup[d.exercise][d.date] = d.volume;
+  });
+
+  const visibleData = data.filter(d => _exVolActive.has(d.exercise));
+  const maxVol = Math.max(...visibleData.map(d => d.volume), 1);
+
+  const W = 1000, H = 190;
+  const PAD = {top:14, right:16, bottom:30, left:54};
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const xp = i => PAD.left + (dates.length > 1 ? (i / (dates.length-1)) * cW : cW/2);
+  const yp = v => PAD.top + cH - Math.min(1, v / maxVol) * cH;
+
+  let svg = '';
+  for (let t = 0; t <= 4; t++) {
+    const v = (maxVol / 4) * t;
+    const yy = yp(v);
+    const lbl = v >= 1000 ? `${(v/1000).toFixed(1)}k` : `${Math.round(v)}`;
+    svg += `<line x1="${PAD.left}" y1="${yy}" x2="${W-PAD.right}" y2="${yy}" stroke="rgba(0,255,65,.05)"/>`;
+    svg += `<text x="${PAD.left-5}" y="${yy+4}" text-anchor="end" font-size="8" fill="#004a18">${lbl}</text>`;
+  }
+  const step = Math.ceil(dates.length / 10);
+  dates.forEach((d, i) => {
+    if (i % step === 0 || i === dates.length - 1) {
+      const dt = new Date(d + 'T12:00:00');
+      const lbl = dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+      svg += `<text x="${xp(i)}" y="${H-5}" text-anchor="middle" font-size="7" fill="#004a18">${lbl}</text>`;
+    }
+  });
+
+  exercises.forEach((ex, ei) => {
+    if (!_exVolActive.has(ex)) return;
+    const color = _EX_PALETTE[ei % _EX_PALETTE.length];
+    const pts = dates.map((d,i) => ({x:xp(i), y:yp((lookup[ex]||{})[d]||0), v:(lookup[ex]||{})[d]||0})).filter(p => p.v > 0);
+    if (!pts.length) return;
+    svg += `<path d="${_smoothPath(pts)}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.7"/>`;
+    pts.forEach(p => svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}" opacity="0.95"/>`);
+  });
+
+  chartEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" style="display:block;">${svg}</svg>`;
+
+  // Build filter buttons (only rebuild if exercise list changed)
+  if (legEl.dataset.forKey !== newKey) {
+    legEl.dataset.forKey = newKey;
+    legEl.innerHTML = '';
+    exercises.forEach((ex, ei) => {
+      const color = _EX_PALETTE[ei % _EX_PALETTE.length];
+      const btn = document.createElement('button');
+      btn.className = 'rec-ex-fbtn' + (_exVolActive.has(ex) ? ' on' : '');
+      btn.style.color = color;
+      btn.style.borderColor = color;
+      btn.textContent = ex.toUpperCase();
+      btn.dataset.ex = ex;
+      btn.addEventListener('click', () => {
+        if (_exVolActive.has(ex)) {
+          if (_exVolActive.size > 1) _exVolActive.delete(ex);
+        } else {
+          _exVolActive.add(ex);
+        }
+        // Update button states
+        legEl.querySelectorAll('.rec-ex-fbtn').forEach(b =>
+          b.classList.toggle('on', _exVolActive.has(b.dataset.ex))
+        );
+        renderExerciseChart(_exVolLastData);
+      });
+      legEl.appendChild(btn);
+    });
+  } else {
+    // Just sync button states
+    legEl.querySelectorAll('.rec-ex-fbtn').forEach(b =>
+      b.classList.toggle('on', _exVolActive.has(b.dataset.ex))
+    );
+  }
+}
+
 function closeRecovery() {
   document.getElementById('recovery-overlay').classList.remove('open');
 }
 
 async function openRecovery() {
   document.getElementById('recovery-overlay').classList.add('open');
+  _recVolActive.clear(); // empty → loadRecoveryVolume auto-fills all muscles with data
+  _recSelectedMuscle = 'Chest'; // drill-down chart defaults to Chest
+  _exVolActive.clear();
+  _exVolLastData = null;
+  document.getElementById('rec-ex-section').style.display = 'none';
   const grid = document.getElementById('recovery-grid');
-  const scoreEl = document.getElementById('rec-banner-score');
-  const statusEl = document.getElementById('rec-banner-status');
   const metaEl = document.getElementById('rec-banner-meta');
 
-  grid.innerHTML = '<div style="color:#005520;letter-spacing:.15em;font-size:.7rem;padding:20px 0;">SCANNING MUSCLE GROUPS...</div>';
-  scoreEl.textContent = '—';
-  scoreEl.className = 'rec-banner-score';
-  statusEl.textContent = '';
+  grid.innerHTML = '';
   metaEl.innerHTML = '';
 
+  // Pre-render muscle filter buttons immediately so voice commands work before data loads
+  renderVolFilters([]);
+
+  // Fire both requests in parallel — don't block volume chart on recovery grid load
+  loadRecoveryVolume();
   try {
     const data = await authFetch('/api/recovery').then(r => r.json());
     renderRecovery(data);
   } catch(e) {
     grid.innerHTML = '<div style="color:#ff4040;padding:20px;">[ ERROR LOADING RECOVERY DATA ]</div>';
   }
-  loadRecoveryVolume();
 }
 
 function renderRecovery(data) {
   const grid = document.getElementById('recovery-grid');
-  const scoreEl = document.getElementById('rec-banner-score');
-  const statusEl = document.getElementById('rec-banner-status');
   const metaEl = document.getElementById('rec-banner-meta');
 
   const trained = data.filter(d => d.recovery_pct !== null);
-  const avgPct = trained.length
-    ? Math.round(trained.reduce((s, d) => s + d.recovery_pct, 0) / trained.length)
-    : null;
-
-  if (avgPct === null) {
-    scoreEl.textContent = '—';
-    scoreEl.className = 'rec-banner-score';
-    statusEl.textContent = 'NO TRAINING DATA';
-    statusEl.style.color = 'var(--green-dim)';
-  } else if (avgPct >= 80) {
-    scoreEl.textContent = avgPct + '%';
-    scoreEl.className = 'rec-banner-score rdy';
-    statusEl.textContent = 'READY TO TRAIN';
-    statusEl.style.color = 'var(--green)';
-  } else if (avgPct >= 40) {
-    scoreEl.textContent = avgPct + '%';
-    scoreEl.className = 'rec-banner-score rec';
-    statusEl.textContent = 'RECOVERING';
-    statusEl.style.color = '#ffaa00';
-  } else {
-    scoreEl.textContent = avgPct + '%';
-    scoreEl.className = 'rec-banner-score ftg';
-    statusEl.textContent = 'NEEDS REST';
-    statusEl.style.color = '#ff4040';
-  }
-
   const weekGroups = data.filter(d => d.week_data && d.week_data.length > 0).length;
   const weekSessions = data.reduce((s, d) => s + (d.week_data ? d.week_data.length : 0), 0);
   metaEl.innerHTML =
     (trained.length ? trained.length + ' OF ' + data.length + ' GROUPS TRACKED' : 'START LOGGING TO TRACK RECOVERY') + '<br>' +
     weekGroups + ' GROUPS TRAINED THIS WEEK<br>' +
-    weekSessions + ' SESSION' + (weekSessions !== 1 ? 'S' : '') + ' IN LAST 7 DAYS<br>' +
-    'RECOVERY WINDOW: 72h';
+    weekSessions + ' SESSION' + (weekSessions !== 1 ? 'S' : '') + ' IN LAST 7 DAYS';
 
   grid.innerHTML = '';
   const DAY_LETTERS = ['S','M','T','W','T','F','S'];
@@ -3130,36 +4420,6 @@ function renderRecovery(data) {
         : Math.round(d.hours_since / 24) + 'd AGO';
     }
 
-    // ETA text
-    var etaHtml = '';
-    if (!isUntested) {
-      if (pct >= 100) {
-        etaHtml = '<div class="rec-eta-text rdy">✓ FULLY RECOVERED</div>';
-      } else {
-        const hoursLeft = Math.round(Math.max(0, 72 - (d.hours_since || 0)));
-        etaHtml = '<div class="rec-eta-text cnt">READY IN ~' + hoursLeft + 'h</div>';
-      }
-    }
-
-    // Weekly bars (last 7 calendar days)
-    const bars = [];
-    for (var i = 6; i >= 0; i--) {
-      const dt = new Date();
-      dt.setDate(dt.getDate() - i);
-      const ds = dt.toISOString().split('T')[0];
-      const entry = d.week_data ? d.week_data.find(function(w) { return w.date === ds; }) : null;
-      bars.push({ vol: entry ? entry.volume : 0, isToday: i === 0, letter: DAY_LETTERS[dt.getDay()] });
-    }
-    const maxVol = Math.max.apply(null, bars.map(function(b) { return b.vol; }).concat([1]));
-    const barsHtml = bars.map(function(b) {
-      const h = b.vol > 0 ? Math.max(3, Math.round((b.vol / maxVol) * 16)) : 2;
-      const cls = b.isToday && b.vol > 0 ? 'today-bar' : b.vol > 0 ? 'trained' : '';
-      return '<div class="rec-week-bar ' + cls + '" style="height:' + h + 'px;"></div>';
-    }).join('');
-    const daysHtml = bars.map(function(b) {
-      return '<div class="rec-week-day">' + b.letter + '</div>';
-    }).join('');
-
     const lastVolText = d.last_volume > 0
       ? (d.last_volume >= 1000 ? (d.last_volume / 1000).toFixed(1) + 'k' : d.last_volume.toLocaleString()) + ' lbs'
       : '';
@@ -3167,42 +4427,225 @@ function renderRecovery(data) {
     const card = document.createElement('div');
     card.className = 'rec-card ' + sClass;
     card.innerHTML =
-      '<div class="rec-gauge-wrap">' +
-        '<svg viewBox="0 0 100 100">' +
-          '<circle class="rec-gauge-bg" cx="' + CX + '" cy="' + CY + '" r="' + R + '" transform="rotate(-90 ' + CX + ' ' + CY + ')"/>' +
-          '<circle class="rec-gauge-arc" cx="' + CX + '" cy="' + CY + '" r="' + R + '"' +
-            ' stroke="' + arcColor + '"' +
-            ' stroke-dasharray="' + circ + '"' +
-            ' stroke-dashoffset="' + circ + '"' +
-            ' data-target="' + targetOffset + '"' +
-            ' transform="rotate(-90 ' + CX + ' ' + CY + ')"/>' +
-        '</svg>' +
-        '<div class="rec-gauge-center">' +
-          '<div class="rec-gauge-pct" style="color:' + arcColor + ';">' + (isUntested ? '?' : pct + '%') + '</div>' +
-          '<div class="rec-gauge-sub">RECOVERY</div>' +
-        '</div>' +
-      '</div>' +
       '<div class="rec-card-name">' + d.category.toUpperCase() + '</div>' +
-      '<div class="rec-status-badge ' + sClass + '">' + statusLabel + '</div>' +
-      '<div class="rec-time-text">' + timeText + (lastVolText ? ' · ' + lastVolText : '') + '</div>' +
-      etaHtml +
-      '<div class="rec-week-wrap">' +
-        '<div class="rec-week-bars">' + barsHtml + '</div>' +
-        '<div class="rec-week-days">' + daysHtml + '</div>' +
+      '<div class="rec-last-trained">' +
+        '<span class="rec-last-label">LAST TRAINED</span>' +
+        '<span class="rec-last-val">' + timeText + '</span>' +
+        (lastVolText ? '<span class="rec-vol-line">' + lastVolText + '</span>' : '') +
       '</div>';
 
     grid.appendChild(card);
   });
 
-  // Trigger arc draw animations (double rAF ensures initial render before transition)
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      grid.querySelectorAll('.rec-gauge-arc').forEach(function(arc) {
-        arc.style.strokeDashoffset = arc.getAttribute('data-target');
-      });
+}
+
+// ══════════════════════════════════════
+// QUICK HELP POPUP
+// ══════════════════════════════════════
+const QH_CMDS = {
+  main: {
+    title: '// MAIN PAGE — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold [weight] x [reps]',       desc: 'log set to current exercise'},
+      {cmd: 'hey arnold [exercise] [wt] x [reps]',desc: 'log set by exercise name'},
+      {cmd: 'hey arnold [N] reps',                desc: 'log bodyweight reps to current exercise'},
+      {cmd: 'hey arnold [seconds] seconds',       desc: 'log isometric hold (iso exercises only)'},
+      {cmd: 'hey arnold delete last',             desc: 'undo last logged set'},
+      {cmd: 'hey arnold select [exercise name]',  desc: 'set active exercise by name'},
+      {cmd: 'hey arnold open exercise list',      desc: 'open full exercise list'},
+      {cmd: 'hey arnold open stats',              desc: 'open stats page'},
+      {cmd: 'hey arnold open history',            desc: 'open workout calendar'},
+      {cmd: 'hey arnold open volume',             desc: 'open volume charts'},
+      {cmd: 'hey arnold open details',            desc: 'open exercise trend chart'},
+      {cmd: 'hey arnold open help',               desc: 'open help page'},
+    ]
+  },
+  exsel: {
+    title: '// EXERCISE SELECT — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold select [exercise name]', desc: 'select exercise'},
+      {cmd: 'hey arnold close',                  desc: 'go back'},
+    ]
+  },
+  volume: {
+    title: '// VOLUME PAGE — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold show [muscle]', desc: 'focus a muscle group'},
+      {cmd: 'hey arnold 14 days',       desc: 'switch to 14-day range'},
+      {cmd: 'hey arnold 30 days',       desc: 'switch to 30-day range'},
+      {cmd: 'hey arnold 60 days',       desc: 'switch to 60-day range'},
+      {cmd: 'hey arnold scroll down',   desc: 'scroll down'},
+      {cmd: 'hey arnold close',         desc: 'go back'},
+    ]
+  },
+  history: {
+    title: '// WORKOUT HISTORY — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold select [day]',   desc: 'open that day (e.g. select 14)'},
+      {cmd: 'hey arnold next month',     desc: 'go to next month'},
+      {cmd: 'hey arnold previous month', desc: 'go to previous month'},
+      {cmd: 'hey arnold [month name]',   desc: 'jump to that month'},
+      {cmd: 'hey arnold scroll down',    desc: 'scroll down'},
+      {cmd: 'hey arnold close',          desc: 'go back'},
+    ]
+  },
+  details: {
+    title: '// EXERCISE DETAILS — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold open details', desc: 'reopen for current exercise'},
+      {cmd: 'hey arnold close',        desc: 'go back'},
+    ]
+  },
+  stats: {
+    title: '// STATS — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'hey arnold close', desc: 'go back'},
+    ]
+  },
+  exlist: {
+    title: '// EXERCISE LIST — VOICE COMMANDS',
+    cmds: [
+      {cmd: 'click exercise name',               desc: 'set as active exercise + close'},
+      {cmd: 'hey arnold select [exercise name]', desc: 'select by voice + close'},
+      {cmd: 'hey arnold show [muscle]',          desc: 'filter by muscle group'},
+      {cmd: 'hey arnold show all',               desc: 'clear muscle filter'},
+      {cmd: 'hey arnold edit',                   desc: 'enter edit mode'},
+      {cmd: 'hey arnold edit [exercise name]',   desc: 'open edit form (edit mode)'},
+      {cmd: 'hey arnold delete [exercise name]', desc: 'delete exercise (edit mode)'},
+      {cmd: 'hey arnold done',                   desc: 'exit edit mode'},
+      {cmd: 'hey arnold scroll down',            desc: 'scroll down'},
+      {cmd: 'hey arnold scroll up',              desc: 'scroll up'},
+      {cmd: 'hey arnold close',                  desc: 'go back'},
+    ]
+  },
+};
+
+let _qhTimer = null;
+
+document.getElementById('qh-close').addEventListener('click', hideQuickHelp);
+
+function hideQuickHelp() {
+  document.getElementById('quick-help-popup').classList.remove('visible');
+  clearTimeout(_qhTimer);
+}
+
+function showQuickHelp(noAutoClose) {
+  // Determine context
+  let ctx = 'main';
+  if (document.getElementById('exsel-overlay').classList.contains('open'))         ctx = 'exsel';
+  else if (document.getElementById('recovery-overlay').classList.contains('open')) ctx = 'volume';
+  else if (document.getElementById('history-overlay').classList.contains('open'))  ctx = 'history';
+  else if (document.getElementById('details-overlay').classList.contains('open'))  ctx = 'details';
+  else if (document.getElementById('exlist-overlay').classList.contains('open'))   ctx = 'exlist';
+  else if (document.getElementById('stats-overlay').classList.contains('open'))    ctx = 'stats';
+
+  const data = QH_CMDS[ctx];
+  document.getElementById('qh-title').textContent = data.title;
+  document.getElementById('qh-body').innerHTML = data.cmds.map(c => {
+    const display = c.cmd.replace(/^hey arnold\s*/i, '');
+    return `<div class="qh-row">
+      <span class="qh-cmd">${display.toUpperCase()}</span>
+      <span class="qh-desc">— ${c.desc.toUpperCase()}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('quick-help-popup').classList.add('visible');
+
+  clearTimeout(_qhTimer);
+  if (!noAutoClose) _qhTimer = setTimeout(hideQuickHelp, 7000);
+}
+
+// ══════════════════════════════════════
+// EXERCISE SELECT OVERLAY
+// ══════════════════════════════════════
+let _exselData = [];
+let _exselFilter = 'ALL';
+
+document.getElementById('exsel-close').addEventListener('click', closeExSel);
+
+function closeExSel() {
+  document.getElementById('exsel-overlay').classList.remove('open');
+}
+
+async function openExSel() {
+  document.getElementById('exsel-overlay').classList.add('open');
+  document.getElementById('exsel-search').value = '';
+  _exselFilter = 'ALL';
+  document.getElementById('exsel-list').innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">LOADING...</div>';
+  try {
+    _exselData = await authFetch('/api/exercises/with-last-performed').then(r => r.json());
+    buildExSelFilters();
+    renderExSel();
+    document.getElementById('exsel-search').focus();
+  } catch(e) {
+    document.getElementById('exsel-list').innerHTML = '<div style="color:#ff4040;padding:20px;">ERROR</div>';
+  }
+}
+
+function buildExSelFilters() {
+  const cats = ['ALL', ...new Set(_exselData.map(e => e.muscle_category).filter(Boolean).sort())];
+  const wrap = document.getElementById('exsel-filters');
+  wrap.innerHTML = '';
+  cats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'exsel-fbtn' + (c === _exselFilter ? ' on' : '');
+    btn.textContent = c;
+    btn.addEventListener('click', () => {
+      _exselFilter = c;
+      wrap.querySelectorAll('.exsel-fbtn').forEach(b => b.classList.toggle('on', b.textContent === c));
+      renderExSel();
     });
+    wrap.appendChild(btn);
   });
 }
+
+function renderExSel() {
+  const query  = document.getElementById('exsel-search').value.toLowerCase().trim();
+  const list   = document.getElementById('exsel-list');
+  const filtered = _exselData.filter(e => {
+    if (_exselFilter !== 'ALL' && e.muscle_category !== _exselFilter) return false;
+    if (query && !e.name.toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '<div style="color:#004010;font-size:.62rem;letter-spacing:.15em;padding:20px;">NO EXERCISES FOUND</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  filtered.forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'exsel-row' + (e.name === currentExercise ? ' is-current' : '');
+
+    let daysHtml;
+    if (e.days_since === null) {
+      daysHtml = '<div class="exsel-row-days"><div class="exsel-days-never">NEVER</div></div>';
+    } else if (e.days_since === 0) {
+      daysHtml = '<div class="exsel-row-days"><div class="exsel-days-num" style="color:var(--green);">TODAY</div></div>';
+    } else {
+      daysHtml = `<div class="exsel-row-days">
+        <div class="exsel-days-num">${e.days_since}d</div>
+        <div class="exsel-days-label">SINCE LAST</div>
+      </div>`;
+    }
+
+    row.innerHTML = `<div>
+      <div class="exsel-row-name">${e.name}</div>
+      <div class="exsel-row-cat">${e.muscle_category || ''}</div>
+    </div>${daysHtml}`;
+
+    row.addEventListener('click', () => {
+      setActiveExercise(e.name);
+      authFetch('/api/exercise/set-current', {method: 'POST', body: JSON.stringify({exercise: e.name})});
+      refreshHistory(e.name);
+      closeExSel();
+    });
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('exsel-search').addEventListener('input', renderExSel);
 
 // ══════════════════════════════════════
 // INIT
